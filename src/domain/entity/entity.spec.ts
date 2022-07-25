@@ -1,4 +1,5 @@
 import {Entity} from "./entity";
+import {SizeProperty} from "../property/size/size-property";
 
 describe('Entity', () => {
     it('should be created correctly', () => {
@@ -8,53 +9,57 @@ describe('Entity', () => {
     });
 
     describe('size', () => {
+        const sizeProperty = new SizeProperty();
+
         describe('default size', () => {
             it('should have default size when no options', () => {
                 const entity = new Entity();
 
-                expect(entity.size).toEqual(1);
+                expect(entity.getPropertyValue('size')).toEqual(sizeProperty.default);
             });
 
             it('should have default size when options does not contain size', () => {
                 const entity = new Entity({});
 
-                expect(entity.size).toEqual(1);
+                expect(entity.getPropertyValue('size')).toEqual(sizeProperty.default);
             });
         });
 
-        describe.each([1, 5, 50, 100])('valid size %p', (size) => {
+        describe.each([sizeProperty.default, sizeProperty.min, sizeProperty.max])('valid size %p', (size) => {
             it('should have initially set size', () => {
                 const entity = new Entity({
                     size,
                 });
 
-                expect(entity.size).toEqual(size);
+                expect(entity.getPropertyValue('size')).toEqual(size);
             });
 
             it('should have set size', () => {
                 const entity = new Entity();
 
-                entity.setSize(size);
+                entity.setPropertyValue('size', size);
 
-                expect(entity.size).toEqual(size);
+                expect(entity.getPropertyValue('size')).toEqual(size);
             });
         });
 
-        describe.each([-1, 0, 1000])('invalid size %p', (size) => {
+        describe.each([sizeProperty.min - 1, sizeProperty.max + 1])('invalid size %p', (size) => {
             it('should have initially set size', () => {
+                const sizeProperty = new SizeProperty();
                 expect(() => {
                     new Entity({
                         size,
                     });
-                }).toThrow('Invalid entity size');
+                }).toThrowError(sizeProperty.getOutOfRangeError(size));
             });
 
             it('should have set size', () => {
+                const sizeProperty = new SizeProperty();
                 const entity = new Entity();
 
                 expect(() => {
-                    entity.setSize(size);
-                }).toThrow('Invalid entity size');
+                    entity.setPropertyValue('size', size);
+                }).toThrowError(sizeProperty.getOutOfRangeError(size));
             });
         });
     });
