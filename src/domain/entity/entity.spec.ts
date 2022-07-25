@@ -1,4 +1,4 @@
-import {Entity} from "./entity";
+import {Entity, EntityProperties} from "./entity";
 
 describe('Entity', () => {
     it('should be created correctly', () => {
@@ -7,50 +7,57 @@ describe('Entity', () => {
         expect(entity).toBeTruthy();
     });
 
-    describe('size', () => {
+    describe.each<{ property: keyof EntityProperties, min: number, max: number, defaultValue: number, custom: number }>([
+        { property: 'size', min: 1, max: 100, defaultValue: 1, custom: 50 },
+    ])('number property $property', ({ property, min, max, defaultValue, custom }) => {
         describe('default', () => {
-            it('should be greater than zero', () => {
+            it(`should be equal to default ${defaultValue}`, () => {
                 const entity = new Entity();
 
-                expect(entity.getPropertyValue('size')).toBeGreaterThan(0);
+                expect(entity.getPropertyValue(property)).toEqual(defaultValue);
             });
 
-            it('should less or equal than 100', () => {
+            it(`should be greater or equal than ${min}`, () => {
                 const entity = new Entity();
 
-                expect(entity.getPropertyValue('size')).toBeLessThanOrEqual(100);
+                expect(entity.getPropertyValue(property)).toBeGreaterThanOrEqual(min);
+            });
+
+            it(`should less or equal than ${max}`, () => {
+                const entity = new Entity();
+
+                expect(entity.getPropertyValue(property)).toBeLessThanOrEqual(max);
             });
         });
 
         describe('defined', () => {
             it('should be initially defined', () => {
-                const size = 50;
-                const entity = new Entity({ size });
+                const entity = new Entity({ [property]: custom });
 
-                expect(entity.getPropertyValue('size')).toEqual(size);
+                expect(entity.getPropertyValue(property)).toEqual(custom);
             });
 
-            it('should be greater than zero', () => {
-                const entity = new Entity({ size: 1 });
+            it(`should be greater or equal than ${min}`, () => {
+                const entity = new Entity({ [property]: min });
 
-                expect(entity.getPropertyValue('size')).toBeGreaterThan(0);
+                expect(entity.getPropertyValue(property)).toBeGreaterThanOrEqual(min);
             });
 
-            it('should throw an error when less than 1', () => {
-               expect(() => {
-                   new Entity({size: 0});
-               }).toThrowError();
-            });
-
-            it('should less or equal than 100', () => {
-                const entity = new Entity({ size: 100 });
-
-                expect(entity.getPropertyValue('size')).toBeLessThanOrEqual(100);
-            });
-
-            it('should throw an error when greater than 100', () => {
+            it(`should throw an error when less than ${min}`, () => {
                 expect(() => {
-                    new Entity({size: 101});
+                    new Entity({ [property]: min - 1 });
+                }).toThrowError();
+            });
+
+            it(`should less or equal than ${max}`, () => {
+                const entity = new Entity({ [property]: max });
+
+                expect(entity.getPropertyValue(property)).toBeLessThanOrEqual(max);
+            });
+
+            it(`should throw an error when greater than ${max}`, () => {
+                expect(() => {
+                    new Entity({ [property]: max + 1 });
                 }).toThrowError();
             });
         });

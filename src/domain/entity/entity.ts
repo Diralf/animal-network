@@ -12,7 +12,7 @@ export class Entity {
           size: new NumberProperty({
               defaultValue: 1,
               min: 1,
-              max: 100,
+              max: 100 ,
               current: options.size,
           }),
         };
