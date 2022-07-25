@@ -4,12 +4,12 @@ export class NumberProperty {
     private readonly _max: number;
     private _current: number;
 
-    constructor(options: { defaultValue?: number, min?: number, max?: number } = {}) {
+    constructor(options: { defaultValue?: number, min?: number, max?: number, current?: number } = {}) {
         this._min = options.min ?? -Number.MAX_SAFE_INTEGER;
         this._max = options.max ?? Number.MAX_SAFE_INTEGER;
 
         this._default = this.validate(options.defaultValue ?? 0);
-        this._current = this._default;
+        this._current = this.validate(options.current ?? this._default) ;
     }
 
     get current(): number {

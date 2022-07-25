@@ -1,5 +1,4 @@
 import {Entity} from "./entity";
-import {SizeProperty} from "../property/size/size-property";
 
 describe('Entity', () => {
     it('should be created correctly', () => {
@@ -9,57 +8,50 @@ describe('Entity', () => {
     });
 
     describe('size', () => {
-        const sizeProperty = new SizeProperty();
-
-        describe('default size', () => {
-            it('should have default size when no options', () => {
+        describe('default', () => {
+            it('should be greater than zero', () => {
                 const entity = new Entity();
 
-                expect(entity.getPropertyValue('size')).toEqual(sizeProperty.default);
+                expect(entity.getPropertyValue('size')).toBeGreaterThan(0);
             });
 
-            it('should have default size when options does not contain size', () => {
-                const entity = new Entity({});
+            it('should less or equal than 100', () => {
+                const entity = new Entity();
 
-                expect(entity.getPropertyValue('size')).toEqual(sizeProperty.default);
+                expect(entity.getPropertyValue('size')).toBeLessThanOrEqual(100);
             });
         });
 
-        describe.each([sizeProperty.default, sizeProperty.min, sizeProperty.max])('valid size %p', (size) => {
-            it('should have initially set size', () => {
-                const entity = new Entity({
-                    size,
-                });
+        describe('defined', () => {
+            it('should be initially defined', () => {
+                const size = 50;
+                const entity = new Entity({ size });
 
                 expect(entity.getPropertyValue('size')).toEqual(size);
             });
 
-            it('should have set size', () => {
-                const entity = new Entity();
+            it('should be greater than zero', () => {
+                const entity = new Entity({ size: 1 });
 
-                entity.setPropertyValue('size', size);
-
-                expect(entity.getPropertyValue('size')).toEqual(size);
-            });
-        });
-
-        describe.each([sizeProperty.min - 1, sizeProperty.max + 1])('invalid size %p', (size) => {
-            it('should have initially set size', () => {
-                const sizeProperty = new SizeProperty();
-                expect(() => {
-                    new Entity({
-                        size,
-                    });
-                }).toThrowError(sizeProperty.getOutOfRangeError(size));
+                expect(entity.getPropertyValue('size')).toBeGreaterThan(0);
             });
 
-            it('should have set size', () => {
-                const sizeProperty = new SizeProperty();
-                const entity = new Entity();
+            it('should throw an error when less than 1', () => {
+               expect(() => {
+                   new Entity({size: 0});
+               }).toThrowError();
+            });
 
+            it('should less or equal than 100', () => {
+                const entity = new Entity({ size: 100 });
+
+                expect(entity.getPropertyValue('size')).toBeLessThanOrEqual(100);
+            });
+
+            it('should throw an error when greater than 100', () => {
                 expect(() => {
-                    entity.setPropertyValue('size', size);
-                }).toThrowError(sizeProperty.getOutOfRangeError(size));
+                    new Entity({size: 101});
+                }).toThrowError();
             });
         });
     });

@@ -1,4 +1,3 @@
-import {SizeProperty} from "../property/size/size-property";
 import {NumberProperty} from "../property/base/number-property";
 
 export interface EntityProperties {
@@ -10,7 +9,10 @@ export class Entity {
 
     constructor(options: { size?: number } = {}) {
         this.properties = {
-          size: new SizeProperty({
+          size: new NumberProperty({
+              defaultValue: 1,
+              min: 1,
+              max: 100,
               current: options.size,
           }),
         };
