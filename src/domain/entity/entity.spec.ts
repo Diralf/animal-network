@@ -1,4 +1,5 @@
 import {Entity, EntityProperties} from "./entity";
+import {SIZE} from "./entity.contants";
 
 describe('Entity', () => {
     it('should be created correctly', () => {
@@ -8,7 +9,7 @@ describe('Entity', () => {
     });
 
     describe.each<{ property: keyof EntityProperties, min: number, max: number, defaultValue: number, custom: number }>([
-        { property: 'size', min: 1, max: 100, defaultValue: 1, custom: 50 },
+        { property: 'size', min: SIZE.MIN, max: SIZE.MAX, defaultValue: SIZE.DEFAULT, custom: 50 },
     ])('number property $property', ({ property, min, max, defaultValue, custom }) => {
         describe('default', () => {
             it(`should be equal to default ${defaultValue}`, () => {
