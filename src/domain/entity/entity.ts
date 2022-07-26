@@ -2,9 +2,11 @@ import {NumberProperty} from "../property/number/number-property";
 import {SIZE} from "./entity.contants";
 import {PropertiesContainer} from "../property/container/properties-container";
 import {PropertiesValueTypes} from "../property/utils/property-value.type";
+import {PointProperty} from "../property/point/point-property";
 
 export interface EntityProperties {
     size: NumberProperty;
+    position: PointProperty;
 }
 
 export class Entity extends PropertiesContainer<EntityProperties> {
@@ -16,6 +18,11 @@ export class Entity extends PropertiesContainer<EntityProperties> {
                 max: SIZE.MAX,
                 current: options.size,
             }),
+            position: new PointProperty({
+                x: 0,
+                y: 0,
+                ...options.position,
+            })
         });
     }
 }
