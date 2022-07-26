@@ -1,4 +1,4 @@
-import {BaseProperty} from "./base-property";
+import {BaseProperty} from "../base/base-property";
 
 export class PropertiesContainer<Properties extends Record<keyof Properties, BaseProperty<unknown>>> {
     constructor(private properties: Properties) {

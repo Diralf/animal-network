@@ -1,4 +1,4 @@
-import {BaseProperty} from "./base-property";
+import {BaseProperty} from "../base/base-property";
 
 export class NumberProperty extends BaseProperty<number> {
     private readonly _default: number;

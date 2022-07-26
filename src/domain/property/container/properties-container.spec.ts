@@ -1,5 +1,5 @@
 import {PropertiesContainer} from "./properties-container";
-import {NumberProperty} from "./number-property";
+import {NumberProperty} from "../number/number-property";
 
 interface TestProperties {
     foo: NumberProperty;
