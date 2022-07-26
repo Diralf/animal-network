@@ -24,6 +24,4 @@ export class Field extends PropertiesContainer<FieldProperties> {
             }),
         });
     }
-
-
 }
