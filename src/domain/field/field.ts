@@ -1,5 +1,5 @@
-import {NumberProperty} from "../property/base/number-property";
-import {PropertiesContainer} from "../property/base/properties-container";
+import {NumberProperty} from "../property/number/number-property";
+import {PropertiesContainer} from "../property/container/properties-container";
 import {PropertiesValueTypes} from "../property/utils/property-value.type";
 
 export interface FieldProperties {
