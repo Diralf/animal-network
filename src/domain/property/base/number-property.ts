@@ -1,23 +1,25 @@
-export class NumberProperty {
+import {BaseProperty} from "./base-property";
+
+export class NumberProperty extends BaseProperty<number> {
     private readonly _default: number;
     private readonly _min: number;
     private readonly _max: number;
-    private _current: number;
 
     constructor(options: { defaultValue?: number, min?: number, max?: number, current?: number } = {}) {
+        super(0);
         this._min = options.min ?? -Number.MAX_SAFE_INTEGER;
         this._max = options.max ?? Number.MAX_SAFE_INTEGER;
 
         this._default = this.validate(options.defaultValue ?? 0);
-        this._current = this.validate(options.current ?? this._default) ;
+        this.current = this.validate(options.current ?? this._default);
     }
 
-    get current(): number {
-        return this._current;
+    get current() {
+        return super.current;
     }
 
     set current(value: number) {
-        this._current = this.validate(value);
+        super.current = this.validate(value);
     }
 
     get min(): number {
