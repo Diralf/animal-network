@@ -63,4 +63,23 @@ describe('Entity', () => {
             });
         });
     });
+
+    describe('position', () => {
+        describe('default', () => {
+            it(`should be equal to default {x: 0, y: 0}`, () => {
+                const entity = new Entity();
+
+                expect(entity.getPropertyValue('position')).toEqual({ x: 0, y: 0 });
+            });
+        });
+
+        describe('defined', () => {
+            it('should be initially defined', () => {
+                const point = { x: 1, y: 2 };
+                const entity = new Entity({ position: point });
+
+                expect(entity.getPropertyValue('position')).toEqual(point);
+            });
+        });
+    });
 });
