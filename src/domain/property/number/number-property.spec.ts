@@ -131,4 +131,19 @@ describe('NumberProperty', () => {
             }).toThrowError();
         });
     });
+
+    describe('getOutOfRangeError', () => {
+        it('should return error', () => {
+            const max = 10;
+            const min = -10;
+            const value = 20;
+            const numberProperty = new NumberProperty({ max, min });
+
+            const error = numberProperty.getOutOfRangeError(value);
+
+            expect(() => {
+                throw error;
+            }).toThrowError(`Value out of range. Value ${value}, allowed [${min}, ${max}]`);
+        });
+    });
 });
