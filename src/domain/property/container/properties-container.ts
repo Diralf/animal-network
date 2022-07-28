@@ -1,15 +1,45 @@
 import {BaseProperty} from "../base/base-property";
 import {PropertyValueType} from "../utils/property-value.type";
 
+type IfEquals<X, Y, A=X, B=never> = (<T>() => T extends X ? 1 : 2) extends (<T>() => T extends Y ? 1 : 2) ? A : B;
+
+type WritableKeys<T> = {
+    [P in keyof T]-?: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, P>
+}[keyof T];
+
+type Get<Properties extends Record<keyof Properties, BaseProperty<unknown>>> = {
+    [Key in keyof Properties]: () => PropertyValueType<Properties[Key]>;
+}
+
+type Set<Properties extends Record<keyof Properties, BaseProperty<unknown>>> = {
+    [Key in keyof Properties]: (value: PropertyValueType<Properties[Key]>) => void;
+}
+
 export class PropertiesContainer<Properties extends Record<keyof Properties, BaseProperty<unknown>>> {
+    public get: Get<Properties>;
+    public set: Set<Pick<Properties, WritableKeys<Properties>>>
+
     constructor(private properties: Properties) {
+        const propertyKeys = Object.keys(properties) as (keyof Properties)[];
+        this.get = propertyKeys.reduce((acc, key) => {
+            return {
+                ...acc,
+                [key]: () => this.getPropertyValue(key),
+            }
+        }, {} as Get<Properties>);
+        this.set = propertyKeys.reduce((acc, key) => {
+            return {
+                ...acc,
+                [key]: (value: PropertyValueType<Properties[typeof key]>) => this.setPropertyValue(key, value),
+            }
+        }, {} as Set<Properties>);
     }
 
-    setPropertyValue<Key extends keyof Properties>(property: keyof Properties, value: PropertyValueType<Properties[Key]>) {
+    private setPropertyValue<Key extends keyof Properties>(property: keyof Properties, value: PropertyValueType<Properties[Key]>) {
         this.properties[property].current = value;
     }
 
-    getPropertyValue<Key extends keyof Properties>(property: keyof Properties): PropertyValueType<Properties[Key]> {
+    private getPropertyValue<Key extends keyof Properties>(property: keyof Properties): PropertyValueType<Properties[Key]> {
         return this.properties[property].current;
     }
 }

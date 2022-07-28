@@ -3,12 +3,14 @@ import {NumberProperty} from "../number/number-property";
 
 interface TestProperties {
     foo: NumberProperty;
+    readonly bar: NumberProperty;
 }
 
 describe('PropertiesContainer', () => {
     it('should be valid', () => {
         const container = new PropertiesContainer<TestProperties>({
             foo: new NumberProperty(),
+            bar: new NumberProperty(),
         });
 
         expect(container).toBeTruthy();
@@ -17,18 +19,21 @@ describe('PropertiesContainer', () => {
     it('should get property', () => {
         const container = new PropertiesContainer<TestProperties>({
             foo: new NumberProperty(),
+            bar: new NumberProperty(),
         });
 
-        expect(container.getPropertyValue('foo')).toEqual(0);
+        expect(container.get.foo()).toEqual(0);
+        expect(container.get.bar()).toEqual(0);
     });
 
     it('should set and get property', () => {
         const container = new PropertiesContainer<TestProperties>({
             foo: new NumberProperty(),
+            bar: new NumberProperty(),
         });
 
-        container.setPropertyValue('foo', 123);
+        container.set.foo(123);
 
-        expect(container.getPropertyValue('foo')).toEqual(123);
+        expect(container.get.foo()).toEqual(123);
     });
 });

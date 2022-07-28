@@ -16,8 +16,8 @@ export class FieldClient {
     }
 
     toStringField() {
-        const width = this.field.getPropertyValue('width');
-        const height = this.field.getPropertyValue('height');
+        const width = this.field.get.width();
+        const height = this.field.get.height();
         const row = ''.padEnd(width, this.emptyCell);
         return new Array(height).fill(row).join('\n');
     }

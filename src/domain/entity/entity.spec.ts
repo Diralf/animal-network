@@ -15,19 +15,19 @@ describe('Entity', () => {
             it(`should be equal to default ${defaultValue}`, () => {
                 const entity = new Entity();
 
-                expect(entity.getPropertyValue(property)).toEqual(defaultValue);
+                expect(entity.get[property]()).toEqual(defaultValue);
             });
 
             it(`should be greater or equal than ${min}`, () => {
                 const entity = new Entity();
 
-                expect(entity.getPropertyValue(property)).toBeGreaterThanOrEqual(min);
+                expect(entity.get[property]()).toBeGreaterThanOrEqual(min);
             });
 
             it(`should less or equal than ${max}`, () => {
                 const entity = new Entity();
 
-                expect(entity.getPropertyValue(property)).toBeLessThanOrEqual(max);
+                expect(entity.get[property]()).toBeLessThanOrEqual(max);
             });
         });
 
@@ -35,13 +35,13 @@ describe('Entity', () => {
             it('should be initially defined', () => {
                 const entity = new Entity({ [property]: custom });
 
-                expect(entity.getPropertyValue(property)).toEqual(custom);
+                expect(entity.get[property]()).toEqual(custom);
             });
 
             it(`should be greater or equal than ${min}`, () => {
                 const entity = new Entity({ [property]: min });
 
-                expect(entity.getPropertyValue(property)).toBeGreaterThanOrEqual(min);
+                expect(entity.get[property]()).toBeGreaterThanOrEqual(min);
             });
 
             it(`should throw an error when less than ${min}`, () => {
@@ -53,7 +53,7 @@ describe('Entity', () => {
             it(`should less or equal than ${max}`, () => {
                 const entity = new Entity({ [property]: max });
 
-                expect(entity.getPropertyValue(property)).toBeLessThanOrEqual(max);
+                expect(entity.get[property]()).toBeLessThanOrEqual(max);
             });
 
             it(`should throw an error when greater than ${max}`, () => {
@@ -69,7 +69,7 @@ describe('Entity', () => {
             it(`should be equal to default {x: 0, y: 0}`, () => {
                 const entity = new Entity();
 
-                expect(entity.getPropertyValue('position')).toEqual({ x: 0, y: 0 });
+                expect(entity.get.position()).toEqual({ x: 0, y: 0 });
             });
         });
 
@@ -78,7 +78,7 @@ describe('Entity', () => {
                 const point = { x: 1, y: 2 };
                 const entity = new Entity({ position: point });
 
-                expect(entity.getPropertyValue('position')).toEqual(point);
+                expect(entity.get.position()).toEqual(point);
             });
         });
     });
