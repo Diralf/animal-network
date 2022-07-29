@@ -1,27 +1,19 @@
-import {Field} from "../field/field";
-import {Entity} from "../entity/entity";
-import {RawPoint} from "../property/point/point-property";
-
-export interface EntityListItem {
-    field: Field;
-    entity: Entity;
-    point: RawPoint;
-}
-
-export type EntityListGetEntity = Omit<EntityListItem, 'entity'>;
+import {Entity, EntityProperties, EntityPropertiesValues} from "../entity/entity";
 
 export class EntityList {
-    private entities: EntityListItem[] = [];
+    private entities: Entity[] = [];
 
-    addEntity({ field, entity, point }: EntityListItem) {
-        this.entities.push({ field, entity, point });
+    addEntity(...entities: Entity[]) {
+        this.entities.push(...entities);
     }
 
-    getEntity({ field: targetField, point: targetPoint }: EntityListGetEntity) {
-        const result = this.entities.find(({ field, point }) => {
-            return field === targetField && point.x === targetPoint.x && point.y === targetPoint.y;
-        });
+    getEntity(properties: Partial<EntityPropertiesValues>): Entity[] {
+        const propertyNames = Object.keys(properties) as (keyof EntityProperties)[];
 
-        return result?.entity ?? null;
+        return this.entities.filter((entity) => {
+            return propertyNames.every((propertyName) => {
+                return entity.getProperty(propertyName).isEqualValue(properties[propertyName] as any);
+            });
+        });
     }
 }

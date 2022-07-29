@@ -35,11 +35,15 @@ export class PropertiesContainer<Properties extends Record<keyof Properties, Bas
         }, {} as Set<Properties>);
     }
 
-    private setPropertyValue<Key extends keyof Properties>(property: keyof Properties, value: PropertyValueType<Properties[Key]>) {
+    private setPropertyValue<Key extends keyof Properties>(property: Key, value: PropertyValueType<Properties[Key]>) {
         this.properties[property].current = value;
     }
 
-    private getPropertyValue<Key extends keyof Properties>(property: keyof Properties): PropertyValueType<Properties[Key]> {
+    private getPropertyValue<Key extends keyof Properties>(property: Key): PropertyValueType<Properties[Key]> {
         return this.properties[property].current;
+    }
+
+    public getProperty<Key extends keyof Properties>(property: Key): Properties[Key] {
+        return this.properties[property];
     }
 }

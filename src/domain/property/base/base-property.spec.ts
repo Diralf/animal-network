@@ -96,4 +96,20 @@ describe('BaseProperty', () => {
         expect(typeof property.current).toEqual('object');
         expect(property.current).toBeInstanceOf(BaseProperty);
     });
+
+    it('should compare equal values', () => {
+        const value = new BaseProperty<number>(1);
+        const value2 = new BaseProperty<number>(1);
+
+        expect(value.isEqual(value2)).toBeTruthy();
+        expect(value.isEqualValue(value2.current)).toBeTruthy();
+    });
+
+    it('should compare not equal values', () => {
+        const value = new BaseProperty<number>(1);
+        const value2 = new BaseProperty<number>(2);
+
+        expect(value.isEqual(value2)).toBeFalsy();
+        expect(value.isEqualValue(value2.current)).toBeFalsy();
+    });
 });

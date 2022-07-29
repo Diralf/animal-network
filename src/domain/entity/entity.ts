@@ -9,8 +9,10 @@ export interface EntityProperties {
     position: PointProperty;
 }
 
+export type EntityPropertiesValues = PropertiesValueTypes<EntityProperties>;
+
 export class Entity extends PropertiesContainer<EntityProperties> {
-    constructor(options: Partial<PropertiesValueTypes<EntityProperties>> = {}) {
+    constructor(options: Partial<EntityPropertiesValues> = {}) {
         super({
             size: new NumberProperty({
                 defaultValue: SIZE.DEFAULT,
