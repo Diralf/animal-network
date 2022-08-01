@@ -25,8 +25,4 @@ export class EntityList {
             });
         });
     }
-
-    getEntityInstanceOf<T extends EntityConstructor>(Type: T) {
-        return this.entities.filter((entity) => entity instanceof Type);
-    }
 }

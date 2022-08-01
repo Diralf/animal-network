@@ -7,11 +7,11 @@ export class SimpleGrassWorld {
 
     start() {
         this.entityList.addEntity(
-            new Food(),
-            new Food(),
-            new Food(),
-            new Food(),
-            new Food(),
+            new Food({position: {x: 0, y: 1}}),
+            new Food({position: {x: 1, y: 1}}),
+            new Food({position: {x: 1, y: 2}}),
+            new Food({position: {x: 2, y: 2}}),
+            new Food({position: {x: 2, y: 3}}),
             new Animal(),
         );
     };

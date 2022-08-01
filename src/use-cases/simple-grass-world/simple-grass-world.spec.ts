@@ -18,7 +18,7 @@ describe('SimpleGrassWorld', () => {
         const simpleGrassWorld = new SimpleGrassWorld();
         simpleGrassWorld.start();
         const entityList = simpleGrassWorld.entityList;
-        const grassInstances = entityList.getEntityInstanceOf(Food);
+        const grassInstances = entityList.getEntity({ byInstanceOf: Food });
 
         expect(grassInstances).toHaveLength(5);
         grassInstances.forEach((grassInstance) => {
@@ -28,7 +28,7 @@ describe('SimpleGrassWorld', () => {
                 position,
             });
 
-            expect(result).toHaveLength(5);
+            expect(result).toHaveLength(1);
         });
     });
 });

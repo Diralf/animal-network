@@ -15,7 +15,9 @@ type Set<Properties extends Record<keyof Properties, BaseProperty<unknown>>> = {
     [Key in keyof Properties]: (value: PropertyValueType<Properties[Key]>) => void;
 }
 
-export class PropertiesContainer<Properties extends Record<keyof Properties, BaseProperty<unknown>>> {
+export type PropertiesContainerBase<Properties> = Record<keyof Properties, BaseProperty<unknown>>;
+
+export class PropertiesContainer<Properties extends PropertiesContainerBase<Properties>> {
     public get: Get<Properties>;
     public set: Set<Pick<Properties, WritableKeys<Properties>>>
 
