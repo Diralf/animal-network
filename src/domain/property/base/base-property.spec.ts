@@ -10,6 +10,7 @@ describe('BaseProperty', () => {
     it('should get current', () => {
         const property = new BaseProperty<number>(3);
 
+        expect(property.current).toBeTruthy();
         expect(property.current).toEqual(3);
     });
 

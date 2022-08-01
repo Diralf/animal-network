@@ -5,6 +5,7 @@ import {PropertiesValueTypes} from "../property/utils/property-value.type";
 import {PointProperty} from "../property/point/point-property";
 
 export interface EntityProperties {
+    id: NumberProperty;
     size: NumberProperty;
     position: PointProperty;
 }
@@ -14,6 +15,9 @@ export type EntityPropertiesValues = PropertiesValueTypes<EntityProperties>;
 export class Entity extends PropertiesContainer<EntityProperties> {
     constructor(options: Partial<EntityPropertiesValues> = {}) {
         super({
+            id: new NumberProperty({
+                current: options.id,
+            }),
             size: new NumberProperty({
                 defaultValue: SIZE.DEFAULT,
                 min: SIZE.MIN,

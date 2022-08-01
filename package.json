@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "jest --watch",
-    "mutate": "npx stryker run"
+    "mutate-unit": "npx stryker run",
+    "mutate-integration": "npx stryker run --disableBail"
   },
   "repository": {
     "type": "git",
