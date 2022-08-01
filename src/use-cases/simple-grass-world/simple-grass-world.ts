@@ -25,13 +25,20 @@ export class SimpleGrassWorld {
     }
 
     start() {
-        this.entityList.add(
-            this.getEntity({ tags: [InstanceTypes.GRASS], position: { x: 0, y: 1 }}),
-            this.getEntity({ tags: [InstanceTypes.GRASS], position: { x: 0, y: 2 }}),
-            this.getEntity({ tags: [InstanceTypes.GRASS], position: { x: 0, y: 3 }}),
-            this.getEntity({ tags: [InstanceTypes.GRASS], position: { x: 0, y: 4 }}),
-            this.getEntity({ tags: [InstanceTypes.GRASS], position: { x: 0, y: 5 }}),
-            this.getEntity({ tags: [InstanceTypes.ANIMAL], position: { x: 0, y: 6 }}),
-        );
+        const entitiesCount: Record<InstanceTypes, number> = {
+            [InstanceTypes.GRASS]: 5,
+            [InstanceTypes.ANIMAL]: 1,
+        };
+        const entities = (Object.entries(entitiesCount) as [InstanceTypes, number][])
+            .map(([entityType, entityNumber]): InstanceTypes[] =>
+                new Array(entityNumber).fill(entityType)
+            )
+            .flat()
+            .map((entityType, index) => this.getEntity({
+                tags: [entityType],
+                position: { x: 0, y: index }
+            }));
+
+        this.entityList.add(...entities);
     };
 }

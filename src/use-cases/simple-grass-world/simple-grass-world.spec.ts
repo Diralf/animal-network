@@ -21,7 +21,7 @@ describe('SimpleGrassWorld', () => {
         expect(grassInstances).toHaveLength(5);
         grassInstances.forEach((grassInstance) => {
             const position = grassInstance.get.position();
-            const result = entityList.find({ position });
+            const result = entityList.find({ position, tags: [InstanceTypes.GRASS] });
 
             expect(result).toHaveLength(1);
         });
