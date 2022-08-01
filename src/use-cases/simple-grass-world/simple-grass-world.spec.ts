@@ -1,14 +1,12 @@
-import {Food} from "../../domain/entity/instances/food/food";
-import {Animal} from "../../domain/entity/instances/animal/animal";
-import {SimpleGrassWorld} from "./simple-grass-world";
+import {InstanceTypes, SimpleGrassWorld} from "./simple-grass-world";
 
 describe('SimpleGrassWorld', () => {
     it('should generate world with 5 grass and one animal', () => {
         const simpleGrassWorld = new SimpleGrassWorld();
         simpleGrassWorld.start();
         const entityList = simpleGrassWorld.entityList;
-        const grassInstances = entityList.getEntity({ byInstanceOf: Food });
-        const animalInstances = entityList.getEntity({ byInstanceOf: Animal });
+        const grassInstances = entityList.find({ tags: [InstanceTypes.GRASS] });
+        const animalInstances = entityList.find({ tags: [InstanceTypes.ANIMAL] });
 
         expect(grassInstances).toHaveLength(5);
         expect(animalInstances).toHaveLength(1);
@@ -18,15 +16,12 @@ describe('SimpleGrassWorld', () => {
         const simpleGrassWorld = new SimpleGrassWorld();
         simpleGrassWorld.start();
         const entityList = simpleGrassWorld.entityList;
-        const grassInstances = entityList.getEntity({ byInstanceOf: Food });
+        const grassInstances = entityList.find({ tags: [InstanceTypes.GRASS] });
 
         expect(grassInstances).toHaveLength(5);
         grassInstances.forEach((grassInstance) => {
             const position = grassInstance.get.position();
-            const result = entityList.getEntity({
-                byInstanceOf: Food,
-                position,
-            });
+            const result = entityList.find({ position });
 
             expect(result).toHaveLength(1);
         });
