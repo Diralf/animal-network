@@ -2,6 +2,7 @@ import {SimpleGrassWorld} from "./simple-grass-world";
 import {InstanceTypes} from "./entities/instance-types";
 import {PropertiesContainer} from "../../domain/property/container/properties-container";
 import {AnimalProperties} from "./entities/animal";
+import {MovementDirections} from "../../domain/property/movement/movement-property";
 
 describe('SimpleGrassWorld', () => {
     it('should generate world with 5 grass and one animal', () => {
@@ -37,12 +38,39 @@ describe('SimpleGrassWorld', () => {
         const [animal] = entityList.find({ tags: [InstanceTypes.ANIMAL] }) as PropertiesContainer<AnimalProperties>[];
 
         const animalSight = animal.getProperty('sight');
-
         animalSight.update(entityList);
-
         expect(animalSight.asString()).toEqual('' +
             '0,0,1,0,0\n' +
             '0,0,1,0,0\n' +
+            '0,0,2,0,0\n' +
+            '0,0,0,0,0\n' +
+            '0,0,0,0,0'
+        );
+    });
+
+    it('should animal move right', () => {
+        const simpleGrassWorld = new SimpleGrassWorld();
+        simpleGrassWorld.start();
+        const entityList = simpleGrassWorld.entityList;
+        const [animal] = entityList.find({ tags: [InstanceTypes.ANIMAL] }) as PropertiesContainer<AnimalProperties>[];
+
+        const animalSight = animal.getProperty('sight');
+        animalSight.update(entityList);
+        expect(animalSight.asString()).toEqual('' +
+            '0,0,1,0,0\n' +
+            '0,0,1,0,0\n' +
+            '0,0,2,0,0\n' +
+            '0,0,0,0,0\n' +
+            '0,0,0,0,0'
+        );
+
+        const animalMovement = animal.getProperty('movement');
+        animalMovement.move(MovementDirections.RIGHT);
+
+        animalSight.update(entityList);
+        expect(animalSight.asString()).toEqual('' +
+            '0,1,0,0,0\n' +
+            '0,1,0,0,0\n' +
             '0,0,2,0,0\n' +
             '0,0,0,0,0\n' +
             '0,0,0,0,0'

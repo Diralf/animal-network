@@ -35,6 +35,9 @@ export class PropertiesContainer<Properties extends PropertiesContainerBase<Prop
                 [key]: (value: PropertyValueType<Properties[typeof key]>) => this.setPropertyValue(key, value),
             }
         }, {} as Set<Properties>);
+        propertyKeys.forEach((propertyKey) => {
+           properties[propertyKey].owner = this;
+        });
     }
 
     private setPropertyValue<Key extends keyof Properties>(property: Key, value: PropertyValueType<Properties[Key]>) {

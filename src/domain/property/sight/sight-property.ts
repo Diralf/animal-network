@@ -4,14 +4,13 @@ import {PropertyContainerList} from "../../property-container-list/property-cont
 import {PropertiesContainer} from "../container/properties-container";
 import {BaseProperty} from "../base/base-property";
 
-interface EntityWithPosition {
+interface Owner {
     visual: BaseProperty<number>;
     position: PointProperty;
 }
 
-export class SightProperty extends ArrayProperty<number> {
+export class SightProperty extends ArrayProperty<number, PropertiesContainer<Owner>> {
     private readonly _range: number;
-    private owner: PropertiesContainer<EntityWithPosition> | null = null;
 
     constructor(options: { range: number }) {
         super([]);
@@ -22,18 +21,7 @@ export class SightProperty extends ArrayProperty<number> {
         return this._range;
     }
 
-    setOwner(owner: PropertiesContainer<EntityWithPosition>) {
-        if (!this.owner) {
-            this.owner = owner;
-        } else {
-            throw new Error('Owner already defined');
-        }
-    }
-
-    update(list: PropertyContainerList<EntityWithPosition>) {
-        if (!this.owner) {
-            throw new Error('Owner is not defined');
-        }
+    update(list: PropertyContainerList<Owner>) {
         const { x, y } = this.owner.get.position();
         const [sx, sy] = [x - this.range, y - this.range];
         const [ex, ey] = [x + this.range, y + this.range];
