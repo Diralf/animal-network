@@ -3,6 +3,7 @@ import {InstanceTypes} from "./entities/instance-types";
 import {PropertiesContainer} from "../../domain/property/container/properties-container";
 import {AnimalProperties} from "./entities/animal";
 import {MovementDirections} from "../../domain/property/movement/movement-property";
+import {FieldBuilder} from "../../clients/console/utils/field-builder";
 
 describe('SimpleGrassWorld', () => {
     it('should generate world with 5 grass and one animal', () => {
@@ -48,7 +49,18 @@ describe('SimpleGrassWorld', () => {
         );
     });
 
-    it('should animal move right', () => {
+    it.each([
+        {
+            direction: MovementDirections.RIGHT,
+            result: new FieldBuilder()
+                .row('0,1,0,0,0')
+                .row('0,1,0,0,0')
+                .row('0,0,2,0,0')
+                .row('0,0,0,0,0')
+                .row('0,0,0,0,0')
+                .join()
+        }
+    ])('should animal move right', () => {
         const simpleGrassWorld = new SimpleGrassWorld();
         simpleGrassWorld.start();
         const entityList = simpleGrassWorld.entityList;

@@ -10,4 +10,14 @@ describe('FieldBuilder', () => {
 
         expect(builtField).toEqual('-----\n-----\n-----');
     });
+
+    it('should build field ready to console from template string', () => {
+        const builtField = FieldBuilder.build(`
+            -----
+            -----
+            -----
+        `);
+
+        expect(builtField).toEqual('-----\n-----\n-----');
+    });
 });

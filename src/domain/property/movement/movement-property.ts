@@ -29,6 +29,8 @@ export class MovementProperty extends BaseProperty<void, PropertiesContainer<Own
             case MovementDirections.RIGHT:
                 delta = { x: 1, y: 0 };
                 break;
+            default:
+                delta = { x: 0, y: 0};
         }
         const currentPoint = this.owner.get.position();
         this.owner.set.position({ x: currentPoint.x + delta.x, y: currentPoint.y + delta.y });

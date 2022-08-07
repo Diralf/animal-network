@@ -9,4 +9,12 @@ export class FieldBuilder {
     join(): string {
         return this.rows.join('\n');
     }
+
+    static build(field: string): string {
+        return field
+            .trim()
+            .split('\n')
+            .map((part) => part.trim())
+            .join('\n');
+    }
 }
