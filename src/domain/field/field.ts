@@ -1,6 +1,6 @@
-import {NumberProperty} from "../property/number/number-property";
-import {PropertiesContainer} from "../property/container/properties-container";
-import {PropertiesValueTypes} from "../property/utils/property-value.type";
+import { NumberProperty } from '../property/number/number-property';
+import { PropertiesContainer } from '../property/container/properties-container';
+import { PropertiesValueTypes } from '../property/utils/property-value.type';
 
 export interface FieldProperties {
     width: NumberProperty;

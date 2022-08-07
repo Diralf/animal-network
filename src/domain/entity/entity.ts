@@ -1,8 +1,8 @@
-import {NumberProperty} from "../property/number/number-property";
-import {SIZE} from "./entity.contants";
-import {PropertiesContainer} from "../property/container/properties-container";
-import {PropertiesValueTypes} from "../property/utils/property-value.type";
-import {PointProperty} from "../property/point/point-property";
+import { NumberProperty } from '../property/number/number-property';
+import { SIZE } from './entity.contants';
+import { PropertiesContainer } from '../property/container/properties-container';
+import { PropertiesValueTypes } from '../property/utils/property-value.type';
+import { PointProperty } from '../property/point/point-property';
 
 export interface EntityProperties {
     id: NumberProperty;
@@ -28,7 +28,7 @@ export class Entity extends PropertiesContainer<EntityProperties> {
                 x: 0,
                 y: 0,
                 ...options.position,
-            })
+            }),
         });
     }
 }

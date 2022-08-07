@@ -1,5 +1,5 @@
-import {BaseProperty} from "../base/base-property";
-import {PropertyValueType} from "../utils/property-value.type";
+import { BaseProperty } from '../base/base-property';
+import { PropertyValueType } from '../utils/property-value.type';
 
 type IfEquals<X, Y, A=X, B=never> = (<T>() => T extends X ? 1 : 2) extends (<T>() => T extends Y ? 1 : 2) ? A : B;
 
@@ -9,34 +9,30 @@ type WritableKeys<T> = {
 
 type Get<Properties extends Record<keyof Properties, BaseProperty<unknown>>> = {
     [Key in keyof Properties]: () => PropertyValueType<Properties[Key]>;
-}
+};
 
 type Set<Properties extends Record<keyof Properties, BaseProperty<unknown>>> = {
     [Key in keyof Properties]: (value: PropertyValueType<Properties[Key]>) => void;
-}
+};
 
 export type PropertiesContainerBase<Properties> = Record<keyof Properties, BaseProperty<unknown>>;
 
 export class PropertiesContainer<Properties extends PropertiesContainerBase<Properties>> {
     public get: Get<Properties>;
-    public set: Set<Pick<Properties, WritableKeys<Properties>>>
+    public set: Set<Pick<Properties, WritableKeys<Properties>>>;
 
     constructor(private properties: Properties) {
-        const propertyKeys = Object.keys(properties) as (keyof Properties)[];
-        this.get = propertyKeys.reduce((acc, key) => {
-            return {
-                ...acc,
-                [key]: () => this.getPropertyValue(key),
-            }
-        }, {} as Get<Properties>);
-        this.set = propertyKeys.reduce((acc, key) => {
-            return {
-                ...acc,
-                [key]: (value: PropertyValueType<Properties[typeof key]>) => this.setPropertyValue(key, value),
-            }
-        }, {} as Set<Properties>);
+        const propertyKeys = Object.keys(properties) as Array<keyof Properties>;
+        this.get = propertyKeys.reduce<Get<Properties>>((acc, key) => ({
+            ...acc,
+            [key]: () => this.getPropertyValue(key),
+        }), {});
+        this.set = propertyKeys.reduce<Set<Properties>>((acc, key) => ({
+            ...acc,
+            [key]: (value: PropertyValueType<Properties[typeof key]>) => { this.setPropertyValue(key, value); },
+        }), {});
         propertyKeys.forEach((propertyKey) => {
-           properties[propertyKey].owner = this;
+            properties[propertyKey].owner = this;
         });
     }
 

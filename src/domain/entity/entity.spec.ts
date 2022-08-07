@@ -1,5 +1,5 @@
-import {Entity, EntityProperties} from "./entity";
-import {SIZE} from "./entity.contants";
+import { Entity, EntityProperties } from './entity';
+import { SIZE } from './entity.contants';
 
 describe('Entity', () => {
     it('should be created correctly', () => {
@@ -9,7 +9,13 @@ describe('Entity', () => {
     });
 
     describe.each<{ property: keyof EntityProperties, min: number, max: number, defaultValue: number, custom: number }>([
-        { property: 'size', min: SIZE.MIN, max: SIZE.MAX, defaultValue: SIZE.DEFAULT, custom: 50 },
+        {
+            property: 'size',
+            min: SIZE.MIN,
+            max: SIZE.MAX,
+            defaultValue: SIZE.DEFAULT,
+            custom: 50,
+        },
     ])('number property $property', ({ property, min, max, defaultValue, custom }) => {
         describe('default', () => {
             it(`should be equal to default ${defaultValue}`, () => {
@@ -66,16 +72,22 @@ describe('Entity', () => {
 
     describe('position', () => {
         describe('default', () => {
-            it(`should be equal to default {x: 0, y: 0}`, () => {
+            it('should be equal to default {x: 0, y: 0}', () => {
                 const entity = new Entity();
 
-                expect(entity.get.position()).toEqual({ x: 0, y: 0 });
+                expect(entity.get.position()).toEqual({
+                    x: 0,
+                    y: 0,
+                });
             });
         });
 
         describe('defined', () => {
             it('should be initially defined', () => {
-                const point = { x: 1, y: 2 };
+                const point = {
+                    x: 1,
+                    y: 2,
+                };
                 const entity = new Entity({ position: point });
 
                 expect(entity.get.position()).toEqual(point);

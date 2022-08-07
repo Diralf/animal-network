@@ -1,4 +1,4 @@
-import {BaseProperty} from "./base-property";
+import { BaseProperty } from './base-property';
 
 describe('BaseProperty', () => {
     it('should be truthy', () => {
@@ -67,7 +67,7 @@ describe('BaseProperty', () => {
     it('should have enum current', () => {
         enum TestEnum {
             ONE = 'ONE',
-            TWO = 'TWO'
+            TWO = 'TWO',
         }
         const value: TestEnum = TestEnum.ONE;
         const property = new BaseProperty<TestEnum>(value);
@@ -79,7 +79,7 @@ describe('BaseProperty', () => {
 
     it('should have some class current', () => {
         class Test {
-            a: number = 3;
+            a = 3;
         }
         const value = new Test();
         const property = new BaseProperty<Test>(value);

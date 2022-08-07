@@ -1,7 +1,7 @@
-import {PropertyContainerList} from "./property-container-list";
-import {PropertiesContainer} from "../property/container/properties-container";
-import {NumberProperty} from "../property/number/number-property";
-import {BaseProperty} from "../property/base/base-property";
+import { PropertyContainerList } from './property-container-list';
+import { PropertiesContainer } from '../property/container/properties-container';
+import { NumberProperty } from '../property/number/number-property';
+import { BaseProperty } from '../property/base/base-property';
 
 interface TestContainer {
     foo: NumberProperty;

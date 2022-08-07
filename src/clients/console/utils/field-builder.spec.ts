@@ -1,4 +1,4 @@
-import {FieldBuilder} from "./field-builder";
+import { FieldBuilder } from './field-builder';
 
 describe('FieldBuilder', () => {
     it('should build field ready to console', () => {

@@ -1,4 +1,4 @@
-import {NumberProperty} from "./number-property";
+import { NumberProperty } from './number-property';
 
 describe('NumberProperty', () => {
     describe('should have default value', () => {
@@ -26,7 +26,10 @@ describe('NumberProperty', () => {
             const defaultValue = 5;
 
             expect(() => {
-                new NumberProperty({ defaultValue, min })
+                new NumberProperty({
+                    defaultValue,
+                    min,
+                });
             }).toThrowError();
         });
 
@@ -35,7 +38,10 @@ describe('NumberProperty', () => {
             const defaultValue = 50;
 
             expect(() => {
-                new NumberProperty({ defaultValue, max })
+                new NumberProperty({
+                    defaultValue,
+                    max,
+                });
             }).toThrowError();
         });
     });
@@ -137,7 +143,10 @@ describe('NumberProperty', () => {
             const max = 10;
             const min = -10;
             const value = 20;
-            const numberProperty = new NumberProperty({ max, min });
+            const numberProperty = new NumberProperty({
+                max,
+                min,
+            });
 
             const error = numberProperty.getOutOfRangeError(value);
 

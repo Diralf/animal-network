@@ -1,8 +1,8 @@
-import {ArrayProperty} from "../array/array-property";
-import {PointProperty} from "../point/point-property";
-import {PropertyContainerList} from "../../property-container-list/property-container-list";
-import {PropertiesContainer} from "../container/properties-container";
-import {BaseProperty} from "../base/base-property";
+import { ArrayProperty } from '../array/array-property';
+import { PointProperty } from '../point/point-property';
+import { PropertyContainerList } from '../../property-container-list/property-container-list';
+import { PropertiesContainer } from '../container/properties-container';
+import { BaseProperty } from '../base/base-property';
 
 interface Owner {
     visual: BaseProperty<number>;
@@ -28,8 +28,13 @@ export class SightProperty extends ArrayProperty<number, PropertiesContainer<Own
 
         const newCurrent = [];
         for (let j = sy; j <= ey; j++) {
-            for (let i = sx; i <= ex; i ++) {
-                const [entity] = list.find({ position: { x: i, y: j }});
+            for (let i = sx; i <= ex; i++) {
+                const [entity] = list.find({
+                    position: {
+                        x: i,
+                        y: j,
+                    },
+                });
                 const cell = (entity && entity.get.visual?.()) ?? 0;
                 newCurrent.push(cell);
             }
@@ -41,8 +46,8 @@ export class SightProperty extends ArrayProperty<number, PropertiesContainer<Own
     asString() {
         const sightSize = this.range * 2 + 1;
         const matrix = this.current;
-        return new Array(sightSize).fill(0).map((zero, index) => {
-            return matrix.slice(index * sightSize, index * sightSize + sightSize).join(',');
-        }).join('\n');
+        return new Array(sightSize).fill(0)
+            .map((zero, index) => matrix.slice(index * sightSize, index * sightSize + sightSize).join(','))
+            .join('\n');
     }
 }

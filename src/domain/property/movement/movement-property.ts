@@ -1,6 +1,6 @@
-import {BaseProperty} from "../base/base-property";
-import {PointProperty, RawPoint} from "../point/point-property";
-import {PropertiesContainer} from "../container/properties-container";
+import { BaseProperty } from '../base/base-property';
+import { PointProperty, RawPoint } from '../point/point-property';
+import { PropertiesContainer } from '../container/properties-container';
 
 export enum MovementDirections {
     UP = 'UP',
@@ -18,21 +18,39 @@ export class MovementProperty extends BaseProperty<void, PropertiesContainer<Own
         let delta: RawPoint;
         switch (direction) {
             case MovementDirections.UP:
-                delta = { x: 1, y: 0 };
+                delta = {
+                    x: 1,
+                    y: 0,
+                };
                 break;
             case MovementDirections.DOWN:
-                delta = { x: 1, y: 0 };
+                delta = {
+                    x: 1,
+                    y: 0,
+                };
                 break;
             case MovementDirections.LEFT:
-                delta = { x: 1, y: 0 };
+                delta = {
+                    x: 1,
+                    y: 0,
+                };
                 break;
             case MovementDirections.RIGHT:
-                delta = { x: 1, y: 0 };
+                delta = {
+                    x: 1,
+                    y: 0,
+                };
                 break;
             default:
-                delta = { x: 0, y: 0};
+                delta = {
+                    x: 0,
+                    y: 0,
+                };
         }
         const currentPoint = this.owner.get.position();
-        this.owner.set.position({ x: currentPoint.x + delta.x, y: currentPoint.y + delta.y });
+        this.owner.set.position({
+            x: currentPoint.x + delta.x,
+            y: currentPoint.y + delta.y,
+        });
     }
 }
