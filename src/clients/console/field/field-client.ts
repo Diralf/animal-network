@@ -14,7 +14,7 @@ export class FieldClient {
         this.emptyCell = emptyCell ?? ' ';
     }
 
-    toStringField() {
+    public toStringField(): string {
         const width = this.field.get.width();
         const height = this.field.get.height();
         const row = ''.padEnd(width, this.emptyCell);
