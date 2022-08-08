@@ -47,8 +47,8 @@ describe('BaseProperty', () => {
     });
 
     it('should have object current', () => {
-        const value = { a: 5 };
-        const property = new BaseProperty<{ a: number }>(value);
+        const value = { foo: 5 };
+        const property = new BaseProperty<{ foo: number }>(value);
 
         expect(property.current).toEqual(value);
         expect(typeof property.current).toEqual('object');
@@ -79,7 +79,7 @@ describe('BaseProperty', () => {
 
     it('should have some class current', () => {
         class Test {
-            a = 3;
+            public field = 1;
         }
         const value = new Test();
         const property = new BaseProperty<Test>(value);
