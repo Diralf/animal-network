@@ -4,33 +4,33 @@ export class BaseProperty<Value, Owner = unknown> {
     constructor(private _current: Value) {
     }
 
-    get current(): Value {
+    public get current(): Value {
         return this._current;
     }
 
-    set current(value: Value) {
+    public set current(value: Value) {
         this._current = value;
     }
 
-    get owner(): Owner {
+    public get owner(): Owner {
         if (!this._owner) {
             throw new Error('Owner is not defined');
         }
         return this._owner;
     }
 
-    set owner(value: Owner) {
+    public set owner(value: Owner) {
         if (this._owner) {
             throw new Error('Owner already defined');
         }
         this._owner = value;
     }
 
-    public isEqual(other: BaseProperty<Value>) {
+    public isEqual(other: BaseProperty<Value>): boolean {
         return this.isEqualValue(other.current);
     }
 
-    public isEqualValue(otherValue: Value) {
+    public isEqualValue(otherValue: Value): boolean {
         return this._current === otherValue;
     }
 }
