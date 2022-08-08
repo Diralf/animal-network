@@ -19,19 +19,19 @@ export class MovementProperty extends BaseProperty<void, PropertiesContainer<Own
         switch (direction) {
             case MovementDirections.UP:
                 delta = {
-                    x: 1,
-                    y: 0,
+                    x: 0,
+                    y: -1,
                 };
                 break;
             case MovementDirections.DOWN:
                 delta = {
-                    x: 1,
-                    y: 0,
+                    x: 0,
+                    y: 1,
                 };
                 break;
             case MovementDirections.LEFT:
                 delta = {
-                    x: 1,
+                    x: -1,
                     y: 0,
                 };
                 break;

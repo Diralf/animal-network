@@ -43,11 +43,12 @@ export class SightProperty extends ArrayProperty<number, PropertiesContainer<Own
         this.current = newCurrent;
     }
 
-    public asString(): string {
+    public asString(emptyCell = '_'): string {
         const sightSize = (this.range * 2) + 1;
         const matrix = this.current;
         return new Array(sightSize).fill(0)
             .map((zero, index) => matrix.slice(index * sightSize, (index * sightSize) + sightSize).join(','))
-            .join('\n');
+            .join('\n')
+            .replaceAll('0', emptyCell);
     }
 }

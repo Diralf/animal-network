@@ -530,7 +530,7 @@
       {
         "ObjectExpression": {
           "multiline": true,
-          "minProperties": 2,
+          "minProperties": 3,
           "consistent": true
         },
         "ObjectPattern": {
@@ -549,7 +549,12 @@
       "error",
       "always"
     ],
-    "object-property-newline": "error",
+    "object-property-newline": [
+      "error",
+      {
+        "allowAllPropertiesOnSameLine": true
+      }
+    ],
     "object-shorthand": "error",
     "one-var": "off",
     "one-var-declaration-per-line": "error",

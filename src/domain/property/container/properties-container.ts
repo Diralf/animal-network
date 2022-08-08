@@ -3,6 +3,13 @@ import { isGetValid, Get } from './get.type';
 import { PropertiesContainerBase } from './properties-container-base.type';
 import { isSetValid, SetWritable } from './set.type';
 
+export const isPropertiesContainerValid = <Properties extends PropertiesContainerBase<Properties>>(
+    instance: PropertiesContainer<PropertiesContainerBase<unknown>>,
+    propertyKeys: Array<keyof Properties>,
+): instance is PropertiesContainer<Properties> => {
+    return isGetValid(instance.get, propertyKeys) && isSetValid(instance.set, propertyKeys);
+};
+
 export class PropertiesContainer<Properties extends PropertiesContainerBase<Properties>> {
     public get: Get<Properties>;
     public set: SetWritable<Properties>;
