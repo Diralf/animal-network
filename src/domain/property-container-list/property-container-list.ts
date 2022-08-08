@@ -10,11 +10,11 @@ interface InstanceOfFilter<T extends InstanceConstructor<Properties>, Properties
 export class PropertyContainerList<Properties extends PropertiesContainerBase<Properties>> {
     private instances: Array<PropertiesContainer<Properties>> = [];
 
-    add(...instances: Array<PropertiesContainer<Properties>>) {
+    public add(...instances: Array<PropertiesContainer<Properties>>): void {
         this.instances.push(...instances);
     }
 
-    find<T extends InstanceConstructor<Properties>>(
+    public find<T extends InstanceConstructor<Properties>>(
         properties: Partial<PropertiesValueTypes<Properties>> = {},
         additional: Partial<InstanceOfFilter<T, Properties>> = {},
     ): Array<PropertiesContainer<Properties>> {
@@ -28,7 +28,7 @@ export class PropertyContainerList<Properties extends PropertiesContainerBase<Pr
         });
     }
 
-    getAll(): Array<PropertiesContainer<Properties>> {
+    public getAll(): Array<PropertiesContainer<Properties>> {
         return this.instances;
     }
 }
