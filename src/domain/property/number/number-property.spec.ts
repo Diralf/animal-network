@@ -25,24 +25,20 @@ describe('NumberProperty', () => {
             const min = 10;
             const defaultValue = 5;
 
-            expect(() => {
-                new NumberProperty({
-                    defaultValue,
-                    min,
-                });
-            }).toThrowError();
+            expect(() => new NumberProperty({
+                defaultValue,
+                min,
+            })).toThrowError();
         });
 
         it('when default is greater than max', () => {
             const max = 10;
             const defaultValue = 50;
 
-            expect(() => {
-                new NumberProperty({
-                    defaultValue,
-                    max,
-                });
-            }).toThrowError();
+            expect(() => new NumberProperty({
+                defaultValue,
+                max,
+            })).toThrowError();
         });
     });
 

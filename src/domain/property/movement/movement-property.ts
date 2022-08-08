@@ -14,7 +14,7 @@ interface Owner {
 }
 
 export class MovementProperty extends BaseProperty<void, PropertiesContainer<Owner>> {
-    move(direction: MovementDirections) {
+    public move(direction: MovementDirections): void {
         let delta: RawPoint;
         switch (direction) {
             case MovementDirections.UP:
