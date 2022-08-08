@@ -14,34 +14,34 @@ export class NumberProperty extends BaseProperty<number> {
         this.current = this.validate(options.current ?? this._default);
     }
 
-    get current() {
+    public get current(): number {
         return super.current;
     }
 
-    set current(value: number) {
+    public set current(value: number) {
         super.current = this.validate(value);
     }
 
-    get min(): number {
+    public get min(): number {
         return this._min;
     }
 
-    get max(): number {
+    public get max(): number {
         return this._max;
     }
 
-    get default(): number {
+    public get default(): number {
         return this._default;
     }
 
-    validate(value: number) {
+    public validate(value: number): number {
         if (value < this.min || value > this.max) {
             throw this.getOutOfRangeError(value);
         }
         return value;
     }
 
-    getOutOfRangeError(value: number) {
+    public getOutOfRangeError(value: number): Error {
         return new Error(`Value out of range. Value ${value}, allowed [${this.min}, ${this.max}]`);
     }
 }
