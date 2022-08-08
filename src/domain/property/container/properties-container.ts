@@ -1,33 +1,7 @@
-import { BaseProperty } from '../base/base-property';
 import { PropertyValueType } from '../utils/property-value.type';
-
-type IfEquals<X, Y, A=X, B=never> = (<T>() => T extends X ? 1 : 2) extends (<T>() => T extends Y ? 1 : 2) ? A : B;
-
-type WritableKeys<T> = {
-    [P in keyof T]-?: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, P>
-}[keyof T];
-
-export type PropertiesContainerBase<Properties> = Record<keyof Properties, BaseProperty<unknown>>;
-
-type Get<Properties extends PropertiesContainerBase<Properties>> = {
-    [Key in keyof Properties]: () => PropertyValueType<Properties[Key]>;
-};
-
-const isGetValid = <Properties extends PropertiesContainerBase<Properties>>(
-    getInstance: Partial<Get<Properties>>,
-    propertyKeys: Array<keyof Properties>,
-): getInstance is Get<Properties> => propertyKeys.every((propertyKey) => propertyKey in getInstance);
-
-type Set<Properties extends PropertiesContainerBase<Properties>> = {
-    [Key in keyof Properties]: (value: PropertyValueType<Properties[Key]>) => void;
-};
-
-type SetWritable<Properties extends PropertiesContainerBase<Properties>> = Set<Pick<Properties, WritableKeys<Properties>>>;
-
-const isSetValid = <Properties extends PropertiesContainerBase<Properties>>(
-    getInstance: Partial<SetWritable<Properties>>,
-    propertyKeys: Array<keyof Properties>,
-): getInstance is SetWritable<Properties> => propertyKeys.every((propertyKey) => propertyKey in getInstance);
+import { isGetValid, Get } from './get.type';
+import { PropertiesContainerBase } from './properties-container-base.type';
+import { isSetValid, SetWritable } from './set.type';
 
 export class PropertiesContainer<Properties extends PropertiesContainerBase<Properties>> {
     public get: Get<Properties>;

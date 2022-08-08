@@ -1,4 +1,5 @@
-import { PropertiesContainer, PropertiesContainerBase } from '../property/container/properties-container';
+import { PropertiesContainer} from '../property/container/properties-container';
+import { PropertiesContainerBase } from '../property/container/properties-container-base.type';
 import { PropertiesValueTypes } from '../property/utils/property-value.type';
 
 interface InstanceConstructor<Properties extends PropertiesContainerBase<Properties>> { new(): PropertiesContainer<Properties> }
