@@ -17,11 +17,11 @@ export class SightProperty extends ArrayProperty<number, PropertiesContainer<Own
         this._range = options.range;
     }
 
-    get range(): number {
+    public get range(): number {
         return this._range;
     }
 
-    update(list: PropertyContainerList<Owner>) {
+    public update(list: PropertyContainerList<Owner>): void {
         const { x, y } = this.owner.get.position();
         const [sx, sy] = [x - this.range, y - this.range];
         const [ex, ey] = [x + this.range, y + this.range];
@@ -43,11 +43,11 @@ export class SightProperty extends ArrayProperty<number, PropertiesContainer<Own
         this.current = newCurrent;
     }
 
-    asString() {
-        const sightSize = this.range * 2 + 1;
+    public asString(): string {
+        const sightSize = (this.range * 2) + 1;
         const matrix = this.current;
         return new Array(sightSize).fill(0)
-            .map((zero, index) => matrix.slice(index * sightSize, index * sightSize + sightSize).join(','))
+            .map((zero, index) => matrix.slice(index * sightSize, (index * sightSize) + sightSize).join(','))
             .join('\n');
     }
 }

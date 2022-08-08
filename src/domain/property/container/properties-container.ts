@@ -26,17 +26,17 @@ export class PropertiesContainer<Properties extends PropertiesContainerBase<Prop
         this.get = propertyKeys.reduce<Get<Properties>>((acc, key) => ({
             ...acc,
             [key]: () => this.getPropertyValue(key),
-        }), {});
+        }), {} as Get<Properties>);
         this.set = propertyKeys.reduce<Set<Properties>>((acc, key) => ({
             ...acc,
             [key]: (value: PropertyValueType<Properties[typeof key]>) => { this.setPropertyValue(key, value); },
-        }), {});
+        }), {} as Set<Properties>);
         propertyKeys.forEach((propertyKey) => {
             properties[propertyKey].owner = this;
         });
     }
 
-    private setPropertyValue<Key extends keyof Properties>(property: Key, value: PropertyValueType<Properties[Key]>) {
+    private setPropertyValue<Key extends keyof Properties>(property: Key, value: PropertyValueType<Properties[Key]>): void {
         this.properties[property].current = value;
     }
 

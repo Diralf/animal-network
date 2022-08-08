@@ -4,9 +4,9 @@ import { Grass } from './entities/grass';
 import { Animal } from './entities/animal';
 
 export class SimpleGrassWorld {
-    entityList: PropertyContainerList<BaseProperties> = new PropertyContainerList();
+    public entityList: PropertyContainerList<BaseProperties> = new PropertyContainerList();
 
-    start() {
+    public start(): void {
         const grassList = new Array(5).fill(0)
             .map((zero, index) => new Grass({
                 position: {
