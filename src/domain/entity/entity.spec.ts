@@ -51,9 +51,7 @@ describe('Entity', () => {
             });
 
             it(`should throw an error when less than ${min}`, () => {
-                expect(() => {
-                    new Entity({ [property]: min - 1 });
-                }).toThrowError();
+                expect(() => new Entity({ [property]: min - 1 })).toThrowError();
             });
 
             it(`should less or equal than ${max}`, () => {
@@ -63,9 +61,7 @@ describe('Entity', () => {
             });
 
             it(`should throw an error when greater than ${max}`, () => {
-                expect(() => {
-                    new Entity({ [property]: max + 1 });
-                }).toThrowError();
+                expect(() => new Entity({ [property]: max + 1 })).toThrowError();
             });
         });
     });

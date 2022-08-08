@@ -1,16 +1,16 @@
 export class FieldBuilder {
     private rows: string[] = [];
 
-    row(row: string): FieldBuilder {
+    public row(row: string): FieldBuilder {
         this.rows.push(row);
         return this;
     }
 
-    join(): string {
+    public join(): string {
         return this.rows.join('\n');
     }
 
-    static build(field: string): string {
+    public static build(field: string): string {
         return field
             .trim()
             .split('\n')
