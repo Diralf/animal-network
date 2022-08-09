@@ -10,6 +10,7 @@ export class Grass extends PropertiesContainer<BaseProperties> {
             tags: [InstanceTypes.GRASS],
             visual: 1,
             collision: () => { /**/ },
+            size: 1,
         }));
     }
 }

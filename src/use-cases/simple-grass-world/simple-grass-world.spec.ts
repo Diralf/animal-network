@@ -163,6 +163,7 @@ describe('SimpleGrassWorld', () => {
             _,_,_,_,_
             _,_,_,_,_
         `));
+        expect(animal.get.size()).toEqual(1);
 
         animalMovement.move(MovementDirections.UP);
         simpleGrassWorld.tick();
@@ -178,5 +179,6 @@ describe('SimpleGrassWorld', () => {
             _,1,_,1,_
             1,_,_,_,1
         `));
+        expect(animal.get.size()).toEqual(2);
     });
 });
