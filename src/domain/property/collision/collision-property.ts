@@ -3,17 +3,21 @@ import { TimeThreadListener } from '../../time-thread/time-thread-listener';
 import { World } from '../../world/world';
 import { BaseProperty } from '../base/base-property';
 import { PropertiesContainer } from '../container/properties-container';
+import { PropertyOwner } from '../owner/property-owner';
+import { PropertyWithOwner } from '../owner/property-with-owner';
 import { CollisionOptions } from './collision-options';
 import { CollisionOwner } from './collision-owner';
 
 type Current = (options: CollisionOptions) => void;
 
-export class CollisionProperty extends BaseProperty<Current, PropertiesContainer<CollisionOwner>> implements TimeThreadListener {
+export class CollisionProperty extends BaseProperty<Current> implements PropertyWithOwner<CollisionOwner>, TimeThreadListener {
+    public owner = new PropertyOwner<CollisionOwner>();
+
     public check(list: PropertyContainerList<CollisionOwner>): Array<PropertiesContainer<CollisionOwner>> {
-        const ownPosition = this.owner.get.position();
+        const ownPosition = this.owner.ref.get.position();
         return list
             .find({ position: ownPosition })
-            .filter((entity) => entity !== this.owner);
+            .filter((entity) => entity !== this.owner.ref);
     }
 
     public collide(list: PropertyContainerList<CollisionOwner>): void {

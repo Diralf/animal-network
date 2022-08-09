@@ -1,9 +1,10 @@
 import { TimeThreadListener } from '../../time-thread/time-thread-listener';
 import { World } from '../../world/world';
 import { ArrayProperty } from '../array/array-property';
+import { PropertyOwner } from '../owner/property-owner';
+import { PropertyWithOwner } from '../owner/property-with-owner';
 import { PointProperty } from '../point/point-property';
 import { PropertyContainerList } from '../../property-container-list/property-container-list';
-import { PropertiesContainer } from '../container/properties-container';
 import { BaseProperty } from '../base/base-property';
 
 interface Owner {
@@ -11,7 +12,8 @@ interface Owner {
     position: PointProperty;
 }
 
-export class SightProperty extends ArrayProperty<number, PropertiesContainer<Owner>> implements TimeThreadListener {
+export class SightProperty extends ArrayProperty<number> implements PropertyWithOwner<Owner>, TimeThreadListener {
+    public owner = new PropertyOwner<Owner>();
     private readonly _range: number;
 
     constructor(options: { range: number }) {
@@ -24,7 +26,7 @@ export class SightProperty extends ArrayProperty<number, PropertiesContainer<Own
     }
 
     public update(list: PropertyContainerList<Owner>): void {
-        const { x, y } = this.owner.get.position();
+        const { x, y } = this.owner.ref.get.position();
         const [sx, sy] = [x - this.range, y - this.range];
         const [ex, ey] = [x + this.range, y + this.range];
 

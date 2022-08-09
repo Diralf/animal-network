@@ -1,6 +1,7 @@
 import { BaseProperty } from '../base/base-property';
+import { PropertyOwner } from '../owner/property-owner';
+import { PropertyWithOwner } from '../owner/property-with-owner';
 import { PointProperty } from '../point/point-property';
-import { PropertiesContainer } from '../container/properties-container';
 import { RawPoint } from '../point/raw-point';
 
 export enum MovementDirections {
@@ -14,7 +15,9 @@ interface Owner {
     position: PointProperty;
 }
 
-export class MovementProperty extends BaseProperty<void, PropertiesContainer<Owner>> {
+export class MovementProperty extends BaseProperty<void> implements PropertyWithOwner<Owner> {
+    public owner = new PropertyOwner<Owner>();
+
     public move(direction: MovementDirections): void {
         let delta: RawPoint;
         switch (direction) {
@@ -48,8 +51,8 @@ export class MovementProperty extends BaseProperty<void, PropertiesContainer<Own
                     y: 0,
                 };
         }
-        const currentPoint = this.owner.get.position();
-        this.owner.set.position({
+        const currentPoint = this.owner.ref.get.position();
+        this.owner.ref.set.position({
             x: currentPoint.x + delta.x,
             y: currentPoint.y + delta.y,
         });

@@ -1,5 +1,6 @@
 import { TimeThreadListener, isTimeThreadListener } from '../../time-thread/time-thread-listener';
 import { World } from '../../world/world';
+import { isPropertyWithOwner } from '../owner/property-with-owner';
 import { PropertyValueType } from '../utils/property-value.type';
 import { isGetValid, Get } from './get.type';
 import { PropertiesContainerBase } from './properties-container-base.type';
@@ -21,7 +22,9 @@ export class PropertiesContainer<Properties extends PropertiesContainerBase<Prop
         this.get = this.propertiesToGetInstance(propertyKeys);
         this.set = this.propertiesToSetInstance(propertyKeys);
         allProperties.forEach(([, property]) => {
-            property.init(this);
+            if (isPropertyWithOwner(property)) {
+                property.owner.ref = this;
+            }
             if (isTimeThreadListener(property)) {
                 this.listeners.push(property);
             }

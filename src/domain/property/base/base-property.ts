@@ -1,11 +1,5 @@
-export class BaseProperty<Value, Owner = unknown> {
-    private _owner: Owner = null as unknown as Owner;
-
+export class BaseProperty<Value> {
     constructor(private _current: Value) {
-    }
-
-    public init(owner: Owner): void {
-        this.owner = owner;
     }
 
     public get current(): Value {
@@ -14,20 +8,6 @@ export class BaseProperty<Value, Owner = unknown> {
 
     public set current(value: Value) {
         this._current = value;
-    }
-
-    public get owner(): Owner {
-        if (!this._owner) {
-            throw new Error('Owner is not defined');
-        }
-        return this._owner;
-    }
-
-    public set owner(value: Owner) {
-        if (this._owner) {
-            throw new Error('Owner already defined');
-        }
-        this._owner = value;
     }
 
     public isEqual(other: BaseProperty<Value>): boolean {
