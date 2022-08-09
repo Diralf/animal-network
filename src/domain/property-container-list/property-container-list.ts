@@ -1,4 +1,4 @@
-import { PropertiesContainer} from '../property/container/properties-container';
+import { PropertiesContainer } from '../property/container/properties-container';
 import { PropertiesContainerBase } from '../property/container/properties-container-base.type';
 import { PropertiesValueTypes } from '../property/utils/property-value.type';
 
@@ -31,5 +31,9 @@ export class PropertyContainerList<Properties extends PropertiesContainerBase<Pr
 
     public getAll(): Array<PropertiesContainer<Properties>> {
         return this.instances;
+    }
+
+    public remove(...instances: Array<PropertiesContainer<Properties>>): void {
+        this.instances = this.instances.filter((item) => !instances.includes(item));
     }
 }

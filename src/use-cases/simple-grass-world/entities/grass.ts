@@ -9,6 +9,7 @@ export class Grass extends PropertiesContainer<BaseProperties> {
             position: values.position,
             tags: [InstanceTypes.GRASS],
             visual: 1,
+            collision: () => { /**/ },
         }));
     }
 }

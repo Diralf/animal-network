@@ -1,3 +1,4 @@
+import { CollisionOptions } from '../../../domain/property/collision/collision-options';
 import { PropertiesValueTypes } from '../../../domain/property/utils/property-value.type';
 import { BaseProperties, getBaseProperties } from './base-properties';
 import { PropertiesContainer } from '../../../domain/property/container/properties-container';
@@ -17,11 +18,18 @@ export class Animal extends PropertiesContainer<AnimalProperties> {
                 position: values.position,
                 tags: [InstanceTypes.ANIMAL],
                 visual: 2,
+                collision: (options) => {
+                    this.handleCollision(options);
+                },
             }),
             sight: new SightProperty({
                 range: 2,
             }),
             movement: new MovementProperty(),
         });
+    }
+
+    private handleCollision({ other, list }: CollisionOptions): void {
+        list.remove(...other);
     }
 }

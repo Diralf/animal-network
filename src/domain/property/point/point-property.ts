@@ -1,9 +1,5 @@
 import { BaseProperty } from '../base/base-property';
-
-export interface RawPoint {
-    x: number;
-    y: number;
-}
+import { RawPoint } from './raw-point';
 
 export class PointProperty extends BaseProperty<RawPoint> {
     public isEqualValue(otherValue: RawPoint): boolean {

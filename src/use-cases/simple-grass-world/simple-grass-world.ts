@@ -1,6 +1,7 @@
-import { PropertyContainerList } from '../../domain/property-container-list/property-container-list';
 import { PropertiesContainer } from '../../domain/property/container/properties-container';
-import { RawPoint } from '../../domain/property/point/point-property';
+import { RawPoint } from '../../domain/property/point/raw-point';
+import { TimeThread } from '../../domain/time-thread/time-thread';
+import { World } from '../../domain/world/world';
 import { BaseProperties } from './entities/base-properties';
 
 interface FieldOptions {
@@ -9,7 +10,8 @@ interface FieldOptions {
 }
 
 export class SimpleGrassWorld {
-    public entityList: PropertyContainerList<BaseProperties> = new PropertyContainerList();
+    public world: World = new World();
+    public timeThread = new TimeThread();
 
     public start(fieldOptions: FieldOptions): void {
         const { stringField, availableEntities } = fieldOptions;
@@ -20,9 +22,14 @@ export class SimpleGrassWorld {
                 const entityFactory = availableEntities[cell];
                 if (entityFactory) {
                     const entityWithPosition = entityFactory({ x: cellIndex, y: rowIndex });
-                    this.entityList.add(entityWithPosition);
+                    this.world.entityList.add(entityWithPosition);
+                    this.timeThread.addListener(entityWithPosition);
                 }
             });
         });
+    }
+
+    public tick(): void {
+        this.timeThread.tick(this.world);
     }
 }

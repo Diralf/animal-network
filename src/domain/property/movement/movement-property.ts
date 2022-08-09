@@ -1,6 +1,7 @@
 import { BaseProperty } from '../base/base-property';
-import { PointProperty, RawPoint } from '../point/point-property';
+import { PointProperty } from '../point/point-property';
 import { PropertiesContainer } from '../container/properties-container';
+import { RawPoint } from '../point/raw-point';
 
 export enum MovementDirections {
     UP = 'UP',

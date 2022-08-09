@@ -1,3 +1,5 @@
+import { TimeThreadListener } from '../../time-thread/time-thread-listener';
+import { World } from '../../world/world';
 import { ArrayProperty } from '../array/array-property';
 import { PointProperty } from '../point/point-property';
 import { PropertyContainerList } from '../../property-container-list/property-container-list';
@@ -9,7 +11,7 @@ interface Owner {
     position: PointProperty;
 }
 
-export class SightProperty extends ArrayProperty<number, PropertiesContainer<Owner>> {
+export class SightProperty extends ArrayProperty<number, PropertiesContainer<Owner>> implements TimeThreadListener {
     private readonly _range: number;
 
     constructor(options: { range: number }) {
@@ -50,5 +52,9 @@ export class SightProperty extends ArrayProperty<number, PropertiesContainer<Own
             .map((zero, index) => matrix.slice(index * sightSize, (index * sightSize) + sightSize).join(','))
             .join('\n')
             .replaceAll('0', emptyCell);
+    }
+
+    public tick(world: World): void {
+        this.update(world.entityList);
     }
 }

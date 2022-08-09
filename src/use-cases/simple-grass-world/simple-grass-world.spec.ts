@@ -1,11 +1,11 @@
-import { RawPoint } from '../../domain/property/point/point-property';
-import { Grass } from './entities/grass';
-import { SimpleGrassWorld } from './simple-grass-world';
-import { InstanceTypes } from './entities/instance-types';
-import { PropertiesContainer } from '../../domain/property/container/properties-container';
-import { AnimalProperties, Animal } from './entities/animal';
-import { MovementDirections } from '../../domain/property/movement/movement-property';
 import { FieldBuilder } from '../../clients/console/utils/field-builder';
+import { PropertiesContainer } from '../../domain/property/container/properties-container';
+import { MovementDirections } from '../../domain/property/movement/movement-property';
+import { RawPoint } from '../../domain/property/point/raw-point';
+import { AnimalProperties, Animal } from './entities/animal';
+import { Grass } from './entities/grass';
+import { InstanceTypes } from './entities/instance-types';
+import { SimpleGrassWorld } from './simple-grass-world';
 
 const startWorld = (simpleGrassWorld: SimpleGrassWorld): void => {
     simpleGrassWorld.start({
@@ -32,9 +32,9 @@ describe('SimpleGrassWorld', () => {
     it('should generate world with 5 grass and one animal', () => {
         const simpleGrassWorld = new SimpleGrassWorld();
         startWorld(simpleGrassWorld);
-        const { entityList } = simpleGrassWorld;
-        const grassInstances = entityList.find({ tags: [InstanceTypes.GRASS] });
-        const animalInstances = entityList.find({ tags: [InstanceTypes.ANIMAL] });
+        const { world } = simpleGrassWorld;
+        const grassInstances = world.entityList.find({ tags: [InstanceTypes.GRASS] });
+        const animalInstances = world.entityList.find({ tags: [InstanceTypes.ANIMAL] });
 
         expect(grassInstances).toHaveLength(5);
         expect(animalInstances).toHaveLength(1);
@@ -43,13 +43,13 @@ describe('SimpleGrassWorld', () => {
     it('should generate all instances in the different places', () => {
         const simpleGrassWorld = new SimpleGrassWorld();
         startWorld(simpleGrassWorld);
-        const { entityList } = simpleGrassWorld;
-        const allInstances = entityList.getAll();
+        const { world } = simpleGrassWorld;
+        const allInstances = world.entityList.getAll();
 
         expect(allInstances).toHaveLength(6);
         allInstances.forEach((instance) => {
             const position = instance.get.position();
-            const result = entityList.find({ position });
+            const result = world.entityList.find({ position });
 
             expect(result).toHaveLength(1);
         });
@@ -58,10 +58,10 @@ describe('SimpleGrassWorld', () => {
     it('should build field from string and display whole field as string', () => {
         const simpleGrassWorld = new SimpleGrassWorld();
         startWorld(simpleGrassWorld);
-        const { entityList } = simpleGrassWorld;
-        const grassInstances = entityList.find({ tags: [InstanceTypes.GRASS] });
-        const animalInstances = entityList.find({ tags: [InstanceTypes.ANIMAL] });
-        const allInstances = entityList.getAll();
+        const { world } = simpleGrassWorld;
+        const grassInstances = world.entityList.find({ tags: [InstanceTypes.GRASS] });
+        const animalInstances = world.entityList.find({ tags: [InstanceTypes.ANIMAL] });
+        const allInstances = world.entityList.getAll();
 
         expect(grassInstances).toHaveLength(5);
         expect(animalInstances).toHaveLength(1);
@@ -78,11 +78,11 @@ describe('SimpleGrassWorld', () => {
     it('should get matrix of sight of animal', () => {
         const simpleGrassWorld = new SimpleGrassWorld();
         startWorld(simpleGrassWorld);
-        const { entityList } = simpleGrassWorld;
-        const [animal] = entityList.find({ tags: [InstanceTypes.ANIMAL] }) as Array<PropertiesContainer<AnimalProperties>>;
+        const { world } = simpleGrassWorld;
+        const [animal] = world.entityList.find({ tags: [InstanceTypes.ANIMAL] }) as Array<PropertiesContainer<AnimalProperties>>;
 
         const animalSight = animal.getProperty('sight');
-        animalSight.update(entityList);
+        animalSight.update(world.entityList);
         expect(animalSight.asString()).toEqual(FieldBuilder.build(`
             _,1,1,1,_
             1,_,_,_,1
@@ -136,14 +136,47 @@ describe('SimpleGrassWorld', () => {
     ])('should animal move $direction', ({ direction, result }) => {
         const simpleGrassWorld = new SimpleGrassWorld();
         startWorld(simpleGrassWorld);
-        const { entityList } = simpleGrassWorld;
-        const [animal] = entityList.find({ tags: [InstanceTypes.ANIMAL] }) as Array<PropertiesContainer<AnimalProperties>>;
+        const { world } = simpleGrassWorld;
+        const [animal] = world.entityList.find({ tags: [InstanceTypes.ANIMAL] }) as Array<PropertiesContainer<AnimalProperties>>;
         const animalSight = animal.getProperty('sight');
         const animalMovement = animal.getProperty('movement');
 
         animalMovement.move(direction);
-        animalSight.update(entityList);
+        animalSight.update(world.entityList);
 
         expect(animalSight.asString()).toEqual(result);
+    });
+
+    it('should eat grass', () => {
+        const simpleGrassWorld = new SimpleGrassWorld();
+        startWorld(simpleGrassWorld);
+        const { world } = simpleGrassWorld;
+        const [animal] = world.entityList.find({ tags: [InstanceTypes.ANIMAL] }) as Array<PropertiesContainer<AnimalProperties>>;
+        const animalSight = animal.getProperty('sight');
+        const animalMovement = animal.getProperty('movement');
+
+        simpleGrassWorld.tick();
+        expect(animalSight.asString()).toEqual(FieldBuilder.build(`
+            _,1,1,1,_
+            1,_,_,_,1
+            _,_,2,_,_
+            _,_,_,_,_
+            _,_,_,_,_
+        `));
+
+        animalMovement.move(MovementDirections.UP);
+        simpleGrassWorld.tick();
+        animalMovement.move(MovementDirections.UP);
+        simpleGrassWorld.tick();
+        animalMovement.move(MovementDirections.UP);
+        simpleGrassWorld.tick();
+
+        expect(animalSight.asString()).toEqual(FieldBuilder.build(`
+            _,_,_,_,_
+            _,_,_,_,_
+            _,_,2,_,_
+            _,1,_,1,_
+            1,_,_,_,1
+        `));
     });
 });

@@ -4,6 +4,10 @@ export class BaseProperty<Value, Owner = unknown> {
     constructor(private _current: Value) {
     }
 
+    public init(owner: Owner): void {
+        this.owner = owner;
+    }
+
     public get current(): Value {
         return this._current;
     }
