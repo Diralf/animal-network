@@ -1,20 +1,19 @@
+import { BrainProperty } from '../../../domain/property/brain/brain-property';
 import { CollisionOptions } from '../../../domain/property/collision/collision-options';
-import { NumberProperty } from '../../../domain/property/number/number-property';
-import { PropertiesValueTypes } from '../../../domain/property/utils/property-value.type';
-import { BaseProperties, getBaseProperties } from './base-properties';
 import { PropertiesContainer } from '../../../domain/property/container/properties-container';
-import { InstanceTypes } from './instance-types';
+import { MovementProperty, MovementDirections } from '../../../domain/property/movement/movement-property';
 import { SightProperty } from '../../../domain/property/sight/sight-property';
-import { MovementProperty } from '../../../domain/property/movement/movement-property';
+import { PropertiesValueTypes } from '../../../domain/property/utils/property-value.type';
+import { AnimalProperties } from './animal';
+import { getBaseProperties, BaseProperties } from './base-properties';
+import { InstanceTypes } from './instance-types';
 
-export interface AnimalProperties extends BaseProperties {
-    sight: SightProperty;
-    movement: MovementProperty;
-    size: NumberProperty;
+export interface StaticAnimalProperties extends AnimalProperties {
+    brain: BrainProperty;
 }
 
-export class Animal extends PropertiesContainer<AnimalProperties> {
-    constructor(values: Pick<PropertiesValueTypes<AnimalProperties>, 'position'>) {
+export class StaticAnimal extends PropertiesContainer<StaticAnimalProperties> {
+    constructor(values: Pick<PropertiesValueTypes<StaticAnimalProperties>, 'position'>) {
         super({
             ...getBaseProperties({
                 position: values.position,
@@ -29,6 +28,7 @@ export class Animal extends PropertiesContainer<AnimalProperties> {
                 range: 2,
             }),
             movement: new MovementProperty(),
+            brain: new BrainProperty(() => MovementDirections.UP),
         });
     }
 

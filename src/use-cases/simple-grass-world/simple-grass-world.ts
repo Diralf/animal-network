@@ -4,7 +4,7 @@ import { TimeThread } from '../../domain/time-thread/time-thread';
 import { World } from '../../domain/world/world';
 import { BaseProperties } from './entities/base-properties';
 
-interface FieldOptions {
+export interface FieldOptions {
     stringField: string;
     availableEntities: Record<string, (point: RawPoint) => PropertiesContainer<BaseProperties>>;
 }

@@ -57,7 +57,7 @@ describe('CollisionProperty', () => {
             entityList,
         } = prepareContext();
 
-        const result = entity1.getProperty('collision').check(entityList) as Array<PropertiesContainer<Entity>>;
+        const result = entity1.getProperty('collision').check(entityList);
         expect(result.map((entity) => entity.get.id())).toEqual([entity2.get.id()]);
     });
 
