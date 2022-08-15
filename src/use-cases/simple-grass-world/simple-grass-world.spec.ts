@@ -246,7 +246,7 @@ describe('SimpleGrassWorld', () => {
                     '1': (point: RawPoint) => new Grass({ position: point }),
                 },
                 staticEntities: [
-                    () => new GrassGenerator(),
+                    () => new GrassGenerator(2),
                 ],
                 ...options,
             });
@@ -265,6 +265,25 @@ describe('SimpleGrassWorld', () => {
             }
 
             expect(result).toEqual([0, 1, 1, 2, 2, 3]);
+        });
+
+        it('should generate randomly', () => {
+            const simpleGrassWorld = new SimpleGrassWorld();
+            startWorld(simpleGrassWorld);
+            const { world } = simpleGrassWorld;
+
+            for (let i = 0; i < 6; i++) {
+                simpleGrassWorld.tick();
+            }
+            const grassInstances = world.getEntityList().find({ tags: [InstanceTypes.GRASS] });
+            console.log(world.print());
+            expect(grassInstances).toHaveLength(3);
+            grassInstances.forEach((instance) => {
+                const position = instance.get.position();
+                const result = world.getEntityList().find({ position });
+
+                expect(result).toHaveLength(1);
+            });
         });
     });
 });

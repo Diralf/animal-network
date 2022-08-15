@@ -21,6 +21,8 @@ export class SimpleGrassWorld {
         this.fieldOptions = fieldOptions;
         const { stringField, availableEntities, staticEntities } = fieldOptions;
         const rows = stringField.split('\n');
+        this.world.height = rows.length;
+        this.world.width = rows[0]?.split(',').length ?? 0;
         rows.forEach((row, rowIndex) => {
             const cells = row.split(',');
             cells.forEach((cell, cellIndex) => {

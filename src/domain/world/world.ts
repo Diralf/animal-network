@@ -7,6 +7,11 @@ export class World<EntityList extends PropertiesContainerBase<EntityList> = {}, 
     private staticList: PropertyContainerList<StaticList> = new PropertyContainerList();
     private timeThread = new TimeThread();
     private time = 0;
+    public width: number = 0;
+    public height: number = 0;
+
+    constructor() {
+    }
 
     public addEntity(...instances: Parameters<typeof this.entityList.add>): void {
         this.entityList.add(...instances);
@@ -29,5 +34,20 @@ export class World<EntityList extends PropertiesContainerBase<EntityList> = {}, 
     public tick(): void {
         this.timeThread.tick(this, this.time);
         this.time += 1;
+    }
+
+    public print() {
+        let result = [];
+        for (let y = 0; y < this.height; y++) {
+            const row = [];
+            for (let x = 0; x < this.width; x++) {
+                // @ts-ignore
+                const entity = this.entityList.find({ position: { x, y } });
+                // @ts-ignore
+                row.push(entity[0]?.get?.visual?.() ?? 0);
+            }
+            result.push(row.join(','));
+        }
+        return result.join('\n');
     }
 }
