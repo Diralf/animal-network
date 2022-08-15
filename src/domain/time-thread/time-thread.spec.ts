@@ -11,9 +11,9 @@ describe('TimeThread', () => {
         };
 
         timeThread.addListener(listener);
-        timeThread.tick(world);
+        timeThread.tick(world, 0);
 
         expect(listener.tick).toHaveBeenCalledTimes(1);
-        expect(listener.tick).toHaveBeenCalledWith(world);
+        expect(listener.tick).toHaveBeenCalledWith(world, 0);
     });
 });

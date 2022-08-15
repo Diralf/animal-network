@@ -56,7 +56,7 @@ export class SightProperty extends ArrayProperty<number> implements PropertyWith
             .replaceAll('0', emptyCell);
     }
 
-    public tick(world: World): void {
-        this.update(world.entityList);
+    public tick(world: World<Owner>): void {
+        this.update(world.getEntityList());
     }
 }

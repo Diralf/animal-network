@@ -4,13 +4,13 @@ import { TimeThreadListener } from './time-thread-listener';
 export class TimeThread {
     private listeners: TimeThreadListener[] = [];
 
-    public addListener(listener: TimeThreadListener): void {
-        this.listeners.push(listener);
+    public addListener(...listener: TimeThreadListener[]): void {
+        this.listeners.push(...listener);
     }
 
-    public tick(world: World): void {
+    public tick(world: World, time: number): void {
         this.listeners.forEach((listener) => {
-            listener.tick(world);
+            listener.tick(world, time);
         });
     }
 }

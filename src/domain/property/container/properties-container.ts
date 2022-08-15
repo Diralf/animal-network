@@ -72,9 +72,9 @@ export class PropertiesContainer<Properties extends PropertiesContainerBase<Prop
         return Object.entries(this.properties) as Array<[Key, Properties[Key]]>;
     }
 
-    public tick(world: World): void {
+    public tick(world: World, time: number): void {
         this.listeners.forEach((property) => {
-            property.tick(world);
+            property.tick(world, time);
         });
     }
 }

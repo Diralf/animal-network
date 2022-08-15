@@ -30,7 +30,7 @@ export class CollisionProperty extends BaseProperty<Current> implements Property
         this.current({ other: result, list });
     }
 
-    public tick(world: World): void {
-        this.collide(world.entityList);
+    public tick(world: World<CollisionOwner>): void {
+        this.collide(world.getEntityList());
     }
 }
