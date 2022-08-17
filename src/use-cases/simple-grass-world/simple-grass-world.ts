@@ -11,32 +11,11 @@ export interface FieldOptions {
 
 export class SimpleGrassWorld {
     public world: World<BaseProperties, {}> = new World();
-    private fieldOptions: FieldOptions = {
-        stringField: '',
-        availableEntities: {},
-        staticEntities: [],
-    };
 
-    public start(fieldOptions: FieldOptions): void {
-        this.fieldOptions = fieldOptions;
-        const { stringField, availableEntities, staticEntities } = fieldOptions;
-        const rows = stringField.split('\n');
-        this.world.height = rows.length;
-        this.world.width = rows[0]?.split(',').length ?? 0;
-        rows.forEach((row, rowIndex) => {
-            const cells = row.split(',');
-            cells.forEach((cell, cellIndex) => {
-                const entityFactory = availableEntities[cell];
-                if (entityFactory) {
-                    const entityWithPosition = entityFactory({ x: cellIndex, y: rowIndex });
-                    this.world.addEntity(entityWithPosition);
-                }
-            });
-        });
-
-        staticEntities.forEach((factory) => {
-            this.world.addStatic(factory());
-        });
+    public start({ stringField, availableEntities, staticEntities }: FieldOptions): void {
+        this.world.registerStatic(staticEntities);
+        this.world.registerEntities(new Map(Object.entries(availableEntities)));
+        this.world.buildWorldFromString(stringField);
     }
 
     public tick(): void {

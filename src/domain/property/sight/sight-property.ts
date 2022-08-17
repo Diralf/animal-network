@@ -6,6 +6,8 @@ import { PropertyWithOwner } from '../owner/property-with-owner';
 import { PointProperty } from '../point/point-property';
 import { PropertyContainerList } from '../../property-container-list/property-container-list';
 import { BaseProperty } from '../base/base-property';
+import { arrayToMatrix } from '../utils/array-to-matrix';
+import { visualEntitiesAsString } from '../utils/visual-entities-as-string';
 
 interface Owner {
     visual: BaseProperty<number>;
@@ -50,10 +52,10 @@ export class SightProperty extends ArrayProperty<number> implements PropertyWith
     public asString(emptyCell = '_'): string {
         const sightSize = (this.range * 2) + 1;
         const matrix = this.current;
-        return new Array(sightSize).fill(0)
-            .map((zero, index) => matrix.slice(index * sightSize, (index * sightSize) + sightSize).join(','))
-            .join('\n')
-            .replaceAll('0', emptyCell);
+        return visualEntitiesAsString(
+            arrayToMatrix(matrix, sightSize),
+            emptyCell,
+        );
     }
 
     public tick(world: World<Owner>): void {
