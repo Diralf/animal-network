@@ -2,15 +2,18 @@ import { PropertiesContainer } from '../../../domain/property/container/properti
 import { TimeThreadListener } from '../../../domain/time-thread/time-thread-listener';
 import { World } from '../../../domain/world/world';
 import { Grass } from './grass';
+import { InstanceTypes } from './instance-types';
 
 export class GrassGenerator extends PropertiesContainer<{}> implements TimeThreadListener {
-    constructor(private rate: number) {
+    constructor(private rate: number, private maxGrassAtOnce: number = 100) {
         super({});
     }
 
     public tick(world: World, time: number): void {
         super.tick(world, time);
-        if (time % this.rate === 0) {
+        const grassInstances = world.getEntityList().find({ tags: [InstanceTypes.GRASS] });
+        if (grassInstances.length < this.maxGrassAtOnce
+            && time % this.rate === 0) {
             let success = false;
             let attempt = 0;
             do {

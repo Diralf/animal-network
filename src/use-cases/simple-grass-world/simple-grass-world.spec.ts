@@ -285,5 +285,28 @@ describe('SimpleGrassWorld', () => {
                 expect(result).toHaveLength(1);
             });
         });
+
+        it('should generate no more than 1 at once', () => {
+            const simpleGrassWorld = new SimpleGrassWorld();
+            startWorld(simpleGrassWorld, {
+                staticEntities: [
+                    () => new GrassGenerator(3, 1),
+                ],
+            });
+            const { world } = simpleGrassWorld;
+            const getGrassInstances = () => world.getEntityList().find({ tags: [InstanceTypes.GRASS] });
+            const result = [];
+
+            for (let i = 0; i < 6; i++) {
+                if (i === 3) {
+                    const grass = getGrassInstances();
+                    world.getEntityList().remove(...grass);
+                }
+                result.push(getGrassInstances().length);
+                simpleGrassWorld.tick();
+            }
+
+            expect(result.toString()).toEqual([0, 1, 1, 0, 1, 1].toString());
+        });
     });
 });
