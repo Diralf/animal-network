@@ -1,7 +1,5 @@
-import { TimeThreadListener } from '../../time-thread/time-thread-listener';
+import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
-import { BaseProperty } from '../base/base-property';
-import { PropertiesContainer } from '../container/properties-container';
 import { MovementProperty, MovementDirections } from '../movement/movement-property';
 import { PropertyOwner } from '../owner/property-owner';
 import { PropertyWithOwner } from '../owner/property-with-owner';
@@ -10,17 +8,20 @@ export interface BrainOwner {
     movement: MovementProperty;
 }
 export interface BrainCurrentInput {
-    owner: PropertiesContainer<BrainOwner>;
+    owner: BrainOwner;
     world: World;
 }
 export type BrainCommands = MovementDirections | 'STAND';
 export type BrainCurrent = (input: BrainCurrentInput) => BrainCommands;
 
-export class BrainProperty extends BaseProperty<BrainCurrent> implements PropertyWithOwner<BrainOwner>, TimeThreadListener {
+export class BrainProperty implements PropertyWithOwner<BrainOwner>, OnTick {
     public owner = new PropertyOwner<BrainOwner>();
 
+    constructor(public handler: BrainCurrent) {
+    }
+
     public decide(world: World): BrainCommands {
-        return this.current({
+        return this.handler({
             owner: this.owner.ref,
             world,
         });
@@ -29,7 +30,7 @@ export class BrainProperty extends BaseProperty<BrainCurrent> implements Propert
     public applyDecision(world: World): void {
         const nextStep = this.decide(world);
         if (nextStep in MovementDirections) {
-            this.owner.ref.getProperty('movement').move(nextStep as MovementDirections);
+            this.owner.ref.movement.move(nextStep as MovementDirections);
         }
     }
 

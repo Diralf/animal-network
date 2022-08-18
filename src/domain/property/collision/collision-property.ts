@@ -1,36 +1,36 @@
-import { PropertyContainerList } from '../../property-container-list/property-container-list';
-import { TimeThreadListener } from '../../time-thread/time-thread-listener';
+import { EntityList } from '../../property-container-list/entity-list';
+import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
-import { BaseProperty } from '../base/base-property';
-import { PropertiesContainer } from '../container/properties-container';
-import { PropertiesContainerBase } from '../container/properties-container-base.type';
 import { PropertyOwner } from '../owner/property-owner';
 import { PropertyWithOwner } from '../owner/property-with-owner';
+import { Positionable } from '../point/positionable';
+import { positionableGuard } from '../point/positionable.guard';
 import { CollisionOptions } from './collision-options';
-import { CollisionOwner } from './collision-owner';
 
-type Current = (options: CollisionOptions) => void;
+type Handler = (options: CollisionOptions) => void;
 
-export class CollisionProperty extends BaseProperty<Current> implements PropertyWithOwner<CollisionOwner>, TimeThreadListener {
-    public owner = new PropertyOwner<CollisionOwner>();
+export class CollisionProperty implements OnTick, PropertyWithOwner<Positionable> {
+    public owner = new PropertyOwner<Positionable>();
 
-    public check<Entity extends PropertiesContainerBase<Entity>>(
-        list: PropertyContainerList<Entity>,
-    ): Array<PropertiesContainer<Entity>> {
-        const ownerList = list as unknown as PropertyContainerList<CollisionOwner>;
-        const ownPosition = this.owner.ref.get.position();
-        const result = ownerList
-            .find({ position: ownPosition })
+    constructor(private handler: Handler) {
+    }
+
+    public check<Entity extends Positionable>(list: EntityList<Entity | Positionable>): Entity[] {
+        const ownPosition = this.owner.ref.position.current;
+        const entitiesWithPositions = list.findWithType<Positionable>(
+            positionableGuard,
+            (instance) => instance.position.isEqualValue(ownPosition),
+        )
             .filter((entity) => entity !== this.owner.ref);
-        return result as unknown as Array<PropertiesContainer<Entity>>;
+        return entitiesWithPositions as Entity[];
     }
 
-    public collide(list: PropertyContainerList<CollisionOwner>): void {
+    public collide(list: EntityList<Positionable>): void {
         const result = this.check(list);
-        this.current({ other: result, list });
+        this.handler({ other: result, list });
     }
 
-    public tick(world: World<CollisionOwner>): void {
+    public tick(world: World<Positionable>): void {
         this.collide(world.getEntityList());
     }
 }

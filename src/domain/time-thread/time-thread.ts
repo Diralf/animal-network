@@ -1,10 +1,10 @@
 import { World } from '../world/world';
-import { TimeThreadListener } from './time-thread-listener';
+import { OnTick } from './on-tick';
 
 export class TimeThread {
-    private listeners: TimeThreadListener[] = [];
+    private listeners: OnTick[] = [];
 
-    public addListener(...listener: TimeThreadListener[]): void {
+    public addListener(...listener: OnTick[]): void {
         this.listeners.push(...listener);
     }
 

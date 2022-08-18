@@ -1,4 +1,4 @@
-import { TimeThreadListener, isTimeThreadListener } from '../../time-thread/time-thread-listener';
+import { OnTick, isOnTickGuard } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 import { isPropertyWithOwner } from '../owner/property-with-owner';
 import { PropertyValueType } from '../utils/property-value.type';
@@ -11,10 +11,10 @@ export const isPropertiesContainerValid = <Properties extends PropertiesContaine
     propertyKeys: Array<keyof Properties>,
 ): instance is PropertiesContainer<Properties> => isGetValid(instance.get, propertyKeys) && isSetValid(instance.set, propertyKeys);
 
-export class PropertiesContainer<Properties extends PropertiesContainerBase<Properties>> implements TimeThreadListener {
+export class PropertiesContainer<Properties extends PropertiesContainerBase<Properties>> implements OnTick {
     public get: Get<Properties>;
     public set: SetWritable<Properties>;
-    private listeners: TimeThreadListener[] = [];
+    private listeners: OnTick[] = [];
 
     constructor(private properties: Properties) {
         const allProperties = this.getAllProperties();
@@ -25,7 +25,7 @@ export class PropertiesContainer<Properties extends PropertiesContainerBase<Prop
             if (isPropertyWithOwner(property)) {
                 property.owner.ref = this;
             }
-            if (isTimeThreadListener(property)) {
+            if (isOnTickGuard(property)) {
                 this.listeners.push(property);
             }
         });

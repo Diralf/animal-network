@@ -1,17 +1,14 @@
-import { PropertiesContainer } from '../container/properties-container';
-import { PropertiesContainerBase } from '../container/properties-container-base.type';
+export class PropertyOwner<Owner> {
+    private _owner: Owner = null as unknown as Owner;
 
-export class PropertyOwner<Owner extends PropertiesContainerBase<Owner>> {
-    private _owner: PropertiesContainer<Owner> = null as unknown as PropertiesContainer<Owner>;
-
-    public get ref(): PropertiesContainer<Owner> {
+    public get ref(): Owner {
         if (!this._owner) {
             throw new Error('Owner is not defined');
         }
         return this._owner;
     }
 
-    public set ref(value: PropertiesContainer<Owner>) {
+    public set ref(value: Owner) {
         if (this._owner) {
             throw new Error('Owner already defined');
         }

@@ -1,12 +1,12 @@
 import { World } from '../world/world';
 import { TimeThread } from './time-thread';
-import { TimeThreadListener } from './time-thread-listener';
+import { OnTick } from './on-tick';
 
 describe('TimeThread', () => {
     it('should add listeners and trigger it on event', () => {
         const world = new World();
         const timeThread = new TimeThread();
-        const listener: TimeThreadListener = {
+        const listener: OnTick = {
             tick: jest.fn(),
         };
 

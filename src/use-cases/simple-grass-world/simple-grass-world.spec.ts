@@ -1,8 +1,8 @@
 import { FieldBuilder } from '../../clients/console/utils/field-builder';
-import { PropertiesContainer } from '../../domain/property/container/properties-container';
 import { MovementDirections } from '../../domain/property/movement/movement-property';
+import { Positionable } from '../../domain/property/point/positionable';
 import { RawPoint } from '../../domain/property/point/raw-point';
-import { AnimalProperties, Animal } from './entities/animal';
+import { Animal } from './entities/animal';
 import { Grass } from './entities/grass';
 import { GrassGenerator } from './entities/grass-generator';
 import { InstanceTypes } from './entities/instance-types';
@@ -37,9 +37,8 @@ describe('SimpleGrassWorld', () => {
         it('should generate world with 5 grass and one animal', () => {
             const simpleGrassWorld = new SimpleGrassWorld();
             startWorld(simpleGrassWorld);
-            const { world } = simpleGrassWorld;
-            const grassInstances = world.getEntityList().find({ tags: [InstanceTypes.GRASS] });
-            const animalInstances = world.getEntityList().find({ tags: [InstanceTypes.ANIMAL] });
+            const grassInstances = simpleGrassWorld.findByTag(InstanceTypes.GRASS);
+            const animalInstances = simpleGrassWorld.findByTag(InstanceTypes.ANIMAL);
 
             expect(grassInstances).toHaveLength(5);
             expect(animalInstances).toHaveLength(1);
@@ -49,12 +48,14 @@ describe('SimpleGrassWorld', () => {
             const simpleGrassWorld = new SimpleGrassWorld();
             startWorld(simpleGrassWorld);
             const { world } = simpleGrassWorld;
-            const allInstances = world.getEntityList().getAll();
+            const allInstances = world.getEntityList().getAll() as Positionable[];
 
             expect(allInstances).toHaveLength(6);
             allInstances.forEach((instance) => {
-                const position = instance.get.position();
-                const result = world.getEntityList().find({ position });
+                const position = instance.position.current;
+                const result = world.getEntityList().find(
+                    (positionableInstance) => positionableInstance.position.isEqualValue(position),
+                );
 
                 expect(result).toHaveLength(1);
             });
@@ -64,13 +65,13 @@ describe('SimpleGrassWorld', () => {
             const simpleGrassWorld = new SimpleGrassWorld();
             startWorld(simpleGrassWorld);
             const { world } = simpleGrassWorld;
-            const grassInstances = world.getEntityList().find({ tags: [InstanceTypes.GRASS] });
-            const animalInstances = world.getEntityList().find({ tags: [InstanceTypes.ANIMAL] });
-            const allInstances = world.getEntityList().getAll();
+            const grassInstances = simpleGrassWorld.findByTag(InstanceTypes.GRASS);
+            const animalInstances = simpleGrassWorld.findByTag(InstanceTypes.ANIMAL);
+            const allInstances = world.getEntityList().getAll() as Positionable[];
 
             expect(grassInstances).toHaveLength(5);
             expect(animalInstances).toHaveLength(1);
-            expect(allInstances.map((instance) => instance.get.position())).toEqual([
+            expect(allInstances.map((instance) => instance.position.current)).toEqual([
                 { x: 3, y: 3 },
                 { x: 4, y: 3 },
                 { x: 5, y: 3 },
@@ -84,107 +85,102 @@ describe('SimpleGrassWorld', () => {
             const simpleGrassWorld = new SimpleGrassWorld();
             startWorld(simpleGrassWorld);
             const { world } = simpleGrassWorld;
-            const [animal] = world.getEntityList().find({ tags: [InstanceTypes.ANIMAL] }) as Array<PropertiesContainer<AnimalProperties>>;
+            const [animal] = simpleGrassWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
 
-            const animalSight = animal.getProperty('sight');
+            const animalSight = animal.sight;
             animalSight.update(world.getEntityList());
             expect(animalSight.asString()).toEqual(FieldBuilder.build(`
-            _,1,1,1,_
-            1,_,_,_,1
-            _,_,2,_,_
-            _,_,_,_,_
-            _,_,_,_,_
-        `));
+                _,1,1,1,_
+                1,_,_,_,1
+                _,_,2,_,_
+                _,_,_,_,_
+                _,_,_,_,_
+            `));
         });
 
         it.each([
             {
                 direction: MovementDirections.RIGHT,
                 result: FieldBuilder.build(`
-                1,1,1,_,_
-                _,_,_,1,_
-                _,_,2,_,_
-                _,_,_,_,_
-                _,_,_,_,_
-            `),
+                    1,1,1,_,_
+                    _,_,_,1,_
+                    _,_,2,_,_
+                    _,_,_,_,_
+                    _,_,_,_,_
+                `),
             },
             {
                 direction: MovementDirections.LEFT,
                 result: FieldBuilder.build(`
-                _,_,1,1,1
-                _,1,_,_,_
-                _,_,2,_,_
-                _,_,_,_,_
-                _,_,_,_,_
-            `),
+                    _,_,1,1,1
+                    _,1,_,_,_
+                    _,_,2,_,_
+                    _,_,_,_,_
+                    _,_,_,_,_
+                `),
             },
             {
                 direction: MovementDirections.UP,
                 result: FieldBuilder.build(`
-                _,_,_,_,_
-                _,1,1,1,_
-                1,_,2,_,1
-                _,_,_,_,_
-                _,_,_,_,_
-            `),
+                    _,_,_,_,_
+                    _,1,1,1,_
+                    1,_,2,_,1
+                    _,_,_,_,_
+                    _,_,_,_,_
+                `),
             },
             {
                 direction: MovementDirections.DOWN,
                 result: FieldBuilder.build(`
-                1,_,_,_,1
-                _,_,_,_,_
-                _,_,2,_,_
-                _,_,_,_,_
-                _,_,_,_,_
-            `),
+                    1,_,_,_,1
+                    _,_,_,_,_
+                    _,_,2,_,_
+                    _,_,_,_,_
+                    _,_,_,_,_
+                `),
             },
         ])('should animal move $direction', ({ direction, result }) => {
             const simpleGrassWorld = new SimpleGrassWorld();
             startWorld(simpleGrassWorld);
             const { world } = simpleGrassWorld;
-            const [animal] = world.getEntityList().find({ tags: [InstanceTypes.ANIMAL] }) as Array<PropertiesContainer<AnimalProperties>>;
-            const animalSight = animal.getProperty('sight');
-            const animalMovement = animal.getProperty('movement');
+            const [animal] = simpleGrassWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
 
-            animalMovement.move(direction);
-            animalSight.update(world.getEntityList());
+            animal.movement.move(direction);
+            animal.sight.update(world.getEntityList());
 
-            expect(animalSight.asString()).toEqual(result);
+            expect(animal.sight.asString()).toEqual(result);
         });
 
         it('should eat grass', () => {
             const simpleGrassWorld = new SimpleGrassWorld();
             startWorld(simpleGrassWorld);
-            const { world } = simpleGrassWorld;
-            const [animal] = world.getEntityList().find({ tags: [InstanceTypes.ANIMAL] }) as Array<PropertiesContainer<AnimalProperties>>;
-            const animalSight = animal.getProperty('sight');
-            const animalMovement = animal.getProperty('movement');
+            const [animal] = simpleGrassWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
 
             simpleGrassWorld.tick();
-            expect(animalSight.asString()).toEqual(FieldBuilder.build(`
-            _,1,1,1,_
-            1,_,_,_,1
-            _,_,2,_,_
-            _,_,_,_,_
-            _,_,_,_,_
-        `));
-            expect(animal.get.size()).toEqual(1);
+            expect(animal.sight.asString()).toEqual(FieldBuilder.build(`
+                _,1,1,1,_
+                1,_,_,_,1
+                _,_,2,_,_
+                _,_,_,_,_
+                _,_,_,_,_
+            `));
+            expect(animal.size.current).toEqual(1);
 
-            animalMovement.move(MovementDirections.UP);
+            animal.movement.move(MovementDirections.UP);
             simpleGrassWorld.tick();
-            animalMovement.move(MovementDirections.UP);
+            animal.movement.move(MovementDirections.UP);
             simpleGrassWorld.tick();
-            animalMovement.move(MovementDirections.UP);
+            animal.movement.move(MovementDirections.UP);
             simpleGrassWorld.tick();
 
-            expect(animalSight.asString()).toEqual(FieldBuilder.build(`
-            _,_,_,_,_
-            _,_,_,_,_
-            _,_,2,_,_
-            _,1,_,1,_
-            1,_,_,_,1
-        `));
-            expect(animal.get.size()).toEqual(2);
+            expect(animal.sight.asString()).toEqual(FieldBuilder.build(`
+                _,_,_,_,_
+                _,_,_,_,_
+                _,_,2,_,_
+                _,1,_,1,_
+                1,_,_,_,1
+            `));
+            expect(animal.size.current).toEqual(2);
         });
 
         it('should eat grass by static animal with brain', () => {
@@ -198,32 +194,30 @@ describe('SimpleGrassWorld', () => {
                     },
                 },
             );
-            const { world } = simpleGrassWorld;
-            const [animal] = world.getEntityList().find({ tags: [InstanceTypes.ANIMAL] }) as Array<PropertiesContainer<AnimalProperties>>;
-            const animalSight = animal.getProperty('sight');
+            const [animal] = simpleGrassWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
 
             simpleGrassWorld.tick();
-            expect(animalSight.asString()).toEqual(FieldBuilder.build(`
-            _,1,1,1,_
-            1,_,_,_,1
-            _,_,2,_,_
-            _,_,_,_,_
-            _,_,_,_,_
-        `));
-            expect(animal.get.size()).toEqual(1);
+            expect(animal.sight.asString()).toEqual(FieldBuilder.build(`
+                _,1,1,1,_
+                1,_,_,_,1
+                _,_,2,_,_
+                _,_,_,_,_
+                _,_,_,_,_
+            `));
+            expect(animal.size.current).toEqual(1);
 
             simpleGrassWorld.tick();
             simpleGrassWorld.tick();
             simpleGrassWorld.tick();
 
-            expect(animalSight.asString()).toEqual(FieldBuilder.build(`
-            _,_,_,_,_
-            _,_,_,_,_
-            _,_,2,_,_
-            _,1,_,1,_
-            1,_,_,_,1
-        `));
-            expect(animal.get.size()).toEqual(2);
+            expect(animal.sight.asString()).toEqual(FieldBuilder.build(`
+                _,_,_,_,_
+                _,_,_,_,_
+                _,_,2,_,_
+                _,1,_,1,_
+                1,_,_,_,1
+            `));
+            expect(animal.size.current).toEqual(2);
         });
     });
 
@@ -231,17 +225,17 @@ describe('SimpleGrassWorld', () => {
         const startWorld = (simpleGrassWorld: SimpleGrassWorld, options: Partial<FieldOptions> = {}): void => {
             simpleGrassWorld.start({
                 stringField: FieldBuilder.build(`
-                _,_,_,_,_,_,_,_,_,_
-                _,_,_,_,_,_,_,_,_,_
-                _,_,_,_,_,_,_,_,_,_
-                _,_,_,_,_,_,_,_,_,_
-                _,_,_,_,_,_,_,_,_,_
-                _,_,_,_,_,_,_,_,_,_
-                _,_,_,_,_,_,_,_,_,_
-                _,_,_,_,_,_,_,_,_,_
-                _,_,_,_,_,_,_,_,_,_
-                _,_,_,_,_,_,_,_,_,_
-            `),
+                    _,_,_,_,_,_,_,_,_,_
+                    _,_,_,_,_,_,_,_,_,_
+                    _,_,_,_,_,_,_,_,_,_
+                    _,_,_,_,_,_,_,_,_,_
+                    _,_,_,_,_,_,_,_,_,_
+                    _,_,_,_,_,_,_,_,_,_
+                    _,_,_,_,_,_,_,_,_,_
+                    _,_,_,_,_,_,_,_,_,_
+                    _,_,_,_,_,_,_,_,_,_
+                    _,_,_,_,_,_,_,_,_,_
+                `),
                 availableEntities: {
                     '1': (point: RawPoint) => new Grass({ position: point }),
                 },
@@ -255,8 +249,7 @@ describe('SimpleGrassWorld', () => {
         it('should generate world with and grass each two steps', () => {
             const simpleGrassWorld = new SimpleGrassWorld();
             startWorld(simpleGrassWorld);
-            const { world } = simpleGrassWorld;
-            const getGrassInstances = () => world.getEntityList().find({ tags: [InstanceTypes.GRASS] });
+            const getGrassInstances = () => simpleGrassWorld.findByTag(InstanceTypes.GRASS) as Grass[];
             const result = [];
 
             for (let i = 0; i < 6; i++) {
@@ -275,12 +268,12 @@ describe('SimpleGrassWorld', () => {
             for (let i = 0; i < 6; i++) {
                 simpleGrassWorld.tick();
             }
-            const grassInstances = world.getEntityList().find({ tags: [InstanceTypes.GRASS] });
-            console.log(world.print());
+            const grassInstances = simpleGrassWorld.findByTag(InstanceTypes.GRASS);
+            console.log(world.print(world.getEntityList()));
             expect(grassInstances).toHaveLength(3);
             grassInstances.forEach((instance) => {
-                const position = instance.get.position();
-                const result = world.getEntityList().find({ position });
+                const position = instance.position.current;
+                const result = world.getEntityList().find((inst) => inst.position.isEqualValue(position));
 
                 expect(result).toHaveLength(1);
             });
@@ -294,7 +287,7 @@ describe('SimpleGrassWorld', () => {
                 ],
             });
             const { world } = simpleGrassWorld;
-            const getGrassInstances = () => world.getEntityList().find({ tags: [InstanceTypes.GRASS] });
+            const getGrassInstances = () => simpleGrassWorld.findByTag(InstanceTypes.GRASS);
             const result = [];
 
             for (let i = 0; i < 6; i++) {

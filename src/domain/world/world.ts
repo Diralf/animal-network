@@ -1,32 +1,34 @@
-import { BaseProperties } from '../../use-cases/simple-grass-world/entities/base-properties';
-import { PropertyContainerList } from '../property-container-list/property-container-list';
-import { PropertiesContainer } from '../property/container/properties-container';
-import { PropertiesContainerBase } from '../property/container/properties-container-base.type';
+import { EntityList } from '../property-container-list/entity-list';
+import { Positionable } from '../property/point/positionable';
 import { RawPoint } from '../property/point/raw-point';
+import { Visualable } from '../property/sight/visualable';
 import { visualEntitiesAsString } from '../property/utils/visual-entities-as-string';
+import { isOnTickGuard, OnTick } from '../time-thread/on-tick';
 import { TimeThread } from '../time-thread/time-thread';
 
-export class World<EntityList extends PropertiesContainerBase<EntityList> = {}, StaticList extends PropertiesContainerBase<StaticList> = {}> {
-    private entityList: PropertyContainerList<EntityList> = new PropertyContainerList();
-    private staticList: PropertyContainerList<StaticList> = new PropertyContainerList();
+export class World<Entity = unknown, Static = unknown> {
+    private entityList: EntityList<Entity> = new EntityList();
+    private staticList: EntityList<Static> = new EntityList();
     private timeThread = new TimeThread();
     private time = 0;
     public width: number = 0;
     public height: number = 0;
 
-    private entityMap: Map<string, (point: RawPoint) => PropertiesContainer<BaseProperties>> = new Map();
+    private entityMap: Map<string, (point: RawPoint) => Entity> = new Map();
 
     constructor() {
     }
 
-    public addEntity(...instances: Parameters<typeof this.entityList.add>): void {
+    public addEntity(...instances: Entity[]): void {
         this.entityList.add(...instances);
-        this.timeThread.addListener(...instances);
+        const onTickInstances = instances.filter((instance) => isOnTickGuard(instance)) as unknown as OnTick[];
+        this.timeThread.addListener(...onTickInstances);
     }
 
-    public addStatic(...instances: Parameters<typeof this.staticList.add>): void {
+    public addStatic(...instances: Static[]): void {
         this.staticList.add(...instances);
-        this.timeThread.addListener(...instances);
+        const onTickInstances = instances.filter((instance) => isOnTickGuard(instance)) as unknown as OnTick[];
+        this.timeThread.addListener(...onTickInstances);
     }
 
     public getEntityList() {
@@ -37,11 +39,11 @@ export class World<EntityList extends PropertiesContainerBase<EntityList> = {}, 
         return this.staticList;
     }
 
-    registerEntities(entityMap: Map<string, (point: RawPoint) => PropertiesContainer<BaseProperties>>) {
+    registerEntities(entityMap: Map<string, (point: RawPoint) => Entity>) {
         this.entityMap = entityMap;
     }
 
-    registerStatic(staticList: Array<() => PropertiesContainer<{}>>) {
+    registerStatic(staticList: Array<() => Static>) {
         staticList.forEach((factory) => {
             this.addStatic(factory() as any);
         });
@@ -68,15 +70,16 @@ export class World<EntityList extends PropertiesContainerBase<EntityList> = {}, 
         this.time += 1;
     }
 
-    public print() {
+    public print(entityList: EntityList<Positionable & Visualable>) {
         let matrix: number[][] = [];
         for (let y = 0; y < this.height; y++) {
             const row: number[] = [];
             for (let x = 0; x < this.width; x++) {
-                // @ts-ignore
-                const entity = this.entityList.find({ position: { x, y } });
-                // @ts-ignore
-                row.push(entity[0]?.get?.visual?.() ?? 0);
+                const entity = entityList.findWithType<Positionable & Visualable>(
+                    (instance): instance is Positionable & Visualable => 'position' in instance && 'visual' in instance,
+                    (instance) => instance.position.isEqualValue({ x, y }),
+                );
+                row.push(entity[0]?.visual ?? 0);
             }
             matrix.push(row);
         }

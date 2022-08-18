@@ -1,8 +1,7 @@
-import { PropertyContainerList } from '../../property-container-list/property-container-list';
-import { PropertiesContainer } from '../container/properties-container';
-import { CollisionOwner } from './collision-owner';
+import { EntityList } from '../../property-container-list/entity-list';
+import { Positionable } from '../point/positionable';
 
 export interface CollisionOptions {
-    other: Array<PropertiesContainer<CollisionOwner>>;
-    list: PropertyContainerList<CollisionOwner>;
+    other: Positionable[];
+    list: EntityList<Positionable>;
 }
