@@ -31,6 +31,12 @@ export class World<Entity = unknown, Static = unknown> {
         this.timeThread.addListener(...onTickInstances);
     }
 
+    public removeEntity(...instances: Entity[]): void {
+        this.entityList.remove(...instances);
+        const onTickInstances = instances.filter((instance) => isOnTickGuard(instance)) as unknown as OnTick[];
+        this.timeThread.removeListener(...onTickInstances);
+    }
+
     public getEntityList() {
         return this.entityList;
     }
@@ -85,5 +91,4 @@ export class World<Entity = unknown, Static = unknown> {
         }
         return visualEntitiesAsString(matrix);
     }
-
 }

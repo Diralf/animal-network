@@ -1,4 +1,4 @@
-import { EntityList } from '../../property-container-list/entity-list';
+import { World } from '../../world/world';
 import { BaseProperty } from '../base/base-property';
 import { PointProperty } from '../point/point-property';
 import { RawPoint } from '../point/raw-point';
@@ -42,13 +42,13 @@ const prepareContext = () => {
             y: 1,
         },
     });
-    const entityList = new EntityList<Entity>();
-    entityList.add(entity1, entity2, entity3);
+    const world = new World<Entity>();
+    world.addEntity(entity1, entity2, entity3);
     return {
         entity1,
         entity2,
         entity3,
-        entityList,
+        world,
     };
 };
 
@@ -57,10 +57,10 @@ describe('CollisionProperty', () => {
         const {
             entity1,
             entity2,
-            entityList,
+            world,
         } = prepareContext();
 
-        const result = entity1.collision.check(entityList);
+        const result = entity1.collision.check(world.getEntityList());
         expect(result.map((entity) => entity.id)).toEqual([entity2.id]);
     });
 
@@ -69,10 +69,10 @@ describe('CollisionProperty', () => {
             entity1,
             entity2,
             entity3,
-            entityList,
+            world,
         } = prepareContext();
 
-        entity1.collision.collide(entityList);
+        entity1.collision.collide(world);
 
         expect(entity1.collision['handler']).toHaveBeenCalledTimes(1);
         expect(entity1.collision['handler']).toHaveBeenCalledWith(expect.objectContaining({ other: [entity2] }));

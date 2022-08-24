@@ -7,17 +7,17 @@ import { PropertyWithOwner } from '../owner/property-with-owner';
 export interface BrainOwner {
     movement: MovementProperty;
 }
-export interface BrainCurrentInput {
+export interface BrainHandlerInput {
     owner: BrainOwner;
     world: World;
 }
 export type BrainCommands = MovementDirections | 'STAND';
-export type BrainCurrent = (input: BrainCurrentInput) => BrainCommands;
+export type BrainHandler = (input: BrainHandlerInput) => BrainCommands;
 
 export class BrainProperty implements PropertyWithOwner<BrainOwner>, OnTick {
     public owner = new PropertyOwner<BrainOwner>();
 
-    constructor(public handler: BrainCurrent) {
+    constructor(public handler: BrainHandler) {
     }
 
     public decide(world: World): BrainCommands {

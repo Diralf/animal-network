@@ -1,7 +1,7 @@
-import { EntityList } from '../../property-container-list/entity-list';
+import { World } from '../../world/world';
 import { Positionable } from '../point/positionable';
 
 export interface CollisionOptions {
     other: Positionable[];
-    list: EntityList<Positionable>;
+    world: World<Positionable>;
 }

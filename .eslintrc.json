@@ -229,6 +229,13 @@
       "files": [
         "*.spec.ts"
       ],
+      "parserOptions": {
+        "ecmaVersion": 12,
+        "sourceType": "module",
+        "project": [
+          "./tsconfig.spec.json"
+        ]
+      },
       "rules": {
         "max-lines-per-function": "off",
         "no-return-assign": "off",

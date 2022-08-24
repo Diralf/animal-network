@@ -1,4 +1,4 @@
-import { InstanceTypes } from '../entities/instance-types';
+import { InstanceTypes } from './instance-types';
 
 export interface Taggable {
     readonly tags: InstanceTypes[];

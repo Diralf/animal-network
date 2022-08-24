@@ -25,12 +25,12 @@ export class CollisionProperty implements OnTick, PropertyWithOwner<Positionable
         return entitiesWithPositions as Entity[];
     }
 
-    public collide(list: EntityList<Positionable>): void {
-        const result = this.check(list);
-        this.handler({ other: result, list });
+    public collide(world: World<Positionable>): void {
+        const result = this.check(world.getEntityList());
+        this.handler({ other: result, world });
     }
 
     public tick(world: World<Positionable>): void {
-        this.collide(world.getEntityList());
+        this.collide(world);
     }
 }

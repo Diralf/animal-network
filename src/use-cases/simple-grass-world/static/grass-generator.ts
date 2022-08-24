@@ -2,8 +2,8 @@ import { Positionable } from '../../../domain/property/point/positionable';
 import { OnTick } from '../../../domain/time-thread/on-tick';
 import { World } from '../../../domain/world/world';
 import { Taggable } from '../types/taggable';
-import { Grass } from './grass';
-import { InstanceTypes } from './instance-types';
+import { Grass } from '../entities/grass';
+import { InstanceTypes } from '../types/instance-types';
 
 export class GrassGenerator implements OnTick {
     constructor(private rate: number, private maxGrassAtOnce: number = 100) {

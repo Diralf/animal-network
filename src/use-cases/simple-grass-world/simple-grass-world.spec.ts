@@ -4,8 +4,9 @@ import { Positionable } from '../../domain/property/point/positionable';
 import { RawPoint } from '../../domain/property/point/raw-point';
 import { Animal } from './entities/animal';
 import { Grass } from './entities/grass';
-import { GrassGenerator } from './entities/grass-generator';
-import { InstanceTypes } from './entities/instance-types';
+import { Hole } from './entities/hole';
+import { GrassGenerator } from './static/grass-generator';
+import { InstanceTypes } from './types/instance-types';
 import { StaticAnimal } from './entities/static-animal';
 import { SimpleGrassWorld, FieldOptions } from './simple-grass-world';
 
@@ -27,7 +28,7 @@ describe('SimpleGrassWorld', () => {
             `),
                 availableEntities: {
                     '1': (point: RawPoint) => new Grass({ position: point }),
-                    '2': (point: RawPoint) => new Animal({ position: point }),
+                    '2': (point: RawPoint) => new Animal({ position: point, size: 1, metabolizeSpeed: 0 }),
                 },
                 staticEntities: [],
                 ...options,
@@ -190,7 +191,7 @@ describe('SimpleGrassWorld', () => {
                 {
                     availableEntities: {
                         '1': (point: RawPoint) => new Grass({ position: point }),
-                        '2': (point: RawPoint) => new StaticAnimal({ position: point }),
+                        '2': (point: RawPoint) => new StaticAnimal({ position: point, size: 1, metabolizeSpeed: 0 }),
                     },
                 },
             );
@@ -218,6 +219,49 @@ describe('SimpleGrassWorld', () => {
                 1,_,_,_,1
             `));
             expect(animal.size.current).toEqual(2);
+        });
+
+        it('should dead at hole', () => {
+            const simpleGrassWorld = new SimpleGrassWorld();
+            startWorld(
+                simpleGrassWorld,
+                {
+                    stringField: FieldBuilder.build(`
+                        9,9,9,9,9
+                        9,_,_,_,9
+                        9,_,2,_,9
+                        9,_,_,_,9
+                        9,9,9,9,9
+                    `),
+                    availableEntities: {
+                        '1': (point: RawPoint) => new Grass({ position: point }),
+                        '2': (point: RawPoint) => new StaticAnimal({ position: point }),
+                        '9': (point: RawPoint) => new Hole({ position: point }),
+                    },
+                },
+            );
+            const [animal] = simpleGrassWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
+
+            simpleGrassWorld.tick();
+            expect(animal.sight.asString()).toEqual(FieldBuilder.build(`
+                9,9,9,9,9
+                9,_,_,_,9
+                9,_,2,_,9
+                9,_,_,_,9
+                9,9,9,9,9
+            `));
+
+            simpleGrassWorld.tick();
+            simpleGrassWorld.tick();
+            simpleGrassWorld.tick();
+
+            expect(animal.sight.asString()).toEqual(FieldBuilder.build(`
+                _,_,_,_,_
+                _,_,_,_,_
+                9,9,9,9,9
+                9,_,_,_,9
+                9,_,_,_,9
+            `));
         });
     });
 
@@ -300,6 +344,54 @@ describe('SimpleGrassWorld', () => {
             }
 
             expect(result.toString()).toEqual([0, 1, 1, 0, 1, 1].toString());
+        });
+
+        it('should generate one by one with animal', () => {
+            const simpleGrassWorld = new SimpleGrassWorld();
+            simpleGrassWorld.startOneByOne({
+                width: 20,
+                height: 20,
+                maxGrass: 3,
+            });
+            const { world } = simpleGrassWorld;
+            const getGrassInstances = () => simpleGrassWorld.findByTag(InstanceTypes.GRASS);
+            const result = [];
+
+            for (let i = 0; i < 6; i++) {
+                if (i === 3) {
+                    const grass = getGrassInstances();
+                    world.getEntityList().remove(...grass);
+                }
+                result.push(getGrassInstances().length);
+                simpleGrassWorld.tick();
+            }
+
+            console.log(world.print(world.getEntityList()));
+
+            expect(result.toString()).toEqual([0, 1, 2, 0, 1, 2].toString());
+        });
+    });
+
+    describe('getEntitiesByRect', () => {
+        it('should spawn entities by rect', () => {
+            const simpleGrassWorld = new SimpleGrassWorld();
+            const rect = simpleGrassWorld.getEntitiesByRect(
+                { x: 1, y: 2 },
+                { x: 4, y: 4 },
+                (position) => new Hole({ position }),
+            );
+            simpleGrassWorld.world.width = 6;
+            simpleGrassWorld.world.height = 6;
+            simpleGrassWorld.world.addEntity(...rect);
+
+            expect(simpleGrassWorld.world.print(simpleGrassWorld.world.getEntityList())).toEqual(FieldBuilder.build(`
+                _,_,_,_,_,_
+                _,_,_,_,_,_
+                _,9,9,9,9,_
+                _,9,_,_,9,_
+                _,9,9,9,9,_
+                _,_,_,_,_,_
+            `));
         });
     });
 });
