@@ -2,4 +2,4 @@ export const visualEntitiesAsString = (matrix: number[][], emptyCell = '_'): str
     matrix
         .map((row) => row.join(','))
         .join('\n')
-        .replaceAll('0', emptyCell);
+        .replaceAll('1', emptyCell);

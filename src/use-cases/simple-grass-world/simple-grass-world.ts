@@ -40,7 +40,7 @@ export class SimpleGrassWorld {
                 x: Math.floor(param.width / 2),
                 y: Math.floor(param.height / 2),
             },
-            sightRange: 5,
+            sightRange: 7,
         }));
         this.world.width = param.width;
         this.world.height = param.height;

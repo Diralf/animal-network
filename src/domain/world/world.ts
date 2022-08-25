@@ -85,7 +85,7 @@ export class World<Entity = unknown, Static = unknown> {
                     (instance): instance is Positionable & Visualable => 'position' in instance && 'visual' in instance,
                     (instance) => instance.position.isEqualValue({ x, y }),
                 );
-                row.push(entity[0]?.visual ?? 0);
+                row.push(entity[0]?.visual ?? 1);
             }
             matrix.push(row);
         }

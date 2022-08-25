@@ -8,7 +8,7 @@ import { InstanceTypes } from '../types/instance-types';
 
 export class Grass implements Positionable, Taggable, Visualable {
     public readonly tags = [InstanceTypes.GRASS];
-    public readonly visual = 1;
+    public readonly visual = 3;
     public position: PointProperty;
     public size: NumberProperty = new NumberProperty({ current: 1 });
 

@@ -25,7 +25,7 @@ export interface AnimalOptions {
 
 export class Animal implements Positionable, Taggable, Sightable, Visualable, OnTick {
     public readonly tags = [InstanceTypes.ANIMAL];
-    public readonly visual = 2;
+    public readonly visual = 6;
     public position: PointProperty;
     public size: NumberProperty = new NumberProperty();
     public metabolizeSpeed;

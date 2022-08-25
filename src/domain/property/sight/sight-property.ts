@@ -35,7 +35,7 @@ export class SightProperty implements PropertyWithOwner<Owner>, OnTick {
                     x: i,
                     y: j,
                 }));
-                const cell = entity?.visual ?? 0;
+                const cell = entity?.visual ?? 1;
                 newCurrent.push(cell);
             }
         }

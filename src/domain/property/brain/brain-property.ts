@@ -3,15 +3,21 @@ import { World } from '../../world/world';
 import { MovementProperty, MovementDirections } from '../movement/movement-property';
 import { PropertyOwner } from '../owner/property-owner';
 import { PropertyWithOwner } from '../owner/property-with-owner';
+import { SightProperty } from '../sight/sight-property';
 
 export interface BrainOwner {
     movement: MovementProperty;
+    sight: SightProperty;
 }
 export interface BrainHandlerInput {
     owner: BrainOwner;
     world: World;
 }
-export type BrainCommands = MovementDirections | 'STAND';
+export enum BrainCommandsOther {
+    STAND = 'STAND',
+}
+
+export type BrainCommands = MovementDirections | BrainCommandsOther;
 export type BrainHandler = (input: BrainHandlerInput) => BrainCommands;
 
 export class BrainProperty implements PropertyWithOwner<BrainOwner>, OnTick {

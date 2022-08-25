@@ -18,17 +18,17 @@ describe('SimpleGrassWorld', () => {
                 _,_,_,_,_,_,_,_,_,_
                 _,_,_,_,_,_,_,_,_,_
                 _,_,_,_,_,_,_,_,_,_
-                _,_,_,1,1,1,_,_,_,_
-                _,_,1,_,_,_,1,_,_,_
-                _,_,_,_,2,_,_,_,_,_
+                _,_,_,3,3,3,_,_,_,_
+                _,_,3,_,_,_,3,_,_,_
+                _,_,_,_,6,_,_,_,_,_
                 _,_,_,_,_,_,_,_,_,_
                 _,_,_,_,_,_,_,_,_,_
                 _,_,_,_,_,_,_,_,_,_
                 _,_,_,_,_,_,_,_,_,_
             `),
                 availableEntities: {
-                    '1': (point: RawPoint) => new Grass({ position: point }),
-                    '2': (point: RawPoint) => new Animal({ position: point, size: 1, metabolizeSpeed: 0 }),
+                    '3': (point: RawPoint) => new Grass({ position: point }),
+                    '6': (point: RawPoint) => new Animal({ position: point, size: 1, metabolizeSpeed: 0 }),
                 },
                 staticEntities: [],
                 ...options,
@@ -91,9 +91,26 @@ describe('SimpleGrassWorld', () => {
             const animalSight = animal.sight;
             animalSight.update(world.getEntityList());
             expect(animalSight.asString()).toEqual(FieldBuilder.build(`
-                _,1,1,1,_
-                1,_,_,_,1
-                _,_,2,_,_
+                _,3,3,3,_
+                3,_,_,_,3
+                _,_,6,_,_
+                _,_,_,_,_
+                _,_,_,_,_
+            `));
+        });
+
+        it('should get matrix of sight of animal', () => {
+            const simpleGrassWorld = new SimpleGrassWorld();
+            startWorld(simpleGrassWorld);
+            const { world } = simpleGrassWorld;
+            const [animal] = simpleGrassWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
+
+            const animalSight = animal.sight;
+            animalSight.update(world.getEntityList());
+            expect(animalSight.asString()).toEqual(FieldBuilder.build(`
+                _,3,3,3,_
+                3,_,_,_,3
+                _,_,6,_,_
                 _,_,_,_,_
                 _,_,_,_,_
             `));
@@ -103,9 +120,9 @@ describe('SimpleGrassWorld', () => {
             {
                 direction: MovementDirections.RIGHT,
                 result: FieldBuilder.build(`
-                    1,1,1,_,_
-                    _,_,_,1,_
-                    _,_,2,_,_
+                    3,3,3,_,_
+                    _,_,_,3,_
+                    _,_,6,_,_
                     _,_,_,_,_
                     _,_,_,_,_
                 `),
@@ -113,9 +130,9 @@ describe('SimpleGrassWorld', () => {
             {
                 direction: MovementDirections.LEFT,
                 result: FieldBuilder.build(`
-                    _,_,1,1,1
-                    _,1,_,_,_
-                    _,_,2,_,_
+                    _,_,3,3,3
+                    _,3,_,_,_
+                    _,_,6,_,_
                     _,_,_,_,_
                     _,_,_,_,_
                 `),
@@ -124,8 +141,8 @@ describe('SimpleGrassWorld', () => {
                 direction: MovementDirections.UP,
                 result: FieldBuilder.build(`
                     _,_,_,_,_
-                    _,1,1,1,_
-                    1,_,2,_,1
+                    _,3,3,3,_
+                    3,_,6,_,3
                     _,_,_,_,_
                     _,_,_,_,_
                 `),
@@ -133,9 +150,9 @@ describe('SimpleGrassWorld', () => {
             {
                 direction: MovementDirections.DOWN,
                 result: FieldBuilder.build(`
-                    1,_,_,_,1
+                    3,_,_,_,3
                     _,_,_,_,_
-                    _,_,2,_,_
+                    _,_,6,_,_
                     _,_,_,_,_
                     _,_,_,_,_
                 `),
@@ -159,9 +176,9 @@ describe('SimpleGrassWorld', () => {
 
             simpleGrassWorld.tick();
             expect(animal.sight.asString()).toEqual(FieldBuilder.build(`
-                _,1,1,1,_
-                1,_,_,_,1
-                _,_,2,_,_
+                _,3,3,3,_
+                3,_,_,_,3
+                _,_,6,_,_
                 _,_,_,_,_
                 _,_,_,_,_
             `));
@@ -177,9 +194,9 @@ describe('SimpleGrassWorld', () => {
             expect(animal.sight.asString()).toEqual(FieldBuilder.build(`
                 _,_,_,_,_
                 _,_,_,_,_
-                _,_,2,_,_
-                _,1,_,1,_
-                1,_,_,_,1
+                _,_,6,_,_
+                _,3,_,3,_
+                3,_,_,_,3
             `));
             expect(animal.size.current).toEqual(2);
         });
@@ -190,8 +207,8 @@ describe('SimpleGrassWorld', () => {
                 simpleGrassWorld,
                 {
                     availableEntities: {
-                        '1': (point: RawPoint) => new Grass({ position: point }),
-                        '2': (point: RawPoint) => new StaticAnimal({ position: point, size: 1, metabolizeSpeed: 0 }),
+                        '3': (point: RawPoint) => new Grass({ position: point }),
+                        '6': (point: RawPoint) => new StaticAnimal({ position: point, size: 1, metabolizeSpeed: 0 }),
                     },
                 },
             );
@@ -199,9 +216,9 @@ describe('SimpleGrassWorld', () => {
 
             simpleGrassWorld.tick();
             expect(animal.sight.asString()).toEqual(FieldBuilder.build(`
-                _,1,1,1,_
-                1,_,_,_,1
-                _,_,2,_,_
+                _,3,3,3,_
+                3,_,_,_,3
+                _,_,6,_,_
                 _,_,_,_,_
                 _,_,_,_,_
             `));
@@ -214,9 +231,9 @@ describe('SimpleGrassWorld', () => {
             expect(animal.sight.asString()).toEqual(FieldBuilder.build(`
                 _,_,_,_,_
                 _,_,_,_,_
-                _,_,2,_,_
-                _,1,_,1,_
-                1,_,_,_,1
+                _,_,6,_,_
+                _,3,_,3,_
+                3,_,_,_,3
             `));
             expect(animal.size.current).toEqual(2);
         });
@@ -229,13 +246,13 @@ describe('SimpleGrassWorld', () => {
                     stringField: FieldBuilder.build(`
                         9,9,9,9,9
                         9,_,_,_,9
-                        9,_,2,_,9
+                        9,_,6,_,9
                         9,_,_,_,9
                         9,9,9,9,9
                     `),
                     availableEntities: {
-                        '1': (point: RawPoint) => new Grass({ position: point }),
-                        '2': (point: RawPoint) => new StaticAnimal({ position: point }),
+                        '3': (point: RawPoint) => new Grass({ position: point }),
+                        '6': (point: RawPoint) => new StaticAnimal({ position: point }),
                         '9': (point: RawPoint) => new Hole({ position: point }),
                     },
                 },
@@ -246,7 +263,7 @@ describe('SimpleGrassWorld', () => {
             expect(animal.sight.asString()).toEqual(FieldBuilder.build(`
                 9,9,9,9,9
                 9,_,_,_,9
-                9,_,2,_,9
+                9,_,6,_,9
                 9,_,_,_,9
                 9,9,9,9,9
             `));
@@ -281,7 +298,7 @@ describe('SimpleGrassWorld', () => {
                     _,_,_,_,_,_,_,_,_,_
                 `),
                 availableEntities: {
-                    '1': (point: RawPoint) => new Grass({ position: point }),
+                    '3': (point: RawPoint) => new Grass({ position: point }),
                 },
                 staticEntities: [
                     () => new GrassGenerator(2),

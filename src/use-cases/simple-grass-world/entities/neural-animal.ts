@@ -1,10 +1,11 @@
 import { BrainProperty, BrainHandlerInput, BrainCommands } from '../../../domain/property/brain/brain-property';
-import { MovementDirections } from '../../../domain/property/movement/movement-property';
 import { World } from '../../../domain/world/world';
+import { AnimalGrassNetwork } from '../../../network/animal-grass-network/animal-grass-network';
 import { Animal, AnimalOptions } from './animal';
 
 export class NeuralAnimal extends Animal {
     public brain: BrainProperty;
+    private network = new AnimalGrassNetwork();
 
     constructor(animalOptions: AnimalOptions) {
         super(animalOptions);
@@ -19,13 +20,6 @@ export class NeuralAnimal extends Animal {
     }
 
     private brainHandler(options: BrainHandlerInput): BrainCommands {
-        const commands: BrainCommands[] = [
-            MovementDirections.UP,
-            MovementDirections.DOWN,
-            MovementDirections.LEFT,
-            MovementDirections.RIGHT,
-            'STAND',
-        ];
-        return commands[Math.floor(Math.random() * commands.length)];
+        return this.network.predict({ sight: options.owner.sight.current });
     }
 }
