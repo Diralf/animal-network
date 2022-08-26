@@ -3,7 +3,7 @@ import { BrainCommands, BrainCommandsOther } from '../../domain/property/brain/b
 import { MovementDirections } from '../../domain/property/movement/movement-property';
 
 export interface AnimalGrassNetworkPredictInput {
-    sight: number[];
+    sight: number[][];
 }
 
 export class AnimalGrassNetwork {
@@ -14,6 +14,32 @@ export class AnimalGrassNetwork {
     }
 
     public predict({ sight }: AnimalGrassNetworkPredictInput): BrainCommands {
+        const normalizedSight = this.getNormalizedSight(sight);
+        return tf.tidy(() => {
+            const xs = tf.tensor4d([normalizedSight]);
+            const ys: tf.Tensor<tf.Rank> = this.model.predict(xs) as tf.Tensor<tf.Rank>;
+            const outputs: Int32Array = ys.dataSync() as Int32Array;
+
+            return this.getMaxCommand(outputs);
+        });
+    }
+
+    private getNormalizedSight(sight: number[][]): number[][][] {
+        const normalized: number[][][] = [];
+        const shape = [16, 16, 1];
+
+        for (let i = 0; i < shape[0]; i++) {
+            normalized[i] = [];
+            for (let j = 0; j < shape[1]; j++) {
+                const cell = sight[i] && sight[i][j];
+                normalized[i][j] = [cell ?? 0];
+            }
+        }
+
+        return normalized;
+    }
+
+    private getMaxCommand(outputs: Int32Array) {
         const commands: BrainCommands[] = [
             MovementDirections.UP,
             MovementDirections.DOWN,
@@ -21,7 +47,17 @@ export class AnimalGrassNetwork {
             MovementDirections.RIGHT,
             BrainCommandsOther.STAND,
         ];
-        return commands[Math.floor(Math.random() * commands.length)];
+
+        let max = outputs[0];
+        let maxIndex = 0;
+        outputs.forEach((value, index) => {
+            if (value > max) {
+                max = value;
+                maxIndex = index;
+            }
+        });
+
+        return commands[maxIndex];
     }
 
     private createModel(): tf.Sequential {
@@ -34,7 +70,7 @@ export class AnimalGrassNetwork {
         model.add(tf.layers.conv2d({
             inputShape: [IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS],
             kernelSize: 5,
-            filters: 8,
+            filters: 4,
             strides: 1,
             activation: 'relu',
             kernelInitializer: 'varianceScaling',
@@ -44,7 +80,7 @@ export class AnimalGrassNetwork {
 
         model.add(tf.layers.conv2d({
             kernelSize: 5,
-            filters: 16,
+            filters: 8,
             strides: 1,
             activation: 'relu',
             kernelInitializer: 'varianceScaling',

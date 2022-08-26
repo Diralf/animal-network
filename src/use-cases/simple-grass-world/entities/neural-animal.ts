@@ -20,6 +20,10 @@ export class NeuralAnimal extends Animal {
     }
 
     private brainHandler(options: BrainHandlerInput): BrainCommands {
-        return this.network.predict({ sight: options.owner.sight.current });
+        const sight = options.owner.sight.current;
+        const command = this.network.predict({ sight });
+        console.log(options.owner.sight.asString());
+        console.log(command);
+        return command;
     }
 }

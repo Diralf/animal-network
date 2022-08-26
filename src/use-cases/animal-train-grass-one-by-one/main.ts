@@ -8,17 +8,19 @@ export function main() {
 
     function step() {
         console.log('-'.repeat(40));
+        simpleWorld.tick();
+
         const animals = simpleWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
         const sizes = animals.map((animal) => animal.size.current);
-        simpleWorld.tick();
-        console.log(sizes);
-        console.log(simpleWorld.world.print(simpleWorld.world.getEntityList()));
+        const time = simpleWorld.world.getTime();
+        console.log(`size: ${sizes}`, `time: ${time}`);
+        console.log(simpleWorld.world.print(simpleWorld.world.getEntityList()), ' ');
         if (animals.length > 0) {
             setTimeout(() => {
                 step();
             }, 100);
         } else {
-            console.log('GAMEOVER'.padEnd(40, '='));
+            console.log(`GAMEOVER as time ${time}`.padEnd(40, '='));
         }
     }
 

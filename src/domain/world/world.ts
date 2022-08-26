@@ -71,12 +71,16 @@ export class World<Entity = unknown, Static = unknown> {
         });
     }
 
+    getTime() {
+        return this.time;
+    }
+
     public tick(): void {
         this.timeThread.tick(this, this.time);
         this.time += 1;
     }
 
-    public print(entityList: EntityList<Positionable & Visualable>) {
+    public print(entityList: EntityList<Positionable & Visualable>, emptyCell = '_') {
         let matrix: number[][] = [];
         for (let y = 0; y < this.height; y++) {
             const row: number[] = [];
@@ -89,6 +93,6 @@ export class World<Entity = unknown, Static = unknown> {
             }
             matrix.push(row);
         }
-        return visualEntitiesAsString(matrix);
+        return visualEntitiesAsString(matrix, emptyCell);
     }
 }
