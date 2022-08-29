@@ -17,8 +17,8 @@ export enum BrainCommandsOther {
     STAND = 'STAND',
 }
 
-export type BrainCommands = MovementDirections | BrainCommandsOther;
-export type BrainHandler = (input: BrainHandlerInput) => BrainCommands;
+export type BrainCommand = MovementDirections | BrainCommandsOther;
+export type BrainHandler = (input: BrainHandlerInput) => BrainCommand;
 
 export class BrainProperty implements PropertyWithOwner<BrainOwner>, OnTick {
     public owner = new PropertyOwner<BrainOwner>();
@@ -26,7 +26,7 @@ export class BrainProperty implements PropertyWithOwner<BrainOwner>, OnTick {
     constructor(public handler: BrainHandler) {
     }
 
-    public decide(world: World): BrainCommands {
+    public decide(world: World): BrainCommand {
         return this.handler({
             owner: this.owner.ref,
             world,

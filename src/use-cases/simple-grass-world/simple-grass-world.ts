@@ -2,10 +2,11 @@ import { Positionable } from '../../domain/property/point/positionable';
 import { RawPoint } from '../../domain/property/point/raw-point';
 import { Visualable } from '../../domain/property/sight/visualable';
 import { World } from '../../domain/world/world';
+import { AnimalGrassNetwork } from '../../network/animal-grass-network/animal-grass-network';
 import { Hole } from './entities/hole';
+import { NeuralAnimal } from './entities/neural-animal';
 import { GrassGenerator } from './static/grass-generator';
 import { InstanceTypes } from './types/instance-types';
-import { NeuralAnimal } from './entities/neural-animal';
 import { Taggable } from './types/taggable';
 
 type SimpleGrassWorldEntityTypes = Positionable & Taggable & Visualable;
@@ -33,7 +34,7 @@ export class SimpleGrassWorld {
         return this.world.getEntityList().find((instance) => instance.tags.includes(tag));
     }
 
-    startOneByOne(param: { width: number; height: number, maxGrass: number }) {
+    startOneByOne(param: { width: number; height: number, maxGrass: number, network?: AnimalGrassNetwork }) {
         this.world.addStatic(new GrassGenerator(1, param.maxGrass));
         this.world.addEntity(new NeuralAnimal({
             position: {
@@ -41,6 +42,7 @@ export class SimpleGrassWorld {
                 y: Math.floor(param.height / 2),
             },
             sightRange: 7,
+            network: param.network,
         }));
         this.world.width = param.width;
         this.world.height = param.height;
@@ -69,5 +71,42 @@ export class SimpleGrassWorld {
         }
 
         return entities;
+    }
+
+    despose() {
+        const entities: NeuralAnimal[] = this.world.savedEntityList.getAll() as any;
+        entities.forEach((entity) => {
+            entity.dispose();
+        });
+        this.world.savedEntityList.clear();
+    }
+
+    getFitnessOfEntity() {
+        const entity = this.getSavedNeuralEntity();
+        return entity.fitness;
+    }
+
+    private getSavedNeuralEntity(): NeuralAnimal {
+        return this.world.savedEntityList.getAll()[0] as any;
+    }
+
+    getNetwort() {
+        const entity = this.getSavedNeuralEntity();
+        return entity.getNetwork();
+    }
+
+    mutate() {
+        const entity: NeuralAnimal = this.findByTag(InstanceTypes.ANIMAL)[0] as any;
+        entity.getNetwork().mutate(0.1);
+    }
+
+    getScore() {
+        const entity = this.getSavedNeuralEntity();
+        return entity.score;
+    }
+
+    setFitness(fitness: number) {
+        const entity = this.getSavedNeuralEntity();
+        entity.fitness = fitness;
     }
 }

@@ -3,7 +3,7 @@ import { MovementProperty, MovementDirections } from '../movement/movement-prope
 import { PointProperty } from '../point/point-property';
 import { RawPoint } from '../point/raw-point';
 import { SightProperty } from '../sight/sight-property';
-import { BrainProperty, BrainCommands, BrainCommandsOther } from './brain-property';
+import { BrainProperty, BrainCommand, BrainCommandsOther } from './brain-property';
 
 interface Entity {
     brain: BrainProperty;
@@ -13,7 +13,7 @@ interface Entity {
     visual: number;
 }
 
-const getPropertiesContainer = (action: BrainCommands): Entity => {
+const getPropertiesContainer = (action: BrainCommand): Entity => {
     const entity = {
         brain: new BrainProperty(() => action),
         movement: new MovementProperty(),
@@ -28,7 +28,7 @@ const getPropertiesContainer = (action: BrainCommands): Entity => {
 };
 
 describe('BrainProperty', () => {
-    it.each<[BrainCommands, RawPoint]>([
+    it.each<[BrainCommand, RawPoint]>([
         [BrainCommandsOther.STAND, { x: 0, y: 0 }],
         [MovementDirections.RIGHT, { x: 1, y: 0 }],
         [MovementDirections.LEFT, { x: -1, y: 0 }],

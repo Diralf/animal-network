@@ -1,5 +1,5 @@
 import * as tf from '@tensorflow/tfjs-node';
-import { BrainCommands, BrainCommandsOther } from '../../domain/property/brain/brain-property';
+import { BrainCommand, BrainCommandsOther } from '../../domain/property/brain/brain-property';
 import { MovementDirections } from '../../domain/property/movement/movement-property';
 
 export interface AnimalGrassNetworkPredictInput {
@@ -13,7 +13,41 @@ export class AnimalGrassNetwork {
         this.model = model ?? this.createModel();
     }
 
-    public predict({ sight }: AnimalGrassNetworkPredictInput): BrainCommands {
+    copy(): AnimalGrassNetwork {
+        return tf.tidy(() => {
+            const modelCopy = this.createModel();
+            const weights = this.model.getWeights();
+            const weightCopies = [];
+            for (let i = 0; i < weights.length; i++) {
+                weightCopies[i] = weights[i].clone();
+            }
+            modelCopy.setWeights(weightCopies);
+            return new AnimalGrassNetwork(modelCopy) as any;
+        });
+    }
+
+    mutate(rate: number) {
+        tf.tidy(() => {
+            const weights = this.model.getWeights();
+            const mutatedWeights = [];
+            for (let i = 0; i < weights.length; i++) {
+                const values = weights[i].dataSync().slice();
+                for (let j = 0; j < values.length; j++) {
+                    if (Math.random() < rate) {
+                        values[j] += (Math.random() * 2) - 1;
+                    }
+                }
+                mutatedWeights[i] = tf.tensor(values, weights[i].shape);
+            }
+            this.model.setWeights(mutatedWeights);
+        });
+    }
+
+    dispose() {
+        this.model.dispose();
+    }
+
+    public predict({ sight }: AnimalGrassNetworkPredictInput): BrainCommand {
         const normalizedSight = this.getNormalizedSight(sight);
         return tf.tidy(() => {
             const xs = tf.tensor4d([normalizedSight]);
@@ -39,8 +73,8 @@ export class AnimalGrassNetwork {
         return normalized;
     }
 
-    private getMaxCommand(outputs: Int32Array) {
-        const commands: BrainCommands[] = [
+    private getMaxCommand(outputs: Int32Array): BrainCommand {
+        const commands: BrainCommand[] = [
             MovementDirections.UP,
             MovementDirections.DOWN,
             MovementDirections.LEFT,

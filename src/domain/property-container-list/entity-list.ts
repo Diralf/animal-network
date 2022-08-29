@@ -27,4 +27,8 @@ export class EntityList<Entity> {
     public remove(...instances: Entity[]): void {
         this.instances = this.instances.filter((item) => !instances.includes(item));
     }
+
+    public clear(): void {
+        this.instances = [];
+    }
 }

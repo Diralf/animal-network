@@ -3,6 +3,7 @@ import { Positionable } from '../property/point/positionable';
 import { RawPoint } from '../property/point/raw-point';
 import { Visualable } from '../property/sight/visualable';
 import { visualEntitiesAsString } from '../property/utils/visual-entities-as-string';
+import { OnDestroy } from '../time-thread/on-destroy';
 import { isOnTickGuard, OnTick } from '../time-thread/on-tick';
 import { TimeThread } from '../time-thread/time-thread';
 
@@ -11,8 +12,10 @@ export class World<Entity = unknown, Static = unknown> {
     private staticList: EntityList<Static> = new EntityList();
     private timeThread = new TimeThread();
     private time = 0;
+    public id: number = 0;
     public width: number = 0;
     public height: number = 0;
+    public savedEntityList = new EntityList();
 
     private entityMap: Map<string, (point: RawPoint) => Entity> = new Map();
 
@@ -35,6 +38,8 @@ export class World<Entity = unknown, Static = unknown> {
         this.entityList.remove(...instances);
         const onTickInstances = instances.filter((instance) => isOnTickGuard(instance)) as unknown as OnTick[];
         this.timeThread.removeListener(...onTickInstances);
+        const onDestroy: OnDestroy[] = instances.filter((instances) => 'onDestroy' in instances) as any;
+        onDestroy.forEach((inst) => inst.onDestroy(this));
     }
 
     public getEntityList() {
@@ -95,4 +100,5 @@ export class World<Entity = unknown, Static = unknown> {
         }
         return visualEntitiesAsString(matrix, emptyCell);
     }
+
 }

@@ -6,6 +6,7 @@ import { Positionable } from '../../../domain/property/point/positionable';
 import { RawPoint } from '../../../domain/property/point/raw-point';
 import { Sightable } from '../../../domain/property/sight/sightable';
 import { Visualable } from '../../../domain/property/sight/visualable';
+import { OnDestroy } from '../../../domain/time-thread/on-destroy';
 import { OnTick } from '../../../domain/time-thread/on-tick';
 import { World } from '../../../domain/world/world';
 import { isTaggableGuard } from '../types/is-taggable-guard';
@@ -23,7 +24,7 @@ export interface AnimalOptions {
     metabolizeSpeed?: number;
 }
 
-export class Animal implements Positionable, Taggable, Sightable, Visualable, OnTick {
+export class Animal implements Positionable, Taggable, Sightable, Visualable, OnTick, OnDestroy {
     public readonly tags = [InstanceTypes.ANIMAL];
     public readonly visual = 6;
     public position: PointProperty;
@@ -32,6 +33,8 @@ export class Animal implements Positionable, Taggable, Sightable, Visualable, On
     public sight: SightProperty;
     public movement: MovementProperty;
     public collision: CollisionProperty;
+    public score = 0;
+    public fitness = 0;
 
     constructor({ position, sightRange = 2, size = 10, metabolizeSpeed = 0.1 }: AnimalOptions) {
         this.position = new PointProperty(position);
@@ -73,11 +76,16 @@ export class Animal implements Positionable, Taggable, Sightable, Visualable, On
     }
 
     public tick(world: World<Animal>, time: number): void {
+        this.score += 1;
         this.sight.tick(world);
         this.collision.tick(world);
         this.size.current -= this.metabolizeSpeed;
         if (this.size.current < 0) {
             world.removeEntity(this);
         }
+    }
+
+    onDestroy(world: World<Animal>): void {
+        world.savedEntityList.add(this);
     }
 }
