@@ -6,10 +6,8 @@ export enum DirectionTurn {
     TURN_RIGHT = 'TURN_RIGHT',
 }
 
-
-
 export class DirectionProperty {
-    constructor(private current: RawPoint = { x: 0, y: 1 }) {
+    constructor(private current: RawPoint = { x: 0, y: -1 }) {
     }
 
     turn(to: DirectionTurn) {

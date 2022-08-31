@@ -55,7 +55,7 @@ export class DirectionSightProperty implements PropertyWithOwner<Owner>, OnTick 
         return [{ x: sx, y: sy }, { x: ex, y: ey }];
     }
 
-    public getSightField(list: EntityList<Owner>, [{ x: sx, y: sy }, { x: ex, y: ey }]: [RawPoint, RawPoint]) {
+    public getSightField(list: EntityList<Positionable & Visualable>, [{ x: sx, y: sy }, { x: ex, y: ey }]: [RawPoint, RawPoint]) {
         const newCurrent = [];
         for (let j = sy; j <= ey; j++) {
             const row = [];
@@ -89,7 +89,7 @@ export class DirectionSightProperty implements PropertyWithOwner<Owner>, OnTick 
         return rotateMatrix(newCurrent, angle);
     }
 
-    public update(list: EntityList<Owner>): void {
+    public update(list: EntityList<Positionable & Visualable>): void {
         const area = this.getSightFieldArea();
         const newCurrent = this.getSightField(list, area);
 
