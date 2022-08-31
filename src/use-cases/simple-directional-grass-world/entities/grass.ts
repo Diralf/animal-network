@@ -10,7 +10,7 @@ export class Grass implements Positionable, Taggable, Visualable {
     public readonly tags = [InstanceTypes.GRASS];
     public readonly visual = 3;
     public position: PointProperty;
-    public size: NumberProperty = new NumberProperty({ current: 1 });
+    public size: NumberProperty = new NumberProperty({ current: 10 });
 
     constructor({ position }: { position: RawPoint }) {
         this.position = new PointProperty(position);

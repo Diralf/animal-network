@@ -39,7 +39,7 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
     public score = 0;
     public fitness = 0;
 
-    constructor({ position, sightRange = [5, 2], size = 10, metabolizeSpeed = 0.1 }: AnimalOptions) {
+    constructor({ position, sightRange = [5, 2], size = 10, metabolizeSpeed = 1 }: AnimalOptions) {
         this.position = new PointProperty(position);
         this.size.current = size;
         this.metabolizeSpeed = metabolizeSpeed;

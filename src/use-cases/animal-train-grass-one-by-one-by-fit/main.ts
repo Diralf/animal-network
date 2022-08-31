@@ -1,7 +1,7 @@
-import { Animal } from '../simple-grass-world/entities/animal';
-import { SimpleGrassWorld } from '../simple-grass-world/simple-grass-world';
-import { InstanceTypes } from '../simple-grass-world/types/instance-types';
 import * as tf from '@tensorflow/tfjs-node';
+import { Animal } from '../simple-directional-grass-world/entities/animal';
+import { SimpleGrassWorld } from '../simple-directional-grass-world/simple-grass-world';
+import { InstanceTypes } from '../simple-directional-grass-world/types/instance-types';
 
 function displayWorld(simpleWorld: SimpleGrassWorld) {
     const animals = simpleWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
@@ -11,6 +11,7 @@ function displayWorld(simpleWorld: SimpleGrassWorld) {
     console.log(tf.memory());
     console.log(`ID: ${simpleWorld.world.id} `.padEnd(40, '-'));
     console.log(`size: ${sizes}`, `time: ${time}`);
+    console.log(animals[0].sight.asString());
     console.log(simpleWorld.world.print(simpleWorld.world.getEntityList()), ' ');
 }
 
@@ -19,7 +20,7 @@ const timer = (milliseconds: number) => new Promise((resolve) => {
 });
 
 export async function main() {
-    const worldParams = { width: 20, height: 20, maxGrass: 100 };
+    const worldParams = { width: 20, height: 20, maxGrass: 10 };
     const worldsCount = 1;
     let generation = 0;
     let isGenerationView = false;
@@ -35,7 +36,7 @@ export async function main() {
     }
 
     async function step() {
-        isGenerationView = generation % 100 === 0;
+        isGenerationView = generation % 1 === 0;
         activeWorlds.forEach((world, index) => {
             world.tick();
 
@@ -62,12 +63,12 @@ export async function main() {
             finishedWorlds = [];
             await timer(isGenerationView ? 3000 : 0);
         }
-
-        await timer(isGenerationView ? 100 : 0);
-        await step();
     }
 
-    await step();
+    while (true) {
+        await step();
+        await timer(isGenerationView ? 200 : 0);
+    }
 }
 
 async function pickOne(finishedWorlds: SimpleGrassWorld[], worldParams: { width: number; height: number, maxGrass: number }) {

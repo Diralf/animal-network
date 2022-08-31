@@ -11,7 +11,7 @@ import { InstanceTypes } from './types/instance-types';
 import { StaticAnimal } from './entities/static-animal';
 import { SimpleGrassWorld, FieldOptions } from './simple-grass-world';
 
-describe('SimpleGrassWorld', () => {
+describe('Directional SimpleGrassWorld', () => {
     describe('static world', () => {
         const startWorld = (simpleGrassWorld: SimpleGrassWorld, options: Partial<FieldOptions> = {}): void => {
             simpleGrassWorld.start({

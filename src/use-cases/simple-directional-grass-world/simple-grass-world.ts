@@ -41,7 +41,7 @@ export class SimpleGrassWorld {
                 x: Math.floor(param.width / 2),
                 y: Math.floor(param.height / 2),
             },
-            sightRange: [5, 2],
+            sightRange: [7, 3],
             network: param.network,
         });
         if (param.network) {
@@ -99,11 +99,6 @@ export class SimpleGrassWorld {
     getSavedNetwort() {
         const entity = this.getSavedNeuralEntity();
         return entity.getNetwork();
-    }
-
-    mutate() {
-        const entity: NeuralAnimal = this.findByTag(InstanceTypes.ANIMAL)[0] as any;
-        entity.getNetwork().mutate(0.1);
     }
 
     async trainSavedNetwork() {

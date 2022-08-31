@@ -21,13 +21,14 @@ export interface AnimalGrassNetworkFitInput {
 interface NetworkOptions {
     model?: tf.Sequential;
     previousRecord?: number;
+    generation?: number;
 }
 
 export class AnimalDirectionGrassNetwork {
     private model: tf.Sequential;
     private lifeFrames: LifeFrame[] = [];
     private previousRecord;
-    private inputShape = [16, 16, 1];
+    private inputShape = [8, 8, 1];
     private commands: DirectionBrainCommand[] = [
         DirectionTurn.TURN_LEFT,
         DirectionTurn.TURN_RIGHT,
@@ -35,24 +36,12 @@ export class AnimalDirectionGrassNetwork {
         DirectionMovementValue.BACK,
         BrainCommandsOther.STAND,
     ];
+    private generation = 0;
 
-    constructor({ model, previousRecord }: NetworkOptions = {}) {
+    constructor({ model, previousRecord, generation }: NetworkOptions = {}) {
         this.model = model ?? this.createModel();
         this.previousRecord = previousRecord ?? 0;
-    }
-
-    copy(): AnimalDirectionGrassNetwork {
-        return tf.tidy(() => {
-            const modelCopy = this.createModel();
-            const weights = this.model.getWeights();
-            const weightCopies = [];
-            for (let i = 0; i < weights.length; i++) {
-                weightCopies[i] = weights[i].clone();
-            }
-            modelCopy.setWeights(weightCopies);
-            const record = Math.max(this.previousRecord, this.lifeFrames.length);
-            return new AnimalDirectionGrassNetwork({ model: modelCopy, previousRecord: record }) as any;
-        });
+        this.generation = generation ?? 0;
     }
 
     async copyByFile(save = true): Promise<AnimalDirectionGrassNetwork> {
@@ -61,28 +50,16 @@ export class AnimalDirectionGrassNetwork {
         }
         const modelCopy = await this.loadFromFile();
         const record = Math.max(this.previousRecord, this.lifeFrames.length);
-        return new AnimalDirectionGrassNetwork({ model: modelCopy, previousRecord: record });
-    }
-
-    mutate(rate: number) {
-        tf.tidy(() => {
-            const weights = this.model.getWeights();
-            const mutatedWeights = [];
-            for (let i = 0; i < weights.length; i++) {
-                const values = weights[i].dataSync().slice();
-                for (let j = 0; j < values.length; j++) {
-                    if (Math.random() < rate) {
-                        values[j] += (Math.random() * 2) - 1;
-                    }
-                }
-                mutatedWeights[i] = tf.tensor(values, weights[i].shape);
-            }
-            this.model.setWeights(mutatedWeights);
-        });
+        const generation = this.generation;
+        return new AnimalDirectionGrassNetwork({ model: modelCopy, previousRecord: record, generation });
     }
 
     dispose() {
-        this.model.dispose();
+        try {
+            this.model.dispose();
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     public predict({ sight }: AnimalGrassNetworkPredictInput): DirectionBrainCommand {
@@ -107,7 +84,7 @@ export class AnimalDirectionGrassNetwork {
 
     private getNormalizedSight(sight: number[][]): number[][] {
         const normalized: number[][] = [];
-        const shape = [16, 16];
+        const shape = [this.inputShape[0], this.inputShape[1]];
 
         for (let i = 0; i < shape[0]; i++) {
             normalized[i] = [];
@@ -153,6 +130,7 @@ export class AnimalDirectionGrassNetwork {
             strides: 1,
             activation: 'relu',
             kernelInitializer: 'varianceScaling',
+            padding: 'same',
         }));
         model.add(tf.layers.maxPooling2d({ poolSize: [2, 2], strides: [2, 2] }));
 
@@ -185,10 +163,8 @@ export class AnimalDirectionGrassNetwork {
         switch (true) {
             case current > previous:
                 return 1;
-            case current === previous:
-                return -0.1;
             default:
-                return (current / previous) - 1;
+                return -1;
             // default:
             //     return -1;
         }
@@ -202,7 +178,12 @@ export class AnimalDirectionGrassNetwork {
         const [trainXs, trainYs] = tf.tidy(() => {
             const sightArray = lifeFrames.map(({ sight }) => sight);
             const sightTensor = tf.tensor3d(sightArray);
-            const trueArray = lifeFrames.map(({ output }) => output.map((value) => value * reward));
+            const trueArray = lifeFrames.map(({ output }, index, array) => {
+                const k = array.length - index - 1;
+                const actualReward = k < 10 ? -1 : 1;
+
+                return output.map((value) => value * actualReward);
+            });
             const trueTensor = tf.tensor2d(trueArray);
             return [
                 sightTensor.reshape([BATCH_SIZE, ...this.inputShape]),
@@ -226,7 +207,11 @@ export class AnimalDirectionGrassNetwork {
 
     async saveToFile() {
         await this.model.save('file://./model');
-        fs.writeFileSync('./model/record.txt', this.previousRecord.toString());
+        const meta = {
+            previousRecord: this.previousRecord,
+            generation: this.generation,
+        }
+        fs.writeFileSync('./model/record.json', JSON.stringify(meta));
     }
 
     disposeVariables() {
@@ -235,8 +220,10 @@ export class AnimalDirectionGrassNetwork {
 
     async loadFromFile() {
         try {
-            const record = fs.readFileSync('./model/record.txt', { encoding: 'utf-8' });
-            this.previousRecord = parseInt(record, 10);
+            const record = fs.readFileSync('./model/record.json', { encoding: 'utf-8' });
+            const meta = JSON.parse(record);
+            this.previousRecord = meta.previousRecord;
+            this.generation = meta.generation + 1;
         } catch (e) {
             console.error(e);
         }
