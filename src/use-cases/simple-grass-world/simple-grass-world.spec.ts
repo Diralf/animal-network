@@ -385,7 +385,7 @@ describe('SimpleGrassWorld', () => {
 
             console.log(world.print(world.getEntityList()));
 
-            expect(result.toString()).toEqual([0, 1, 2, 0, 1, 2].toString());
+            expect(result.toString()).toEqual([0, 1, 1, 0, 1, 1].toString());
         });
     });
 

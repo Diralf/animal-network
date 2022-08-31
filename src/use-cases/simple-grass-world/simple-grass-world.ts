@@ -34,16 +34,22 @@ export class SimpleGrassWorld {
         return this.world.getEntityList().find((instance) => instance.tags.includes(tag));
     }
 
-    startOneByOne(param: { width: number; height: number, maxGrass: number, network?: AnimalGrassNetwork }) {
+    async startOneByOne(param: { width: number; height: number, maxGrass: number, network?: AnimalGrassNetwork }) {
         this.world.addStatic(new GrassGenerator(1, param.maxGrass));
-        this.world.addEntity(new NeuralAnimal({
+        const neuralAnimal = new NeuralAnimal({
             position: {
                 x: Math.floor(param.width / 2),
                 y: Math.floor(param.height / 2),
             },
             sightRange: 7,
             network: param.network,
-        }));
+        });
+        if (param.network) {
+            await neuralAnimal.setNetwork(param.network);
+        } else {
+            await neuralAnimal.loadFromFile();
+        }
+        this.world.addEntity(neuralAnimal);
         this.world.width = param.width;
         this.world.height = param.height;
         this.world.addEntity(
@@ -73,7 +79,7 @@ export class SimpleGrassWorld {
         return entities;
     }
 
-    despose() {
+    dispose() {
         const entities: NeuralAnimal[] = this.world.savedEntityList.getAll() as any;
         entities.forEach((entity) => {
             entity.dispose();
@@ -90,7 +96,7 @@ export class SimpleGrassWorld {
         return this.world.savedEntityList.getAll()[0] as any;
     }
 
-    getNetwort() {
+    getSavedNetwort() {
         const entity = this.getSavedNeuralEntity();
         return entity.getNetwork();
     }
@@ -98,6 +104,12 @@ export class SimpleGrassWorld {
     mutate() {
         const entity: NeuralAnimal = this.findByTag(InstanceTypes.ANIMAL)[0] as any;
         entity.getNetwork().mutate(0.1);
+    }
+
+    async trainSavedNetwork() {
+        const network = this.getSavedNetwort();
+        network.compile();
+        await network.fit();
     }
 
     getScore() {

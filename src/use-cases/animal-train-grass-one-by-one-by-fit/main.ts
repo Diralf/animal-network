@@ -14,21 +14,28 @@ function displayWorld(simpleWorld: SimpleGrassWorld) {
     console.log(simpleWorld.world.print(simpleWorld.world.getEntityList()), ' ');
 }
 
-export function main() {
-    const worldParams = { width: 20, height: 20, maxGrass: 200 };
-    const worldsCount = 10;
+const timer = (milliseconds: number) => new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+});
+
+export async function main() {
+    const worldParams = { width: 20, height: 20, maxGrass: 100 };
+    const worldsCount = 1;
+    let generation = 0;
+    let isGenerationView = false;
 
     let activeWorlds: SimpleGrassWorld[] = [];
     let finishedWorlds: SimpleGrassWorld[] = [];
 
     for (let i = 0; i < worldsCount; i++) {
         const simpleWorld = new SimpleGrassWorld();
-        simpleWorld.startOneByOne(worldParams);
+        await simpleWorld.startOneByOne(worldParams);
         simpleWorld.world.id = i;
         activeWorlds.push(simpleWorld);
     }
 
-    function step() {
+    async function step() {
+        isGenerationView = generation % 100 === 0;
         activeWorlds.forEach((world, index) => {
             world.tick();
 
@@ -38,51 +45,36 @@ export function main() {
         });
 
         if (activeWorlds.length > 0) {
-            displayWorld(activeWorlds[0]);
+            if (isGenerationView) {
+                displayWorld(activeWorlds[0]);
+            }
         } else {
+            generation += 1;
             console.log(`GAMEOVER`.padEnd(40, '='));
-            console.log('next generation');
-            finishedWorlds = finishedWorlds.reverse();
-            calculateFitness(finishedWorlds);
+            console.log(`Fitting ${generation}`);
             activeWorlds = [];
             for (let i = 0; i < worldsCount; i++) {
-                activeWorlds[i] = pickOne(finishedWorlds, worldParams);
+                activeWorlds[i] = await pickOne(finishedWorlds, worldParams);
             }
             finishedWorlds.forEach((world) => {
-                world.despose();
+                world.dispose();
             });
             finishedWorlds = [];
+            await timer(isGenerationView ? 3000 : 0);
         }
 
-        setTimeout(() => {
-            step();
-        }, 10);
+        await timer(isGenerationView ? 100 : 0);
+        await step();
     }
 
-    step();
+    await step();
 }
 
-function pickOne(finishedWorlds: SimpleGrassWorld[], worldParams: { width: number; height: number, maxGrass: number }) {
-    let index = 0;
-    let r = Math.random();
-    while (r > 0) {
-        r = r - finishedWorlds[index].getFitnessOfEntity();
-        index++;
-    }
-    index--;
-    let world = finishedWorlds[index];
-    let child = new SimpleGrassWorld();
-    child.startOneByOne({ ...worldParams, network: world.getNetwort() });
-    child.mutate();
+async function pickOne(finishedWorlds: SimpleGrassWorld[], worldParams: { width: number; height: number, maxGrass: number }) {
+    const world = finishedWorlds[0];
+    await world.trainSavedNetwork();
+
+    const child = new SimpleGrassWorld();
+    await child.startOneByOne({ ...worldParams, network: world.getSavedNetwort() });
     return child;
-}
-
-function calculateFitness(finishedWorlds: SimpleGrassWorld[]) {
-    let sum = 0;
-    for (let world of finishedWorlds) {
-        sum += world.getScore();
-    }
-    for (let world of finishedWorlds) {
-        world.setFitness(world.getScore() / sum);
-    }
 }

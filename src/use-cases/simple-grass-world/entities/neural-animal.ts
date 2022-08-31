@@ -17,7 +17,23 @@ export class NeuralAnimal extends Animal {
 
         this.brain.owner.ref = this;
 
-        this.network = animalOptions.network?.copy() ?? new AnimalGrassNetwork();
+        // this.network = animalOptions.network?.copy() ?? new AnimalGrassNetwork();
+    }
+
+    async loadFromFile() {
+        try {
+            // this.network.dispose();
+            this.network = await this.network?.copyByFile(false);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async setNetwork(network: AnimalGrassNetwork) {
+        this.network.dispose();
+        await network.saveToFile();
+        network.disposeVariables();
+        this.network = await network?.copyByFile(false);
     }
 
     public tick(world: World<Animal>, time: number): void {

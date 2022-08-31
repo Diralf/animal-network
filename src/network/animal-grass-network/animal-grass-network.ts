@@ -1,4 +1,5 @@
 import * as tf from '@tensorflow/tfjs-node';
+import * as fs from 'fs';
 import { BrainCommand, BrainCommandsOther } from '../../domain/property/brain/brain-property';
 import { MovementDirections } from '../../domain/property/movement/movement-property';
 
@@ -6,11 +7,37 @@ export interface AnimalGrassNetworkPredictInput {
     sight: number[][];
 }
 
+interface LifeFrame {
+    sight: number[][];
+    output: number[];
+}
+
+export interface AnimalGrassNetworkFitInput {
+    lifeFrames: LifeFrame[];
+    previousRecord: number;
+}
+
+interface NetworkOptions {
+    model?: tf.Sequential;
+    previousRecord?: number;
+}
+
 export class AnimalGrassNetwork {
     private model: tf.Sequential;
+    private lifeFrames: LifeFrame[] = [];
+    private previousRecord;
+    private inputShape = [16, 16, 1];
+    private commands: BrainCommand[] = [
+        MovementDirections.UP,
+        MovementDirections.DOWN,
+        MovementDirections.LEFT,
+        MovementDirections.RIGHT,
+        BrainCommandsOther.STAND,
+    ];
 
-    constructor(model?: tf.Sequential) {
+    constructor({ model, previousRecord }: NetworkOptions = {}) {
         this.model = model ?? this.createModel();
+        this.previousRecord = previousRecord ?? 0;
     }
 
     copy(): AnimalGrassNetwork {
@@ -22,8 +49,18 @@ export class AnimalGrassNetwork {
                 weightCopies[i] = weights[i].clone();
             }
             modelCopy.setWeights(weightCopies);
-            return new AnimalGrassNetwork(modelCopy) as any;
+            const record = Math.max(this.previousRecord, this.lifeFrames.length);
+            return new AnimalGrassNetwork({ model: modelCopy, previousRecord: record }) as any;
         });
+    }
+
+    async copyByFile(save = true): Promise<AnimalGrassNetwork> {
+        if (save) {
+            await this.saveToFile();
+        }
+        const modelCopy = await this.loadFromFile();
+        const record = Math.max(this.previousRecord, this.lifeFrames.length);
+        return new AnimalGrassNetwork({ model: modelCopy, previousRecord: record });
     }
 
     mutate(rate: number) {
@@ -48,40 +85,41 @@ export class AnimalGrassNetwork {
     }
 
     public predict({ sight }: AnimalGrassNetworkPredictInput): BrainCommand {
-        const normalizedSight = this.getNormalizedSight(sight);
         return tf.tidy(() => {
-            const xs = tf.tensor4d([normalizedSight]);
+            const normalizedSight = this.getNormalizedSight(sight);
+            const xs = tf.tensor3d([normalizedSight]).reshape([1, ...this.inputShape]);
             const ys: tf.Tensor<tf.Rank> = this.model.predict(xs) as tf.Tensor<tf.Rank>;
             const outputs: Int32Array = ys.dataSync() as Int32Array;
 
-            return this.getMaxCommand(outputs);
+            const { command, index } = this.getMaxCommand(outputs);
+            const output = new Array(this.commands.length).fill(0);
+            output[index] = 1;
+
+            this.lifeFrames.push({
+                sight: normalizedSight,
+                output,
+            });
+
+            return command;
         });
     }
 
-    private getNormalizedSight(sight: number[][]): number[][][] {
-        const normalized: number[][][] = [];
-        const shape = [16, 16, 1];
+    private getNormalizedSight(sight: number[][]): number[][] {
+        const normalized: number[][] = [];
+        const shape = [16, 16];
 
         for (let i = 0; i < shape[0]; i++) {
             normalized[i] = [];
             for (let j = 0; j < shape[1]; j++) {
                 const cell = sight[i] && sight[i][j];
-                normalized[i][j] = [cell ?? 0];
+                normalized[i][j] = cell ?? 0;
             }
         }
 
         return normalized;
     }
 
-    private getMaxCommand(outputs: Int32Array): BrainCommand {
-        const commands: BrainCommand[] = [
-            MovementDirections.UP,
-            MovementDirections.DOWN,
-            MovementDirections.LEFT,
-            MovementDirections.RIGHT,
-            BrainCommandsOther.STAND,
-        ];
-
+    private getMaxCommand(outputs: Int32Array): { command: BrainCommand, index: number } {
         let max = outputs[0];
         let maxIndex = 0;
         outputs.forEach((value, index) => {
@@ -91,18 +129,14 @@ export class AnimalGrassNetwork {
             }
         });
 
-        return commands[maxIndex];
+        return { command: this.commands[maxIndex], index: maxIndex };
     }
 
     private createModel(): tf.Sequential {
         const model = tf.sequential();
 
-        const IMAGE_WIDTH = 16;
-        const IMAGE_HEIGHT = 16;
-        const IMAGE_CHANNELS = 1;
-
         model.add(tf.layers.conv2d({
-            inputShape: [IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS],
+            inputShape: this.inputShape,
             kernelSize: 5,
             filters: 4,
             strides: 1,
@@ -123,7 +157,7 @@ export class AnimalGrassNetwork {
 
         model.add(tf.layers.flatten());
 
-        const NUM_OUTPUT_CLASSES = 5;
+        const NUM_OUTPUT_CLASSES = this.commands.length;
         model.add(tf.layers.dense({
             units: NUM_OUTPUT_CLASSES,
             kernelInitializer: 'varianceScaling',
@@ -131,5 +165,80 @@ export class AnimalGrassNetwork {
         }));
 
         return model;
+    }
+
+    compile() {
+        return tf.tidy(() => {
+            const optimizer = tf.train.adam();
+
+            this.model.compile({
+                optimizer: optimizer,
+                // @ts-ignore
+                loss: tf.losses.softmaxCrossEntropy,
+                metrics: ['accuracy'],
+            });
+        });
+    }
+
+    private getReward(current: number, previous: number): number {
+        switch (true) {
+            case current > previous:
+                return 1;
+            case current === previous:
+                return -0.1;
+            default:
+                return (current / previous) - 1;
+            // default:
+            //     return -1;
+        }
+    }
+
+    async fit(options?: AnimalGrassNetworkFitInput) {
+        const { lifeFrames, previousRecord } = options ?? { lifeFrames: this.lifeFrames, previousRecord: this.previousRecord };
+        const reward = this.getReward(lifeFrames.length, previousRecord);
+        const BATCH_SIZE = lifeFrames.length;
+
+        const [trainXs, trainYs] = tf.tidy(() => {
+            const sightArray = lifeFrames.map(({ sight }) => sight);
+            const sightTensor = tf.tensor3d(sightArray);
+            const trueArray = lifeFrames.map(({ output }) => output.map((value) => value * reward));
+            const trueTensor = tf.tensor2d(trueArray);
+            return [
+                sightTensor.reshape([BATCH_SIZE, ...this.inputShape]),
+                trueTensor,
+            ];
+        });
+
+        await this.model.fit(trainXs, trainYs, {
+            batchSize: BATCH_SIZE,
+            epochs: 1,
+            callbacks: {
+                onEpochEnd: (epoch, log) => {
+                    console.log({ loss: log?.loss, acc: log?.acc, reward, current: lifeFrames.length, previous: previousRecord });
+                },
+            },
+        });
+
+        trainXs.dispose();
+        trainYs.dispose();
+    }
+
+    async saveToFile() {
+        await this.model.save('file://./model');
+        fs.writeFileSync('./model/record.txt', this.previousRecord.toString());
+    }
+
+    disposeVariables() {
+        tf.disposeVariables();
+    }
+
+    async loadFromFile() {
+        try {
+            const record = fs.readFileSync('./model/record.txt', { encoding: 'utf-8' });
+            this.previousRecord = parseInt(record, 10);
+        } catch (e) {
+            console.error(e);
+        }
+        return tf.loadLayersModel('file://./model/model.json') as unknown as tf.Sequential;
     }
 }
