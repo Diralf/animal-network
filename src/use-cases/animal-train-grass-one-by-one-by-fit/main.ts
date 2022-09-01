@@ -20,7 +20,7 @@ const timer = (milliseconds: number) => new Promise((resolve) => {
 });
 
 export async function main() {
-    const worldParams = { width: 20, height: 20, maxGrass: 10 };
+    const worldParams = { width: 20, height: 20, maxGrass: 30 };
     const worldsCount = 1;
     let generation = 0;
     let isGenerationView = false;

@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { DirectionBrainCommand, BrainCommandsOther } from '../../domain/property/direction-brain/direction-brain-property';
 import { DirectionMovementValue } from '../../domain/property/direction-movement/direction-movement-property';
 import { DirectionTurn } from '../../domain/property/direction/direction-property';
+import { visualEntitiesAsString } from '../../domain/property/utils/visual-entities-as-string';
 
 export interface AnimalGrassNetworkPredictInput {
     sight: number[][];
@@ -18,10 +19,11 @@ export interface AnimalGrassNetworkFitInput {
     previousRecord: number;
 }
 
-interface NetworkOptions {
-    model?: tf.Sequential;
-    previousRecord?: number;
-    generation?: number;
+interface StorageModel {
+    previousRecord: number;
+    generation: number;
+    recordSum: number;
+    model: tf.Sequential;
 }
 
 export class AnimalDirectionGrassNetwork {
@@ -37,21 +39,22 @@ export class AnimalDirectionGrassNetwork {
         BrainCommandsOther.STAND,
     ];
     private generation = 0;
+    private recordSum = 0;
 
-    constructor({ model, previousRecord, generation }: NetworkOptions = {}) {
+    constructor({ model, previousRecord, generation, recordSum }: Partial<StorageModel> = {}) {
         this.model = model ?? this.createModel();
         this.previousRecord = previousRecord ?? 0;
         this.generation = generation ?? 0;
+        this.recordSum = recordSum ?? 0;
     }
 
     async copyByFile(save = true): Promise<AnimalDirectionGrassNetwork> {
         if (save) {
             await this.saveToFile();
         }
-        const modelCopy = await this.loadFromFile();
-        const record = Math.max(this.previousRecord, this.lifeFrames.length);
-        const generation = this.generation;
-        return new AnimalDirectionGrassNetwork({ model: modelCopy, previousRecord: record, generation });
+        const { model, previousRecord, recordSum, generation } = await this.loadFromFile();
+        const record = Math.max(previousRecord, this.lifeFrames.length);
+        return new AnimalDirectionGrassNetwork({ model, previousRecord: record, generation, recordSum });
     }
 
     dispose() {
@@ -152,8 +155,7 @@ export class AnimalDirectionGrassNetwork {
 
             this.model.compile({
                 optimizer: optimizer,
-                // @ts-ignore
-                loss: tf.losses.softmaxCrossEntropy,
+                loss: 'categoricalCrossentropy',
                 metrics: ['accuracy'],
             });
         });
@@ -164,7 +166,7 @@ export class AnimalDirectionGrassNetwork {
             case current > previous:
                 return 1;
             default:
-                return -1;
+                return 0;
             // default:
             //     return -1;
         }
@@ -172,17 +174,23 @@ export class AnimalDirectionGrassNetwork {
 
     async fit(options?: AnimalGrassNetworkFitInput) {
         const { lifeFrames, previousRecord } = options ?? { lifeFrames: this.lifeFrames, previousRecord: this.previousRecord };
-        const reward = this.getReward(lifeFrames.length, previousRecord);
+        this.recordSum += lifeFrames.length;
+        const averageRecord = this.recordSum / this.generation;
+        const reward = this.getReward(lifeFrames.length, averageRecord);
         const BATCH_SIZE = lifeFrames.length;
 
         const [trainXs, trainYs] = tf.tidy(() => {
             const sightArray = lifeFrames.map(({ sight }) => sight);
             const sightTensor = tf.tensor3d(sightArray);
             const trueArray = lifeFrames.map(({ output }, index, array) => {
-                const k = array.length - index - 1;
-                const actualReward = k < 10 ? -1 : 1;
+                const k = array.length - index;
+                const actualReward = k <= 11 ? -1 : 1;
 
-                return output.map((value) => value * actualReward);
+                if (actualReward > 0) {
+                    return output.map((value) => value);
+                } else {
+                    return output.map((value) => (-value + 1) / k);
+                }
             });
             const trueTensor = tf.tensor2d(trueArray);
             return [
@@ -196,7 +204,10 @@ export class AnimalDirectionGrassNetwork {
             epochs: 1,
             callbacks: {
                 onEpochEnd: (epoch, log) => {
-                    console.log({ loss: log?.loss, acc: log?.acc, reward, current: lifeFrames.length, previous: previousRecord });
+                    if (log && log.loss < 0) {
+                        throw new Error('Loss less then 0');
+                    }
+                    console.log({ loss: log?.loss, acc: log?.acc, reward, current: lifeFrames.length, averageRecord, previous: previousRecord });
                 },
             },
         });
@@ -207,26 +218,47 @@ export class AnimalDirectionGrassNetwork {
 
     async saveToFile() {
         await this.model.save('file://./model');
-        const meta = {
+        const meta: Omit<StorageModel, 'model'> = {
             previousRecord: this.previousRecord,
             generation: this.generation,
-        }
+            recordSum: this.recordSum
+        };
         fs.writeFileSync('./model/record.json', JSON.stringify(meta));
+        if (this.lifeFrames.length >= this.previousRecord) {
+
+            const stringFrames = this.lifeFrames.map(({ sight, output }) => {
+                const action = this.commands.find((command, index) => {
+                    return output[index] === 1;
+                });
+                return `${visualEntitiesAsString(sight)}\naction: ${action}\n`;
+            }).join('\n===\n');
+            fs.writeFileSync('./model/recordLifeFrames.json', stringFrames);
+        }
     }
 
     disposeVariables() {
         tf.disposeVariables();
     }
 
-    async loadFromFile() {
+    async loadFromFile(): Promise<StorageModel> {
+        const result: Omit<StorageModel, 'model' > = {
+            previousRecord: 0,
+            generation: 0,
+            recordSum: 0,
+        };
         try {
             const record = fs.readFileSync('./model/record.json', { encoding: 'utf-8' });
             const meta = JSON.parse(record);
-            this.previousRecord = meta.previousRecord;
-            this.generation = meta.generation + 1;
+            result.previousRecord = meta.previousRecord;
+            result.generation = meta.generation + 1;
+            result.recordSum = meta.recordSum;
         } catch (e) {
             console.error(e);
         }
-        return tf.loadLayersModel('file://./model/model.json') as unknown as tf.Sequential;
+        const model = await tf.loadLayersModel('file://./model/model.json') as unknown as tf.Sequential;
+        return {
+            ...result,
+            model,
+        };
     }
 }
