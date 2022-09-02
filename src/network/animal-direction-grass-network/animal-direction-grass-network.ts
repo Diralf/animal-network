@@ -202,17 +202,17 @@ export class AnimalDirectionGrassNetwork {
                 const k = array.length - index;
                 const actualReward = k <= 11 ? -1 : 1;
 
-                if (actualReward > 0) {
-                    return output.map((value) => value);
-                } else {
-                    return output.map((value) => Math.abs(value - 1));
-                }
-                // return output.map((value) => {
-                //     if (value === 1) {
-                //         return Math.min(reward, Math.max(reward - (value - (0.05 * k)), 0));
-                //     }
-                //     return Math.max(1 - (0.05 * k), 0);
-                // });
+                // if (actualReward > 0) {
+                //     return output.map((value) => value);
+                // } else {
+                //     return output.map((value) => Math.abs(value - 1));
+                // }
+                return output.map((value) => {
+                    if (value === 1) {
+                        return Math.min(reward, Math.max(reward - (value - (0.05 * k)), 0));
+                    }
+                    return Math.max(1 - (0.05 * k), 0);
+                });
             });
             const trueTensor = tf.tensor2d(trueArray);
             return [
