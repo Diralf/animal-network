@@ -7,10 +7,11 @@ import { visualEntitiesAsString } from '../../domain/property/utils/visual-entit
 
 export interface AnimalGrassNetworkPredictInput {
     sight: number[][];
+    size: number;
 }
 
 interface LifeFrame {
-    sight: number[][];
+    sight: number[][][];
     output: number[];
 }
 
@@ -30,7 +31,7 @@ export class AnimalDirectionGrassNetwork {
     private model: tf.Sequential;
     private lifeFrames: LifeFrame[] = [];
     private previousRecord;
-    private inputShape = [8, 8, 1];
+    private inputShape = [8, 8, 2];
     private commands: DirectionBrainCommand[] = [
         DirectionTurn.TURN_LEFT,
         DirectionTurn.TURN_RIGHT,
@@ -65,10 +66,10 @@ export class AnimalDirectionGrassNetwork {
         }
     }
 
-    public predict({ sight }: AnimalGrassNetworkPredictInput): DirectionBrainCommand {
+    public predict({ sight, size }: AnimalGrassNetworkPredictInput): DirectionBrainCommand {
         return tf.tidy(() => {
-            const normalizedSight = this.getNormalizedSight(sight);
-            const xs = tf.tensor3d([normalizedSight]).reshape([1, ...this.inputShape]);
+            const normalizedSight = this.getNormalizedSight(sight, size);
+            const xs = tf.tensor4d([normalizedSight]);
             const ys: tf.Tensor<tf.Rank> = this.model.predict(xs) as tf.Tensor<tf.Rank>;
             const outputs: Int32Array = ys.dataSync() as Int32Array;
 
@@ -85,15 +86,32 @@ export class AnimalDirectionGrassNetwork {
         });
     }
 
-    private getNormalizedSight(sight: number[][]): number[][] {
-        const normalized: number[][] = [];
+    private getNormalizedSight(sight: number[][], size: number): number[][][] {
+        const normalized: number[][][] = [];
         const shape = [this.inputShape[0], this.inputShape[1]];
 
         for (let i = 0; i < shape[0]; i++) {
             normalized[i] = [];
             for (let j = 0; j < shape[1]; j++) {
                 const cell = sight[i] && sight[i][j];
-                normalized[i][j] = cell ?? 0;
+                let cellSize;
+                switch (cell) {
+                    case 6:
+                        cellSize = Math.min(Math.max(size, 0), 10) / 10;
+                        break;
+                    case 3:
+                        cellSize = 0.5;
+                        break;
+                    case 9:
+                        cellSize = 1;
+                        break;
+                    default:
+                        cellSize = 0;
+                }
+                normalized[i][j] = [
+                    (cell && cell / 10) ?? 0,
+                    cellSize,
+                ];
             }
         }
 
@@ -118,7 +136,7 @@ export class AnimalDirectionGrassNetwork {
 
         model.add(tf.layers.conv2d({
             inputShape: this.inputShape,
-            kernelSize: 5,
+            kernelSize: 3,
             filters: 4,
             strides: 1,
             activation: 'relu',
@@ -128,7 +146,7 @@ export class AnimalDirectionGrassNetwork {
         model.add(tf.layers.maxPooling2d({ poolSize: [2, 2], strides: [2, 2] }));
 
         model.add(tf.layers.conv2d({
-            kernelSize: 5,
+            kernelSize: 3,
             filters: 8,
             strides: 1,
             activation: 'relu',
@@ -181,7 +199,7 @@ export class AnimalDirectionGrassNetwork {
 
         const [trainXs, trainYs] = tf.tidy(() => {
             const sightArray = lifeFrames.map(({ sight }) => sight);
-            const sightTensor = tf.tensor3d(sightArray);
+            const sightTensor = tf.tensor4d(sightArray);
             const trueArray = lifeFrames.map(({ output }, index, array) => {
                 const k = array.length - index;
                 const actualReward = k <= 11 ? -1 : 1;
@@ -194,7 +212,7 @@ export class AnimalDirectionGrassNetwork {
             });
             const trueTensor = tf.tensor2d(trueArray);
             return [
-                sightTensor.reshape([BATCH_SIZE, ...this.inputShape]),
+                sightTensor,
                 trueTensor,
             ];
         });
@@ -227,10 +245,11 @@ export class AnimalDirectionGrassNetwork {
         if (this.lifeFrames.length >= this.previousRecord) {
 
             const stringFrames = this.lifeFrames.map(({ sight, output }) => {
+                const plainSight = sight.map((row) => row.map((cell) => cell[0] * 10));
                 const action = this.commands.find((command, index) => {
                     return output[index] === 1;
                 });
-                return `${visualEntitiesAsString(sight)}\naction: ${action}\n`;
+                return `${visualEntitiesAsString(plainSight)}\naction: ${action}\n`;
             }).join('\n===\n');
             fs.writeFileSync('./model/recordLifeFrames.json', stringFrames);
         }

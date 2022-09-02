@@ -36,7 +36,7 @@ export async function main() {
     }
 
     async function step() {
-        isGenerationView = generation % 1 === 0;
+        isGenerationView = generation % 1000 === 0;
         activeWorlds.forEach((world, index) => {
             world.tick();
 
@@ -61,13 +61,12 @@ export async function main() {
                 world.dispose();
             });
             finishedWorlds = [];
-            await timer(isGenerationView ? 3000 : 0);
         }
     }
 
     while (true) {
         await step();
-        await timer(isGenerationView ? 200 : 0);
+        await timer(isGenerationView ? 300 : 0);
     }
 }
 

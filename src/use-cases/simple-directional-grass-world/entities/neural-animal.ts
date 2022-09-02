@@ -47,7 +47,8 @@ export class NeuralAnimal extends Animal {
 
     private brainHandler(options: DirectionBrainHandlerInput): DirectionBrainCommand {
         const sight = options.owner.sight.current;
-        return this.network.predict({ sight });
+        const size = this.size.current;
+        return this.network.predict({ sight, size });
     }
 
     dispose() {
