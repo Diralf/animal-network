@@ -36,7 +36,7 @@ export async function main() {
     }
 
     async function step() {
-        isGenerationView = generation % 1 === 0;
+        isGenerationView = generation % 100 === 0;
         activeWorlds.forEach((world, index) => {
             world.tick();
 

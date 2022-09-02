@@ -182,7 +182,7 @@ export class AnimalDirectionGrassNetwork {
             case current > previous:
                 return 1;
             default:
-                return 0;
+                return 0.5;
             // default:
             //     return -1;
         }
@@ -207,6 +207,12 @@ export class AnimalDirectionGrassNetwork {
                 } else {
                     return output.map((value) => Math.abs(value - 1));
                 }
+                // return output.map((value) => {
+                //     if (value === 1) {
+                //         return Math.min(reward, Math.max(reward - (value - (0.05 * k)), 0));
+                //     }
+                //     return Math.max(1 - (0.05 * k), 0);
+                // });
             });
             const trueTensor = tf.tensor2d(trueArray);
             return [
