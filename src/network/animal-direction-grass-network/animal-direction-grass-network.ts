@@ -137,23 +137,21 @@ export class AnimalDirectionGrassNetwork {
         model.add(tf.layers.conv2d({
             inputShape: this.inputShape,
             kernelSize: 3,
-            filters: 4,
-            strides: 1,
+            filters: 8,
             activation: 'relu',
             kernelInitializer: 'varianceScaling',
         }));
 
-        model.add(tf.layers.maxPooling2d({ poolSize: [2, 2], strides: [2, 2] }));
+        model.add(tf.layers.maxPooling2d({}));
 
         model.add(tf.layers.conv2d({
             kernelSize: 3,
-            filters: 8,
-            strides: 1,
+            filters: 16,
             activation: 'relu',
             kernelInitializer: 'varianceScaling',
             padding: 'same',
         }));
-        model.add(tf.layers.maxPooling2d({ poolSize: [2, 2], strides: [2, 2] }));
+        model.add(tf.layers.maxPooling2d({}));
 
         model.add(tf.layers.flatten());
 
@@ -207,7 +205,7 @@ export class AnimalDirectionGrassNetwork {
                 if (actualReward > 0) {
                     return output.map((value) => value);
                 } else {
-                    return output.map((value) => (-value + 1) / k);
+                    return output.map((value) => Math.abs(value - 1));
                 }
             });
             const trueTensor = tf.tensor2d(trueArray);
