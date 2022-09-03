@@ -224,16 +224,20 @@ export class AnimalDirectionGrassNetwork {
 
         await this.model.fit(trainXs, trainYs, {
             batchSize: BATCH_SIZE,
-            epochs,
+            epochs: 10,
+            verbose: 0,
             callbacks: {
                 onEpochEnd: (epoch, log) => {
                     if (log && log.loss < 0) {
                         throw new Error('Loss less then 0');
                     }
-                    console.log({ loss: log?.loss, acc: log?.acc, reward, current: lifeFrames.length, averageRecord, previous: previousRecord });
+                    if (epoch === 10) {
+                        console.log({ loss: log?.loss, acc: log?.acc });
+                    }
                 },
             },
         });
+        console.log({ generation: this.generation, reward, current: lifeFrames.length, averageRecord, previous: previousRecord });
 
         trainXs.dispose();
         trainYs.dispose();

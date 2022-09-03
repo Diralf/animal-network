@@ -51,8 +51,8 @@ export async function main() {
             }
         } else {
             generation += 1;
-            console.log(`GAMEOVER`.padEnd(40, '='));
-            console.log(`Fitting ${generation}`);
+            // console.log(`GAMEOVER`.padEnd(40, '='));
+            // console.log(`Fitting ${generation}`);
             activeWorlds = [];
             for (let i = 0; i < worldsCount; i++) {
                 activeWorlds[i] = await pickOne(finishedWorlds, worldParams);
