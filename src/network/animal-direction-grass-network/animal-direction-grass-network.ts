@@ -194,7 +194,8 @@ export class AnimalDirectionGrassNetwork {
         const averageRecord = this.recordSum / this.generation;
         const reward = this.getReward(lifeFrames.length, averageRecord);
         const BATCH_SIZE = lifeFrames.length;
-        const epochs = lifeFrames.length <= averageRecord ? 1 : Math.min(100, Math.ceil((lifeFrames.length - averageRecord) / 10));
+        // const epochs = lifeFrames.length <= averageRecord ? 1 : Math.min(100, Math.ceil((lifeFrames.length - averageRecord) / 10));
+        const epochs = lifeFrames.length >= previousRecord ? 100 : 10;
 
         const [trainXs, trainYs] = tf.tidy(() => {
             const sightArray = lifeFrames.map(({ sight }) => sight);
@@ -203,17 +204,17 @@ export class AnimalDirectionGrassNetwork {
                 const k = array.length - index;
                 const actualReward = k <= 11 ? -1 : 1;
 
-                // if (actualReward > 0) {
-                //     return output.map((value) => value);
-                // } else {
-                //     return output.map((value) => Math.abs(value - 1));
-                // }
-                return output.map((value) => {
-                    if (value === 1) {
-                        return Math.min(reward, Math.max(reward - (value - (0.05 * k)), 0));
-                    }
-                    return Math.max(1 - (0.05 * k), 0);
-                });
+                if (actualReward > 0) {
+                    return output.map((value) => value);
+                } else {
+                    return output.map((value) => Math.abs(value - 1));
+                }
+                // return output.map((value) => {
+                //     if (value === 1) {
+                //         return Math.min(reward, Math.max(reward - (value - (0.05 * k)), 0));
+                //     }
+                //     return Math.max(1 - (0.05 * k), 0);
+                // });
             });
             const trueTensor = tf.tensor2d(trueArray);
             return [
@@ -221,23 +222,23 @@ export class AnimalDirectionGrassNetwork {
                 trueTensor,
             ];
         });
-
+        let lastEpoch = {};
         await this.model.fit(trainXs, trainYs, {
             batchSize: BATCH_SIZE,
-            epochs: 10,
+            epochs,
             verbose: 0,
             callbacks: {
                 onEpochEnd: (epoch, log) => {
                     if (log && log.loss < 0) {
                         throw new Error('Loss less then 0');
                     }
-                    if (epoch === 10) {
-                        console.log({ loss: log?.loss, acc: log?.acc });
+                    if (epoch === epochs - 1) {
+                        lastEpoch = { loss: log?.loss, acc: log?.acc };
                     }
                 },
             },
         });
-        console.log({ generation: this.generation, reward, current: lifeFrames.length, averageRecord, previous: previousRecord });
+        console.log({ ...lastEpoch, generation: this.generation, reward, current: lifeFrames.length, averageRecord, previous: previousRecord });
 
         trainXs.dispose();
         trainYs.dispose();
