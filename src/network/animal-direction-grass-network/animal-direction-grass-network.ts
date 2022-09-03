@@ -194,6 +194,7 @@ export class AnimalDirectionGrassNetwork {
         const averageRecord = this.recordSum / this.generation;
         const reward = this.getReward(lifeFrames.length, averageRecord);
         const BATCH_SIZE = lifeFrames.length;
+        const epochs = lifeFrames.length <= averageRecord ? 1 : Math.min(100, Math.ceil((lifeFrames.length - averageRecord) / 10));
 
         const [trainXs, trainYs] = tf.tidy(() => {
             const sightArray = lifeFrames.map(({ sight }) => sight);
@@ -223,7 +224,7 @@ export class AnimalDirectionGrassNetwork {
 
         await this.model.fit(trainXs, trainYs, {
             batchSize: BATCH_SIZE,
-            epochs: 1,
+            epochs,
             callbacks: {
                 onEpochEnd: (epoch, log) => {
                     if (log && log.loss < 0) {
