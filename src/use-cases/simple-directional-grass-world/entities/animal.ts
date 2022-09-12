@@ -38,6 +38,7 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
     public collision: CollisionProperty;
     public score = 0;
     public fitness = 0;
+    public taste = 0;
 
     constructor({ position, sightRange = [5, 2], size = 10, metabolizeSpeed = 1 }: AnimalOptions) {
         this.position = new PointProperty(position);
@@ -74,12 +75,16 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
             }
             return false;
         }) as Grass[];
+        if (grass.length > 0) {
+            this.taste = 1;
+        }
         const totalScore = grass.reduce((acc, entity) => acc + entity.size.current, 0);
         this.size.current += totalScore;
         world.removeEntity(...grass);
     }
 
     public tick(world: World<Animal>, time: number): void {
+        this.taste = 0;
         this.score += 1;
         this.sight.tick(world);
         this.collision.tick(world);

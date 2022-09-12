@@ -7,11 +7,12 @@ import { DirectionTurn } from '../../domain/property/direction/direction-propert
 import { NumberProperty } from '../../domain/property/number/number-property';
 import { visualEntitiesAsString } from '../../domain/property/utils/visual-entities-as-string';
 
-export type AnimalGrassNetworkPredictInput = DirectionSightable & { size: NumberProperty };
+export type AnimalGrassNetworkPredictInput = DirectionSightable & { size: NumberProperty, taste: number };
 
 interface LifeFrame {
     sight: number[][][];
     output: number[];
+    taste: number;
 }
 
 export interface AnimalGrassNetworkFitInput {
@@ -65,7 +66,7 @@ export class AnimalDirectionGrassNetwork {
         }
     }
 
-    public predict({ sight, size }: AnimalGrassNetworkPredictInput): DirectionBrainCommand {
+    public predict({ sight, size, taste }: AnimalGrassNetworkPredictInput): DirectionBrainCommand {
         return tf.tidy(() => {
             const normalizedSight = this.getNormalizedSight(sight.current, size.current);
             const xs = tf.tensor4d([normalizedSight]);
@@ -79,6 +80,7 @@ export class AnimalDirectionGrassNetwork {
             this.lifeFrames.push({
                 sight: normalizedSight,
                 output,
+                taste,
             });
 
             return command;
@@ -200,22 +202,25 @@ export class AnimalDirectionGrassNetwork {
         const [trainXs, trainYs] = tf.tidy(() => {
             const sightArray = lifeFrames.map(({ sight }) => sight);
             const sightTensor = tf.tensor4d(sightArray);
-            const trueArray = lifeFrames.map(({ output }, index, array) => {
-                const k = array.length - index;
-                const actualReward = k <= 11 ? -1 : 1;
-
-                if (actualReward > 0) {
-                    return output.map((value) => value);
-                } else {
-                    return output.map((value) => Math.abs(value - 1));
+            let lastTasteIndex = 0;
+            const trueArray = lifeFrames.reverse().map(({ output, taste }, index) => {
+                if (taste > 0) {
+                    lastTasteIndex = index;
                 }
-                // return output.map((value) => {
-                //     if (value === 1) {
-                //         return Math.min(reward, Math.max(reward - (value - (0.05 * k)), 0));
-                //     }
-                //     return Math.max(1 - (0.05 * k), 0);
-                // });
+
+                return output.map((value) => {
+                    if (index < 10) {
+                        return Math.abs(value - 1);
+                    }
+
+                    if (lastTasteIndex > 0 && index - lastTasteIndex < 10) {
+                        return value * (1 - (0.1 * (index - lastTasteIndex)));
+                    }
+
+                    return value * 0.1;
+                });
             });
+            console.log(trueArray);
             const trueTensor = tf.tensor2d(trueArray);
             return [
                 sightTensor,
