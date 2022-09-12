@@ -2,13 +2,12 @@ import * as tf from '@tensorflow/tfjs-node';
 import * as fs from 'fs';
 import { DirectionBrainCommand, BrainCommandsOther } from '../../domain/property/direction-brain/direction-brain-property';
 import { DirectionMovementValue } from '../../domain/property/direction-movement/direction-movement-property';
+import { DirectionSightable } from '../../domain/property/direction-sight/direction-sightable';
 import { DirectionTurn } from '../../domain/property/direction/direction-property';
+import { NumberProperty } from '../../domain/property/number/number-property';
 import { visualEntitiesAsString } from '../../domain/property/utils/visual-entities-as-string';
 
-export interface AnimalGrassNetworkPredictInput {
-    sight: number[][];
-    size: number;
-}
+export type AnimalGrassNetworkPredictInput = DirectionSightable & { size: NumberProperty };
 
 interface LifeFrame {
     sight: number[][][];
@@ -68,7 +67,7 @@ export class AnimalDirectionGrassNetwork {
 
     public predict({ sight, size }: AnimalGrassNetworkPredictInput): DirectionBrainCommand {
         return tf.tidy(() => {
-            const normalizedSight = this.getNormalizedSight(sight, size);
+            const normalizedSight = this.getNormalizedSight(sight.current, size.current);
             const xs = tf.tensor4d([normalizedSight]);
             const ys: tf.Tensor<tf.Rank> = this.model.predict(xs) as tf.Tensor<tf.Rank>;
             const outputs: Int32Array = ys.dataSync() as Int32Array;

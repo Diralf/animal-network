@@ -1,7 +1,6 @@
 import {
     DirectionBrainProperty,
     DirectionBrainCommand,
-    DirectionBrainHandlerInput,
 } from '../../../domain/property/direction-brain/direction-brain-property';
 import { World } from '../../../domain/world/world';
 import { AnimalDirectionGrassNetwork } from '../../../network/animal-direction-grass-network/animal-direction-grass-network';
@@ -17,7 +16,7 @@ export class NeuralAnimal extends Animal {
 
     constructor(animalOptions: NeuralAnimalOptions) {
         super(animalOptions);
-        this.brain = new DirectionBrainProperty((options) => this.brainHandler(options));
+        this.brain = new DirectionBrainProperty(() => this.brainHandler());
 
         this.brain.owner.ref = this;
 
@@ -45,10 +44,8 @@ export class NeuralAnimal extends Animal {
         this.brain.tick(world);
     }
 
-    private brainHandler(options: DirectionBrainHandlerInput): DirectionBrainCommand {
-        const sight = options.owner.sight.current;
-        const size = this.size.current;
-        return this.network.predict({ sight, size });
+    private brainHandler(): DirectionBrainCommand {
+        return this.network.predict(this);
     }
 
     dispose() {
