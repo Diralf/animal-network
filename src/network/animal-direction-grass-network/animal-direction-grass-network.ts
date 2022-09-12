@@ -195,7 +195,8 @@ export class AnimalDirectionGrassNetwork {
         const reward = this.getReward(lifeFrames.length, averageRecord);
         const BATCH_SIZE = lifeFrames.length;
         // const epochs = lifeFrames.length <= averageRecord ? 1 : Math.min(100, Math.ceil((lifeFrames.length - averageRecord) / 10));
-        const epochs = lifeFrames.length >= previousRecord ? 100 : 10;
+        // const epochs = lifeFrames.length >= previousRecord ? 100 : 10;
+        const epochs = 1;
 
         const [trainXs, trainYs] = tf.tidy(() => {
             const sightArray = lifeFrames.map(({ sight }) => sight);
