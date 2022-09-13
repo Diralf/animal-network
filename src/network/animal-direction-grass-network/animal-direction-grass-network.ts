@@ -211,12 +211,20 @@ export class AnimalDirectionGrassNetwork {
                     }
 
                     return output.map((value) => {
+                        if (index === 0) {
+                            return Math.abs(value - 1);
+                        }
                         if (index < 10) {
-                            return Math.abs(value - 1) * (1 - 0.1 * index);
+                            const reversedValue = Math.abs(value - 1);
+                            const signOfIncrement = reversedValue - 0.1;
+                            return reversedValue - (0.1 * (index - 1) * signOfIncrement);
                         }
 
-                        if (lastTasteIndex > 0 && index - lastTasteIndex < 10) {
-                            return value * (1 - (0.1 * (index - lastTasteIndex)));
+                        if (lastTasteIndex > 0) {
+                            const tasteIndexAgo = index - lastTasteIndex;
+                            if (tasteIndexAgo < 9) {
+                                return value * (1 - (0.1 * tasteIndexAgo));
+                            }
                         }
 
                         return value * 0.1;
