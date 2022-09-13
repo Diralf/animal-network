@@ -1,6 +1,6 @@
 import { CollisionOptions } from '../../../domain/property/collision/collision-options';
 import { CollisionProperty } from '../../../domain/property/collision/collision-property';
-import { DirectionMovementProperty } from '../../../domain/property/direction-movement/direction-movement-property';
+import { DirectionMovementProperty, DirectionMovementValue } from '../../../domain/property/direction-movement/direction-movement-property';
 import { DirectionSightProperty } from '../../../domain/property/direction-sight/direction-sight-property';
 import { DirectionSightable } from '../../../domain/property/direction-sight/direction-sightable';
 import { DirectionProperty } from '../../../domain/property/direction/direction-property';
@@ -39,6 +39,7 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
     public score = 0;
     public fitness = 0;
     public taste = 0;
+    public energy: NumberProperty = new NumberProperty({ min: 0, max: 100, defaultValue: 100 });
 
     constructor({ position, sightRange = [5, 2], size = 10, metabolizeSpeed = 1 }: AnimalOptions) {
         this.position = new PointProperty(position);
@@ -56,7 +57,26 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
         this.collision.owner.ref = this;
         this.sight.owner.ref = this;
         this.movement.owner.ref = this;
+
+        this.movement.publisher.subscribe(this.handleMovement);
     }
+
+    private handleMovement = (to: DirectionMovementValue) => {
+        let spendEnergy = 0;
+        switch (to) {
+            case DirectionMovementValue.FORWARD:
+                spendEnergy = 5;
+                break;
+            case DirectionMovementValue.BACK:
+                spendEnergy = 2;
+                break;
+        }
+        try {
+            this.energy.current -= spendEnergy;
+        } catch (e) {
+            this.energy.current = 0;
+        }
+    };
 
     // TODO move to separate property
     private handleCollision({ other, world }: CollisionOptions): void {
@@ -92,9 +112,14 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
         if (this.size.current < 0) {
             world.removeEntity(this);
         }
+        this.movement.active = this.energy.current > 0;
+        try {
+            this.energy.current += 1;
+        } catch (e) {}
     }
 
     onDestroy(world: World<Animal>): void {
         world.savedEntityList.add(this);
+        this.movement.publisher.unsubscribe(this.handleMovement);
     }
 }

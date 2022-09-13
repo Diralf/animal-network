@@ -1,20 +1,25 @@
+import { Publisher } from '../property/utils/observer';
 import { World } from '../world/world';
 import { OnTick } from './on-tick';
 
 export class TimeThread {
-    private listeners: OnTick[] = [];
+    private publisher: Publisher<[world: World, time: number]> = new Publisher();
+
+    private getTicks(listeners: OnTick[]) {
+        return listeners.map((listener) => {
+            return listener.tick.bind(listener);
+        });
+    }
 
     public addListener(...listeners: OnTick[]): void {
-        this.listeners.push(...listeners);
+        this.publisher.subscribe(...this.getTicks(listeners));
     }
 
     public removeListener(...listeners: OnTick[]): void {
-        this.listeners = this.listeners.filter((listener) => !listeners.includes(listener));
+        this.publisher.unsubscribe(...this.getTicks(listeners));
     }
 
     public tick(world: World, time: number): void {
-        this.listeners.forEach((listener) => {
-            listener.tick(world, time);
-        });
+        this.publisher.notify(world, time);
     }
 }

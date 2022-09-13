@@ -10,7 +10,7 @@ function displayWorld(simpleWorld: SimpleGrassWorld) {
 
     console.log(tf.memory());
     console.log(`ID: ${simpleWorld.world.id} `.padEnd(40, '-'));
-    console.log(`size: ${sizes}`, `time: ${time}`, `taste: ${animals[0].taste}`);
+    console.log(`size: ${sizes}`, `time: ${time}`, `taste: ${animals[0].taste}`, `energy: ${animals[0].energy.current}`);
     console.log(animals[0].sight.asString());
     console.log(simpleWorld.world.print(simpleWorld.world.getEntityList()), ' ');
 }
