@@ -154,7 +154,7 @@ export class AnimalDirectionGrassNetwork {
 
         model.add(tf.layers.conv2d({
             inputShape: this.inputShape,
-            kernelSize: 3,
+            kernelSize: 5,
             filters: 8,
             activation: 'relu',
             kernelInitializer: 'varianceScaling',
@@ -163,7 +163,7 @@ export class AnimalDirectionGrassNetwork {
         model.add(tf.layers.maxPooling2d({}));
 
         model.add(tf.layers.conv2d({
-            kernelSize: 3,
+            kernelSize: 5,
             filters: 16,
             activation: 'relu',
             kernelInitializer: 'varianceScaling',
@@ -233,21 +233,17 @@ export class AnimalDirectionGrassNetwork {
                         }
                         if (index < 10) {
                             const reversedValue = Math.abs(value - 1);
-                            const signOfIncrement = reversedValue - 0.1;
-                            return reversedValue - (0.1 * (index - 1) * signOfIncrement);
+                            return reversedValue - ((index - 1) / 10);
                         }
 
                         if (lastTasteIndex > 0) {
                             const tasteIndexAgo = index - lastTasteIndex;
-                            if (tasteIndexAgo < 5) {
-                                return value;
-                            }
-                            if (tasteIndexAgo < 10) {
-                                return value * (1 - (0.2 * (tasteIndexAgo - 5)));
+                            if (tasteIndexAgo < 20) {
+                                return value * (1 - (tasteIndexAgo / 20));
                             }
                         }
 
-                        return value * 0.1;
+                        return 0;
                     });
                 })
                 .reverse();

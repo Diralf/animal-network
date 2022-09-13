@@ -66,7 +66,7 @@ export async function main() {
 
     while (true) {
         await step();
-        await timer(isGenerationView ? 300 : 0);
+        await timer(isGenerationView ? 200 : 0);
     }
 }
 
