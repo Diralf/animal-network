@@ -8,7 +8,7 @@ import { NumberProperty } from '../../domain/property/number/number-property';
 import { memo } from '../../domain/property/utils/memo';
 import { visualEntitiesAsString } from '../../domain/property/utils/visual-entities-as-string';
 
-export type AnimalGrassNetworkPredictInput = DirectionSightable & { size: NumberProperty, taste: number };
+export type AnimalGrassNetworkPredictInput = DirectionSightable & { size: NumberProperty, taste: number, energy: NumberProperty };
 
 interface LifeFrame {
     sight: number[][][];
@@ -71,9 +71,9 @@ export class AnimalDirectionGrassNetwork {
         }
     }
 
-    public predict({ sight, size, taste }: AnimalGrassNetworkPredictInput): DirectionBrainCommand {
+    public predict({ sight, size, taste, energy }: AnimalGrassNetworkPredictInput): DirectionBrainCommand {
         return tf.tidy(() => {
-            const normalizedSight = this.getNormalizedSight(sight.current, size.current);
+            const normalizedSight = this.getNormalizedSight(sight.current, size.current, taste, energy.current);
 
             const { command, output } = this.memoPredict.call(normalizedSight);
 
@@ -104,32 +104,49 @@ export class AnimalDirectionGrassNetwork {
         };
     }
 
-    private getNormalizedSight(sight: number[][], size: number): number[][][] {
+    private getNormalizedSight(sight: number[][], size: number, taste: number, energy: number): number[][][] {
         const normalized: number[][][] = [];
         const shape = [this.inputShape[0], this.inputShape[1]];
+        const parametersColumn = 7;
 
         for (let i = 0; i < shape[0]; i++) {
             normalized[i] = [];
             for (let j = 0; j < shape[1]; j++) {
-                const cell = sight[i] && sight[i][j];
-                let cellSize;
-                switch (cell) {
-                    case 6:
-                        cellSize = Math.min(Math.max(size, 0), 100) / 100;
-                        break;
-                    case 3:
-                        cellSize = 0.5;
-                        break;
-                    case 9:
-                        cellSize = 1;
-                        break;
-                    default:
-                        cellSize = 0;
+                if (j === parametersColumn) {
+                    let value = 0;
+                    switch (i) {
+                        case 0:
+                            value = taste;
+                            break;
+                        case 1:
+                            value = energy / 100;
+                            break;
+                    }
+                    normalized[i][j] = [
+                        value,
+                        0,
+                    ];
+                } else {
+                    const cell = sight[i] && sight[i][j];
+                    let cellSize;
+                    switch (cell) {
+                        case 6:
+                            cellSize = Math.min(Math.max(size, 0), 100) / 100;
+                            break;
+                        case 3:
+                            cellSize = 0.5;
+                            break;
+                        case 9:
+                            cellSize = 1;
+                            break;
+                        default:
+                            cellSize = 0;
+                    }
+                    normalized[i][j] = [
+                        (cell && cell / 10) ?? 0,
+                        cellSize,
+                    ];
                 }
-                normalized[i][j] = [
-                    (cell && cell / 10) ?? 0,
-                    cellSize,
-                ];
             }
         }
 
