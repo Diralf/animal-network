@@ -203,24 +203,26 @@ export class AnimalDirectionGrassNetwork {
             const sightArray = lifeFrames.map(({ sight }) => sight);
             const sightTensor = tf.tensor4d(sightArray);
             let lastTasteIndex = 0;
-            const trueArray = lifeFrames.reverse().map(({ output, taste }, index) => {
-                if (taste > 0) {
-                    lastTasteIndex = index;
-                }
-
-                return output.map((value) => {
-                    if (index < 10) {
-                        return Math.abs(value - 1);
+            const trueArray = lifeFrames
+                .slice().reverse()
+                .map(({ output, taste }, index) => {
+                    if (taste > 0) {
+                        lastTasteIndex = index;
                     }
 
-                    if (lastTasteIndex > 0 && index - lastTasteIndex < 10) {
-                        return value * (1 - (0.1 * (index - lastTasteIndex)));
-                    }
+                    return output.map((value) => {
+                        if (index < 10) {
+                            return Math.abs(value - 1) * (1 - 0.1 * index);
+                        }
 
-                    return value * 0.1;
-                });
-            });
-            console.log(trueArray);
+                        if (lastTasteIndex > 0 && index - lastTasteIndex < 10) {
+                            return value * (1 - (0.1 * (index - lastTasteIndex)));
+                        }
+
+                        return value * 0.1;
+                    });
+                })
+                .reverse();
             const trueTensor = tf.tensor2d(trueArray);
             return [
                 sightTensor,
