@@ -65,17 +65,13 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
         let spendEnergy = 0;
         switch (to) {
             case DirectionMovementValue.FORWARD:
-                spendEnergy = 5;
+                spendEnergy = 10;
                 break;
             case DirectionMovementValue.BACK:
-                spendEnergy = 2;
+                spendEnergy = 5;
                 break;
         }
-        try {
-            this.energy.current -= spendEnergy;
-        } catch (e) {
-            this.energy.current = 0;
-        }
+        this.addEnergy(-spendEnergy, 0);
     };
 
     // TODO move to separate property
@@ -97,6 +93,7 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
         }) as Grass[];
         if (grass.length > 0) {
             this.taste = 1;
+            this.addEnergy(10);
         }
         const totalScore = grass.reduce((acc, entity) => acc + entity.size.current, 0);
         this.size.current += totalScore;
@@ -112,10 +109,18 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
         if (this.size.current < 0) {
             world.removeEntity(this);
         }
-        this.movement.active = this.energy.current > 0;
+        this.movement.active = this.energy.current > 10;
+        this.addEnergy(1);
+    }
+
+    private addEnergy(energy: number, onFailed?: number) {
         try {
-            this.energy.current += 1;
-        } catch (e) {}
+            this.energy.current += energy;
+        } catch (e) {
+            if (onFailed) {
+                this.energy.current = onFailed;
+            }
+        }
     }
 
     onDestroy(world: World<Animal>): void {
