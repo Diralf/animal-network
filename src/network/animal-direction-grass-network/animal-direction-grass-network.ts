@@ -5,6 +5,7 @@ import { DirectionMovementValue } from '../../domain/property/direction-movement
 import { DirectionSightable } from '../../domain/property/direction-sight/direction-sightable';
 import { DirectionTurn } from '../../domain/property/direction/direction-property';
 import { NumberProperty } from '../../domain/property/number/number-property';
+import { memo } from '../../domain/property/utils/memo';
 import { visualEntitiesAsString } from '../../domain/property/utils/visual-entities-as-string';
 
 export type AnimalGrassNetworkPredictInput = DirectionSightable & { size: NumberProperty, taste: number };
@@ -42,6 +43,10 @@ export class AnimalDirectionGrassNetwork {
     private generation = 0;
     private recordSum = 0;
 
+    private memoPredict = memo((normalizedSight: number[][][]) => {
+        return this.predictByNetwork(normalizedSight);
+    });
+
     constructor({ model, previousRecord, generation, recordSum }: Partial<StorageModel> = {}) {
         this.model = model ?? this.createModel();
         this.previousRecord = previousRecord ?? 0;
@@ -69,13 +74,8 @@ export class AnimalDirectionGrassNetwork {
     public predict({ sight, size, taste }: AnimalGrassNetworkPredictInput): DirectionBrainCommand {
         return tf.tidy(() => {
             const normalizedSight = this.getNormalizedSight(sight.current, size.current);
-            const xs = tf.tensor4d([normalizedSight]);
-            const ys: tf.Tensor<tf.Rank> = this.model.predict(xs) as tf.Tensor<tf.Rank>;
-            const outputs: Int32Array = ys.dataSync() as Int32Array;
 
-            const { command, index } = this.getMaxCommand(outputs);
-            const output = new Array(this.commands.length).fill(0);
-            output[index] = 1;
+            const { command, output } = this.memoPredict.call(normalizedSight);
 
             this.lifeFrames.push({
                 sight: normalizedSight,
@@ -85,6 +85,23 @@ export class AnimalDirectionGrassNetwork {
 
             return command;
         });
+    }
+
+    private predictByNetwork(normalizedSight: number[][][]): { output: number[]; command: DirectionBrainCommand } {
+        const xs = tf.tensor4d([normalizedSight]);
+        const ys: tf.Tensor<tf.Rank> = this.model.predict(xs) as tf.Tensor<tf.Rank>;
+        const outputs: Int32Array = ys.dataSync() as Int32Array;
+
+        const {
+            command,
+            index,
+        } = this.getMaxCommand(outputs);
+        const output = new Array(this.commands.length).fill(0);
+        output[index] = 1;
+        return {
+            command,
+            output,
+        };
     }
 
     private getNormalizedSight(sight: number[][], size: number): number[][][] {
@@ -98,7 +115,7 @@ export class AnimalDirectionGrassNetwork {
                 let cellSize;
                 switch (cell) {
                     case 6:
-                        cellSize = Math.min(Math.max(size, 0), 10) / 10;
+                        cellSize = Math.min(Math.max(size, 0), 100) / 100;
                         break;
                     case 3:
                         cellSize = 0.5;
@@ -222,8 +239,11 @@ export class AnimalDirectionGrassNetwork {
 
                         if (lastTasteIndex > 0) {
                             const tasteIndexAgo = index - lastTasteIndex;
-                            if (tasteIndexAgo < 9) {
-                                return value * (1 - (0.1 * tasteIndexAgo));
+                            if (tasteIndexAgo < 5) {
+                                return value;
+                            }
+                            if (tasteIndexAgo < 10) {
+                                return value * (1 - (0.2 * (tasteIndexAgo - 5)));
                             }
                         }
 
