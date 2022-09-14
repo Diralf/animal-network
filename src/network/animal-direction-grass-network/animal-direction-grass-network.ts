@@ -14,6 +14,7 @@ interface LifeFrame {
     sight: number[][][];
     output: number[];
     taste: number;
+    energy: number;
 }
 
 export interface AnimalGrassNetworkFitInput {
@@ -81,6 +82,7 @@ export class AnimalDirectionGrassNetwork {
                 sight: normalizedSight,
                 output,
                 taste,
+                energy: energy.current,
             });
 
             return command;
@@ -237,11 +239,15 @@ export class AnimalDirectionGrassNetwork {
             const sightArray = lifeFrames.map(({ sight }) => sight);
             const sightTensor = tf.tensor4d(sightArray);
             let lastTasteIndex = 0;
+            let lastLowEnergyIndex = 0;
             const trueArray = lifeFrames
                 .slice().reverse()
-                .map(({ output, taste }, index) => {
+                .map(({ output, taste, energy }, index) => {
                     if (taste > 0) {
                         lastTasteIndex = index;
+                    }
+                    if (energy <= 10) {
+                        lastLowEnergyIndex = index;
                     }
 
                     return output.map((value) => {
@@ -253,6 +259,14 @@ export class AnimalDirectionGrassNetwork {
                             return reversedValue - ((index - 1) / 10);
                         }
 
+                        if (lastLowEnergyIndex > 0) {
+                            const lowEnergyAgo = index - lastLowEnergyIndex;
+                            if (lowEnergyAgo > 0 && lowEnergyAgo < 6) {
+                                const reversedValue = Math.abs(value - 1);
+                                return reversedValue - ((lowEnergyAgo - 1) / 5);
+                            }
+                        }
+
                         if (lastTasteIndex > 0) {
                             const tasteIndexAgo = index - lastTasteIndex;
                             if (tasteIndexAgo < 20) {
@@ -260,7 +274,7 @@ export class AnimalDirectionGrassNetwork {
                             }
                         }
 
-                        return 0;
+                        return value * 0.1;
                     });
                 })
                 .reverse();
