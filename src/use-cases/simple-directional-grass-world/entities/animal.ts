@@ -65,7 +65,7 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
         let spendEnergy = 0;
         switch (to) {
             case DirectionMovementValue.FORWARD:
-                spendEnergy = 10;
+                spendEnergy = 5;
                 break;
             case DirectionMovementValue.BACK:
                 spendEnergy = 5;

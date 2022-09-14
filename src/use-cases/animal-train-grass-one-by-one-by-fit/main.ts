@@ -1,5 +1,6 @@
 import * as tf from '@tensorflow/tfjs-node';
 import { Animal } from '../simple-directional-grass-world/entities/animal';
+import { NeuralAnimal } from '../simple-directional-grass-world/entities/neural-animal';
 import { SimpleGrassWorld } from '../simple-directional-grass-world/simple-grass-world';
 import { InstanceTypes } from '../simple-directional-grass-world/types/instance-types';
 
@@ -11,6 +12,7 @@ function displayWorld(simpleWorld: SimpleGrassWorld) {
     console.log(tf.memory());
     console.log(`ID: ${simpleWorld.world.id} `.padEnd(40, '-'));
     console.log(`size: ${sizes}`, `time: ${time}`, `taste: ${animals[0].taste}`, `energy: ${animals[0].energy.current}`);
+    console.log((animals[0] as NeuralAnimal).brain.lastCommand);
     console.log(animals[0].sight.asString());
     console.log(simpleWorld.world.print(simpleWorld.world.getEntityList()), ' ');
 }

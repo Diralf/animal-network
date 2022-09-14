@@ -24,6 +24,7 @@ export type DirectionBrainHandler = (input: DirectionBrainHandlerInput) => Direc
 
 export class DirectionBrainProperty implements PropertyWithOwner<DirectionBrainOwner>, OnTick {
     public owner = new PropertyOwner<DirectionBrainOwner>();
+    public lastCommand: DirectionBrainCommand | null = null;
 
     constructor(public handler: DirectionBrainHandler) {
     }
@@ -43,6 +44,7 @@ export class DirectionBrainProperty implements PropertyWithOwner<DirectionBrainO
         if (nextStep in DirectionTurn) {
             this.owner.ref.direction.turn(nextStep as DirectionTurn);
         }
+        this.lastCommand = nextStep;
     }
 
     public tick(world: World): void {
