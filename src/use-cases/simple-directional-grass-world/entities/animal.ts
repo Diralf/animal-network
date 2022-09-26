@@ -1,3 +1,4 @@
+import { ComponentsOwner } from '../../../domain/components/components-owner/components-owner';
 import { CollisionOptions } from '../../../domain/property/collision/collision-options';
 import { CollisionProperty } from '../../../domain/property/collision/collision-property';
 import { DirectionMovementProperty, DirectionMovementValue } from '../../../domain/property/direction-movement/direction-movement-property';
@@ -26,37 +27,35 @@ export interface AnimalOptions {
     metabolizeSpeed?: number;
 }
 
-export class Animal implements Positionable, Taggable, Directional, DirectionSightable, Visualable, OnTick, OnDestroy {
+export class Animal extends ComponentsOwner<Animal> implements Positionable, Taggable, Directional, DirectionSightable, Visualable, OnTick, OnDestroy {
     public readonly tags = [InstanceTypes.ANIMAL];
     public readonly visual = 6;
     public position: PointProperty;
     public size: NumberProperty = new NumberProperty();
     public metabolizeSpeed;
     public direction: DirectionProperty;
-    public sight: DirectionSightProperty;
-    public movement: DirectionMovementProperty;
-    public collision: CollisionProperty;
+    public sight: DirectionSightProperty = this.createComponent(this, 'sight', DirectionSightProperty);
+    public movement: DirectionMovementProperty = this.createComponent(this, 'movement', DirectionMovementProperty);
+    public collision: CollisionProperty = this.createComponent(this, 'collision', CollisionProperty);
     public score = 0;
     public fitness = 0;
     public taste = 0;
     public energy: NumberProperty = new NumberProperty({ min: 0, max: 100, defaultValue: 100 });
 
     constructor({ position, sightRange = [5, 2], size = 10, metabolizeSpeed = 1 }: AnimalOptions) {
+        super({
+            sight: {
+                range: sightRange,
+            },
+            collision: (options) => {
+                this.handleCollision(options);
+            },
+        });
+
         this.position = new PointProperty(position);
         this.size.current = size;
         this.metabolizeSpeed = metabolizeSpeed;
-        this.collision = new CollisionProperty((options) => {
-            this.handleCollision(options);
-        });
         this.direction = new DirectionProperty();
-        this.sight = new DirectionSightProperty({
-            range: sightRange,
-        });
-        this.movement = new DirectionMovementProperty();
-
-        this.collision.owner.ref = this;
-        this.sight.owner.ref = this;
-        this.movement.owner.ref = this;
 
         this.movement.publisher.subscribe(this.handleMovement);
     }
@@ -101,8 +100,7 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
     }
 
     public tick(world: World<Animal>, time: number): void {
-        this.sight.tick(world);
-        this.collision.tick(world);
+        super.tick(world, time);
         this.taste = 0;
         this.score += 1;
         this.size.current -= this.metabolizeSpeed;

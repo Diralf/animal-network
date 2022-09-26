@@ -1,6 +1,5 @@
+import { Component } from '../../components/component/component';
 import { Directional } from '../direction/directional';
-import { PropertyOwner } from '../owner/property-owner';
-import { PropertyWithOwner } from '../owner/property-with-owner';
 import { Positionable } from '../point/positionable';
 import { Publisher } from '../utils/observer';
 
@@ -11,8 +10,7 @@ export enum DirectionMovementValue {
 
 type Owner = Directional & Positionable;
 
-export class DirectionMovementProperty implements PropertyWithOwner<Owner> {
-    public owner = new PropertyOwner<Owner>();
+export class DirectionMovementProperty extends Component<void, Owner> {
     public publisher = new Publisher<[DirectionMovementValue]>();
     public active = true;
 

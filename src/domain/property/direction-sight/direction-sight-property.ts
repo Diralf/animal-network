@@ -1,9 +1,8 @@
+import { Component } from '../../components/component/component';
 import { EntityList } from '../../property-container-list/entity-list';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 import { Directional } from '../direction/directional';
-import { PropertyOwner } from '../owner/property-owner';
-import { PropertyWithOwner } from '../owner/property-with-owner';
 import { Positionable } from '../point/positionable';
 import { RawPoint } from '../point/raw-point';
 import { Visualable } from '../sight/visualable';
@@ -13,12 +12,16 @@ import { visualEntitiesAsString } from '../utils/visual-entities-as-string';
 
 type Owner = Positionable & Visualable & Directional;
 
-export class DirectionSightProperty implements PropertyWithOwner<Owner>, OnTick {
-    public owner = new PropertyOwner<Owner>();
+interface Options {
+    range: [number, number];
+}
+
+export class DirectionSightProperty extends Component<Options, Owner> implements OnTick {
     private readonly _range: [number, number];
     public current: number[][] = [];
 
-    constructor(options: { range: [number, number] }) {
+    constructor(options: Options) {
+        super(options);
         this._range = options.range;
     }
 

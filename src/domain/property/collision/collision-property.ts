@@ -1,20 +1,14 @@
+import { Component } from '../../components/component/component';
 import { EntityList } from '../../property-container-list/entity-list';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
-import { PropertyOwner } from '../owner/property-owner';
-import { PropertyWithOwner } from '../owner/property-with-owner';
 import { Positionable } from '../point/positionable';
 import { positionableGuard } from '../point/positionable.guard';
 import { CollisionOptions } from './collision-options';
 
 type Handler = (options: CollisionOptions) => void;
 
-export class CollisionProperty implements OnTick, PropertyWithOwner<Positionable> {
-    public owner = new PropertyOwner<Positionable>();
-
-    constructor(private handler: Handler) {
-    }
-
+export class CollisionProperty extends Component<Handler, Positionable> implements OnTick {
     public check<Entity extends Positionable>(list: EntityList<Entity | Positionable>): Entity[] {
         const ownPosition = this.owner.ref.position.current;
         const entitiesWithPositions = list.findWithType<Positionable>(
@@ -27,7 +21,7 @@ export class CollisionProperty implements OnTick, PropertyWithOwner<Positionable
 
     public collide(world: World<Positionable>): void {
         const result = this.check(world.getEntityList());
-        this.handler({ other: result, world });
+        this.options({ other: result, world });
     }
 
     public tick(world: World<Positionable>): void {
