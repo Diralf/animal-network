@@ -1,5 +1,3 @@
-import { Actor } from '../../../domain/decorators/Actor';
-import { Component } from '../../../domain/decorators/Component';
 import { CollisionOptions } from '../../../domain/property/collision/collision-options';
 import { CollisionProperty } from '../../../domain/property/collision/collision-property';
 import { DirectionMovementProperty, DirectionMovementValue } from '../../../domain/property/direction-movement/direction-movement-property';
@@ -28,7 +26,6 @@ export interface AnimalOptions {
     metabolizeSpeed?: number;
 }
 
-@Actor()
 export class Animal implements Positionable, Taggable, Directional, DirectionSightable, Visualable, OnTick, OnDestroy {
     public readonly tags = [InstanceTypes.ANIMAL];
     public readonly visual = 6;
@@ -36,9 +33,9 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
     public size: NumberProperty = new NumberProperty();
     public metabolizeSpeed;
     public direction: DirectionProperty;
-    @Component() public sight: DirectionSightProperty;
-    @Component() public movement: DirectionMovementProperty;
-    @Component() public collision: CollisionProperty;
+    public sight: DirectionSightProperty;
+    public movement: DirectionMovementProperty;
+    public collision: CollisionProperty;
     public score = 0;
     public fitness = 0;
     public taste = 0;
@@ -57,8 +54,9 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
         });
         this.movement = new DirectionMovementProperty();
 
-        // @ts-ignore
-        this.componentsInit();
+        this.collision.owner.ref = this;
+        this.sight.owner.ref = this;
+        this.movement.owner.ref = this;
 
         this.movement.publisher.subscribe(this.handleMovement);
     }
@@ -103,8 +101,8 @@ export class Animal implements Positionable, Taggable, Directional, DirectionSig
     }
 
     public tick(world: World<Animal>, time: number): void {
-        // @ts-ignore
-        this.componentsTick(world, time);
+        this.sight.tick(world);
+        this.collision.tick(world);
         this.taste = 0;
         this.score += 1;
         this.size.current -= this.metabolizeSpeed;
