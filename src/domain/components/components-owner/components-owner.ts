@@ -22,6 +22,19 @@ type ComponentsOptions<Owner extends Record<keyof Owner, unknown>> = {
     [Key in ComponentsKeysWithOptions<Owner>]: Owner[Key] extends UnknownComponent ? Owner[Key]['options'] : never;
 };
 
+interface InitialComponentProps<ComponentName, ComponentConstructorType> {
+    name: ComponentName,
+    class: ComponentConstructorType,
+}
+
+interface StaticComponentProps<StaticOptions> {
+    staticOptions: StaticOptions;
+}
+
+type ComponentProps<ComponentName, ComponentConstructorType, StaticOptions> = StaticOptions extends void
+    ? InitialComponentProps<ComponentName, ComponentConstructorType>
+    : InitialComponentProps<ComponentName, ComponentConstructorType> & StaticComponentProps<StaticOptions>;
+
 export class ComponentsOwner<Owner extends Record<keyof Owner, unknown>> implements OnTick {
     private components: UnknownComponent[] = [];
 
@@ -37,12 +50,11 @@ export class ComponentsOwner<Owner extends Record<keyof Owner, unknown>> impleme
         ComponentConstructorType extends ClassType<ConstructorArgs, StaticOptions, ComponentType>,
     >(
         actualOwner: ComponentType['owner']['ref'],
-        componentName: ComponentName,
-        ComponentConstructor: ComponentConstructorType,
-        staticOptions: StaticOptions,
+        props: ComponentProps<ComponentName, ComponentConstructorType, StaticOptions>,
     ): ComponentType {
+        const { name: componentName, class: ComponentConstructor, staticOptions } = props;
         const componentInitOptions = (this.initOptions as Record<keyof Components, ConstructorArgs>)[componentName];
-        const component = new ComponentConstructor(componentInitOptions, staticOptions);
+        const component = new ComponentConstructor(componentInitOptions, staticOptions as StaticOptions);
 
         if (component.owner) {
             component.owner.ref = actualOwner;

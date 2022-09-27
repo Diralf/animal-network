@@ -1,3 +1,4 @@
+import { Component } from '../../components/component/component';
 import { RawPoint } from '../point/raw-point';
 import { rotateVector, angleOfVector } from '../utils/rotate-vector';
 
@@ -6,8 +7,16 @@ export enum DirectionTurn {
     TURN_RIGHT = 'TURN_RIGHT',
 }
 
-export class DirectionProperty {
-    constructor(private current: RawPoint = { x: 0, y: -1 }) {
+interface Options {
+    initialDirection?: RawPoint;
+}
+
+export class DirectionProperty extends Component<Options> {
+    private current: RawPoint;
+
+    constructor(options: Options) {
+        super(options);
+        this.current = options.initialDirection ?? { x: 0, y: -1 };
     }
 
     turn(to: DirectionTurn) {
