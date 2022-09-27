@@ -8,7 +8,9 @@ import { CollisionOptions } from './collision-options';
 
 type Handler = (options: CollisionOptions) => void;
 
-export class CollisionProperty extends Component<Handler, Positionable> implements OnTick {
+export class CollisionProperty extends Component<void, Positionable, Handler> implements OnTick {
+    private handler: Handler = this.staticOptions;
+
     public check<Entity extends Positionable>(list: EntityList<Entity | Positionable>): Entity[] {
         const ownPosition = this.owner.ref.position.current;
         const entitiesWithPositions = list.findWithType<Positionable>(
@@ -21,7 +23,7 @@ export class CollisionProperty extends Component<Handler, Positionable> implemen
 
     public collide(world: World<Positionable>): void {
         const result = this.check(world.getEntityList());
-        this.options({ other: result, world });
+        this.handler({ other: result, world });
     }
 
     public tick(world: World<Positionable>): void {

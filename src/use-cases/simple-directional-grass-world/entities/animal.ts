@@ -34,9 +34,16 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
     public size: NumberProperty = new NumberProperty();
     public metabolizeSpeed;
     public direction: DirectionProperty;
-    public sight: DirectionSightProperty = this.createComponent(this, 'sight', DirectionSightProperty);
-    public movement: DirectionMovementProperty = this.createComponent(this, 'movement', DirectionMovementProperty);
-    public collision: CollisionProperty = this.createComponent(this, 'collision', CollisionProperty);
+    public sight: DirectionSightProperty = this.createComponent(this, 'sight', DirectionSightProperty, undefined);
+    public movement: DirectionMovementProperty = this.createComponent(this, 'movement', DirectionMovementProperty, undefined);
+    public collision: CollisionProperty = this.createComponent(
+        this,
+        'collision',
+        CollisionProperty,
+        (options: CollisionOptions) => {
+            this.handleCollision(options);
+        },
+    );
     public score = 0;
     public fitness = 0;
     public taste = 0;
@@ -46,9 +53,6 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
         super({
             sight: {
                 range: sightRange,
-            },
-            collision: (options) => {
-                this.handleCollision(options);
             },
         });
 

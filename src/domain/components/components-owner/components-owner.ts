@@ -2,26 +2,28 @@ import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 import { Component } from '../component/component';
 
-type ClassType<Options, Result> = new (options: Options) => Result;
+type UnknownComponent = Component<unknown, unknown, unknown>;
+
+type ClassType<Options, StaticOptions, Result> = new (options: Options, staticOptions: StaticOptions) => Result;
 
 type ComponentsKeys<Owner extends Record<keyof Owner, unknown>> = {
-    [Key in keyof Owner]: Owner[Key] extends Component<unknown> ? Key : never;
-}[keyof Owner];
-
-type ComponentsKeysWithOptions<Owner extends Record<keyof Owner, unknown>> = {
-    [Key in keyof Owner]: Owner[Key] extends Component<unknown> ? Owner[Key]['options'] extends void ? never : Key : never;
+    [Key in keyof Owner]: Owner[Key] extends UnknownComponent ? Key : never;
 }[keyof Owner];
 
 export type ComponentsOnly<Owner> = {
-    [Key in ComponentsKeys<Owner>]: Owner[Key] extends Component<unknown> ? Owner[Key] : never;
+    [Key in ComponentsKeys<Owner>]: Owner[Key] extends UnknownComponent ? Owner[Key] : never;
 };
 
+type ComponentsKeysWithOptions<Owner extends Record<keyof Owner, unknown>> = {
+    [Key in keyof Owner]: Owner[Key] extends UnknownComponent ? Owner[Key]['options'] extends void ? never : Key : never;
+}[keyof Owner];
+
 type ComponentsOptions<Owner extends Record<keyof Owner, unknown>> = {
-    [Key in ComponentsKeysWithOptions<Owner>]: Owner[Key] extends Component<unknown> ? Owner[Key]['options'] : never;
+    [Key in ComponentsKeysWithOptions<Owner>]: Owner[Key] extends UnknownComponent ? Owner[Key]['options'] : never;
 };
 
 export class ComponentsOwner<Owner extends Record<keyof Owner, unknown>> implements OnTick {
-    private components: Array<Component<unknown>> = [];
+    private components: UnknownComponent[] = [];
 
     constructor(private initOptions: ComponentsOptions<ComponentsOnly<Owner>>) {
     }
@@ -31,14 +33,16 @@ export class ComponentsOwner<Owner extends Record<keyof Owner, unknown>> impleme
         ComponentName extends keyof Components,
         ComponentType extends Components[ComponentName],
         ConstructorArgs extends ComponentType['options'],
-        ComponentConstructorType extends ClassType<ConstructorArgs, ComponentType>,
+        StaticOptions extends ComponentType['staticOptions'],
+        ComponentConstructorType extends ClassType<ConstructorArgs, StaticOptions, ComponentType>,
     >(
         actualOwner: ComponentType['owner']['ref'],
         componentName: ComponentName,
         ComponentConstructor: ComponentConstructorType,
+        staticOptions: StaticOptions,
     ): ComponentType {
         const componentInitOptions = (this.initOptions as Record<keyof Components, ConstructorArgs>)[componentName];
-        const component = new ComponentConstructor(componentInitOptions);
+        const component = new ComponentConstructor(componentInitOptions, staticOptions);
 
         if (component.owner) {
             component.owner.ref = actualOwner;
