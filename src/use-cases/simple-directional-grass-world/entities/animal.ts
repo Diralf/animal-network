@@ -1,4 +1,4 @@
-import { ComponentsOwner } from '../../../domain/components/components-owner/components-owner';
+import { ComponentsOwner, ComponentsOptions } from '../../../domain/components/components-owner/components-owner';
 import { CollisionOptions } from '../../../domain/property/collision/collision-options';
 import { CollisionProperty } from '../../../domain/property/collision/collision-property';
 import { DirectionMovementProperty, DirectionMovementValue } from '../../../domain/property/direction-movement/direction-movement-property';
@@ -32,32 +32,25 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
     public readonly visual = 6;
     public position: PointProperty;
     public size: NumberProperty = new NumberProperty();
-    public metabolizeSpeed;
-    public direction: DirectionProperty = this.createComponent(this, { name: 'direction', class: DirectionProperty });
-    public sight: DirectionSightProperty = this.createComponent(this, { name: 'sight', class: DirectionSightProperty });
-    public movement: DirectionMovementProperty = this.createComponent(this, { name: 'movement', class: DirectionMovementProperty });
-    public collision: CollisionProperty = this.createComponent(
-        this,
-        {
-            name: 'collision',
-            class: CollisionProperty,
-            staticOptions: (options: CollisionOptions) => {
-                this.handleCollision(options);
-            },
-        },
-    );
+    public metabolizeSpeed: number;
+    public direction: DirectionProperty;
+    public sight: DirectionSightProperty;
+    public movement: DirectionMovementProperty = this.createComponent({ owner: this, class: DirectionMovementProperty });
+    public collision: CollisionProperty = this.createComponent({ owner: this, class: CollisionProperty, options: (options: CollisionOptions) => {
+        this.handleCollision(options);
+    }});
     public score = 0;
     public fitness = 0;
     public taste = 0;
     public energy: NumberProperty = new NumberProperty({ min: 0, max: 100, defaultValue: 100 });
 
-    constructor({ position, sightRange = [5, 2], size = 10, metabolizeSpeed = 1 }: AnimalOptions) {
-        super({
-            sight: {
-                range: sightRange,
-            },
-            direction: {},
-        });
+    constructor(
+        { position, sightRange = [5, 2], size = 10, metabolizeSpeed = 1 }: AnimalOptions,
+        options?: Partial<Omit<ComponentsOptions<Animal>, 'collision'>>,
+    ) {
+        super();
+        this.sight = this.createComponent({ owner: this, class: DirectionSightProperty, options: options?.sight ?? { range: [5, 2] } });
+        this.direction = this.createComponent({ owner: this, class: DirectionProperty, options: options?.direction });
 
         this.position = new PointProperty(position);
         this.size.current = size;

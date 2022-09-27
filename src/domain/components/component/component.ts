@@ -3,10 +3,10 @@ import { PropertyWithOwner } from '../../property/owner/property-with-owner';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 
-export abstract class Component<Options = void, Owner = unknown, StaticOptions = void> implements PropertyWithOwner<Owner>, OnTick {
+export abstract class Component<Options = void, Owner = unknown> implements PropertyWithOwner<Owner>, OnTick {
     public owner: PropertyOwner<Owner> = new PropertyOwner<Owner>();
 
-    constructor(public options: Options, public staticOptions: StaticOptions) {}
+    constructor(public options: Options) {}
 
     public tick(world: World, time: number): void {};
 }

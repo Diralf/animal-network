@@ -8,8 +8,8 @@ import { CollisionOptions } from './collision-options';
 
 type Handler = (options: CollisionOptions) => void;
 
-export class CollisionProperty extends Component<void, Positionable, Handler> implements OnTick {
-    private handler: Handler = this.staticOptions;
+export class CollisionProperty extends Component<Handler, Positionable> implements OnTick {
+    private handler: Handler = this.options;
 
     public check<Entity extends Positionable>(list: EntityList<Entity | Positionable>): Entity[] {
         const ownPosition = this.owner.ref.position.current;

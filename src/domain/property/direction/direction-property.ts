@@ -11,12 +11,12 @@ interface Options {
     initialDirection?: RawPoint;
 }
 
-export class DirectionProperty extends Component<Options> {
+export class DirectionProperty extends Component<Options | undefined> {
     private current: RawPoint;
 
-    constructor(options: Options) {
+    constructor(options?: Options) {
         super(options);
-        this.current = options.initialDirection ?? { x: 0, y: -1 };
+        this.current = options?.initialDirection ?? { x: 0, y: -1 };
     }
 
     turn(to: DirectionTurn) {
