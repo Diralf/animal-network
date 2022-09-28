@@ -1,12 +1,19 @@
 import { BaseProperty } from '../base/base-property';
 
-export class NumberProperty extends BaseProperty<number> {
+interface Props {
+    defaultValue?: number;
+    min?: number;
+    max?: number;
+    current?: number;
+}
+
+export class NumberProperty extends BaseProperty<number, Props | undefined> {
     private readonly _default: number;
     private readonly _min: number;
     private readonly _max: number;
 
-    constructor(options: { defaultValue?: number, min?: number, max?: number, current?: number } = {}) {
-        super(0);
+    constructor(options: Props = {}) {
+        super(options);
         this._min = options.min ?? -Number.MAX_SAFE_INTEGER;
         this._max = options.max ?? Number.MAX_SAFE_INTEGER;
 

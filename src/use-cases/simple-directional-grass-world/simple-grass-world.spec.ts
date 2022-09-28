@@ -29,7 +29,7 @@ describe('Directional SimpleGrassWorld', () => {
             `),
                 availableEntities: {
                     '3': (point: RawPoint) => new Grass({ position: point }),
-                    '6': (point: RawPoint) => new Animal({ position: point, size: 1, metabolizeSpeed: 0 }),
+                    '6': (point: RawPoint) => new Animal({ position: point, size: { current: 1 }, metabolizeSpeed: { current: 0 } }),
                 },
                 staticEntities: [],
                 ...options,
@@ -212,7 +212,7 @@ describe('Directional SimpleGrassWorld', () => {
                 {
                     availableEntities: {
                         '3': (point: RawPoint) => new Grass({ position: point }),
-                        '6': (point: RawPoint) => new StaticAnimal({ position: point, size: 1, metabolizeSpeed: 0 }),
+                        '6': (point: RawPoint) => new StaticAnimal({ position: point, size: { current: 1 }, metabolizeSpeed: { current: 0 } }),
                     },
                 },
             );

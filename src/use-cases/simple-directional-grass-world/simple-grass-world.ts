@@ -41,8 +41,7 @@ export class SimpleGrassWorld {
                 x: Math.floor(param.width / 2),
                 y: Math.floor(param.height / 2),
             },
-            sightRange: [7, 3],
-            network: param.network,
+            sight: { range: [7, 3] },
         });
         if (param.network) {
             await neuralAnimal.setNetwork(param.network);

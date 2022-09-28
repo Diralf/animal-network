@@ -1,5 +1,11 @@
-export class BaseProperty<Value> {
-    constructor(private _current: Value) {
+import { Component } from '../../components/component/component';
+
+export class BaseProperty<Value, Props = Value> extends Component<Props> {
+    private _current!: Value;
+
+    constructor(props: Props) {
+        super(props);
+        this._current = props as unknown as Value;
     }
 
     public get current(): Value {
@@ -10,7 +16,7 @@ export class BaseProperty<Value> {
         this._current = value;
     }
 
-    public isEqual(other: BaseProperty<Value>): boolean {
+    public isEqual(other: BaseProperty<Value, Props>): boolean {
         return this.isEqualValue(other.current);
     }
 

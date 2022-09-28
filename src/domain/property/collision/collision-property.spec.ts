@@ -11,7 +11,7 @@ interface Entity {
 }
 
 const getEntity = ({ id, point }: { id: number, point: RawPoint }): Entity => {
-    const entity = {
+    const entity: Entity = {
         id: new BaseProperty(id),
         position: new PointProperty(point),
         collision: new CollisionProperty({ handler: jest.fn() }),

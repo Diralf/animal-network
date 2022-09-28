@@ -17,7 +17,7 @@ interface Entity {
 
 const getPropertiesContainer = (action: DirectionBrainCommand): Entity => {
     const entity = {
-        brain: new DirectionBrainProperty(() => action),
+        brain: new DirectionBrainProperty({ handler: () => action }),
         movement: new DirectionMovementProperty(),
         position: new PointProperty({ x: 0, y: 0 }),
         sight: new DirectionSightProperty({ range: [5, 2] }),

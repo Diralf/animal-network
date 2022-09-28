@@ -4,6 +4,7 @@ import {
 } from '../../../domain/components/components-owner/components-owner';
 import { CollisionOptions } from '../../../domain/property/collision/collision-options';
 import { CollisionProperty } from '../../../domain/property/collision/collision-property';
+import { DirectionBrainProperty } from '../../../domain/property/direction-brain/direction-brain-property';
 import { DirectionMovementProperty, DirectionMovementValue } from '../../../domain/property/direction-movement/direction-movement-property';
 import { DirectionSightProperty } from '../../../domain/property/direction-sight/direction-sight-property';
 import { DirectionSightable } from '../../../domain/property/direction-sight/direction-sightable';
@@ -33,9 +34,9 @@ export interface AnimalOptions {
 export class Animal extends ComponentsOwner<Animal> implements Positionable, Taggable, Directional, DirectionSightable, Visualable, OnTick, OnDestroy {
     public readonly tags = [InstanceTypes.ANIMAL];
     public readonly visual = 6;
-    public position: PointProperty;
-    public size: NumberProperty = new NumberProperty();
-    public metabolizeSpeed: number;
+    public position: PointProperty = this.createComponent({ owner: this, class: PointProperty, name: 'position' });
+    public size: NumberProperty = this.createComponent({ owner: this, class: NumberProperty, name: 'size' });
+    public metabolizeSpeed: NumberProperty = this.createComponent({ owner: this, class: NumberProperty, name: 'metabolizeSpeed' });
     public direction: DirectionProperty = this.createComponent({ owner: this, class: DirectionProperty, name: 'direction' });
     public sight: DirectionSightProperty = this.createComponent({ owner: this, class: DirectionSightProperty, name: 'sight', props: { range: [5, 2] } });
     public movement: DirectionMovementProperty = this.createComponent({ owner: this, class: DirectionMovementProperty });
@@ -47,17 +48,13 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
     public score = 0;
     public fitness = 0;
     public taste = 0;
-    public energy: NumberProperty = new NumberProperty({ min: 0, max: 100, defaultValue: 100 });
+    public energy: NumberProperty = this.createComponent({ owner: this, class: NumberProperty, name: 'energy', props: {
+        min: 0, max: 100, defaultValue: 100,
+    }});
+    public brain!: DirectionBrainProperty;
 
-    constructor(
-        { position, sightRange = [5, 2], size = 10, metabolizeSpeed = 1 }: AnimalOptions,
-        options?: ExternalComponentsProps<Animal>,
-    ) {
-        super(options ?? { sight: { range: sightRange }});
-
-        this.position = new PointProperty(position);
-        this.size.current = size;
-        this.metabolizeSpeed = metabolizeSpeed;
+    constructor(options?: ExternalComponentsProps<Animal>) {
+        super(options);
 
         this.movement.publisher.subscribe(this.handleMovement);
     }
@@ -105,7 +102,7 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
         super.tick(world, time);
         this.taste = 0;
         this.score += 1;
-        this.size.current -= this.metabolizeSpeed;
+        this.size.current -= this.metabolizeSpeed.current;
         if (this.size.current < 0) {
             world.removeEntity(this);
         }

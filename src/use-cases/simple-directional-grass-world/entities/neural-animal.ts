@@ -4,24 +4,13 @@ import {
 } from '../../../domain/property/direction-brain/direction-brain-property';
 import { World } from '../../../domain/world/world';
 import { AnimalDirectionGrassNetwork } from '../../../network/animal-direction-grass-network/animal-direction-grass-network';
-import { Animal, AnimalOptions } from './animal';
-
-export interface NeuralAnimalOptions extends AnimalOptions {
-    network?: AnimalDirectionGrassNetwork;
-}
+import { Animal } from './animal';
 
 export class NeuralAnimal extends Animal {
-    public brain: DirectionBrainProperty;
+    public brain: DirectionBrainProperty = this.createComponent({ owner: this, class: DirectionBrainProperty, name: 'brain', props: {
+        handler: () => this.brainHandler(),
+    }});
     private network = new AnimalDirectionGrassNetwork();
-
-    constructor(animalOptions: NeuralAnimalOptions) {
-        super(animalOptions);
-        this.brain = new DirectionBrainProperty(() => this.brainHandler());
-
-        this.brain.owner.ref = this;
-
-        // this.network = animalOptions.network?.copy() ?? new AnimalGrassNetwork();
-    }
 
     async loadFromFile() {
         try {
