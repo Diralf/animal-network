@@ -4,7 +4,9 @@ import { Component } from '../component/component';
 
 type UnknownComponent = Component<unknown>;
 
-type ClassType<Options, Result> = new (options: Options) => Result;
+export type ComponentClassType<Props, Result> = new (props: Props) => Result;
+
+type ComponentPropsType<Component extends UnknownComponent> = ReturnType<Component['getProps']>;
 
 type ComponentsKeys<Owner extends Record<keyof Owner, unknown>> = {
     [Key in keyof Owner]: Owner[Key] extends UnknownComponent ? Key : never;
@@ -14,44 +16,48 @@ export type ComponentsOnly<Owner> = {
     [Key in ComponentsKeys<Owner>]: Owner[Key] extends UnknownComponent ? Owner[Key] : never;
 };
 
-type ComponentsKeysWithOptions<Owner extends Record<keyof Owner, unknown>> = {
-    [Key in keyof Owner]: Owner[Key] extends UnknownComponent ? Owner[Key]['options'] extends void ? never : Key : never;
+type ComponentsWithPropsKeys<Owner extends Record<keyof Owner, unknown>> = {
+    [Key in keyof Owner]: Owner[Key] extends UnknownComponent ? ComponentPropsType<Owner[Key]> extends void ? never : Key : never;
 }[keyof Owner];
 
-export type ComponentsOptions<Owner extends Record<keyof Owner, unknown>> = {
-    [Key in ComponentsKeysWithOptions<Owner>]: Owner[Key] extends UnknownComponent ? Owner[Key]['options'] : never;
+export type ComponentsWithProps<Owner extends Record<keyof Owner, unknown>> = {
+    [Key in ComponentsWithPropsKeys<Owner>]: Owner[Key] extends UnknownComponent ? ComponentPropsType<Owner[Key]> : never;
 };
 
-interface InitialComponentProps<Owner, ComponentConstructorType> {
+export type ExternalComponentsProps<Owner extends Record<keyof Owner, unknown>> = Partial<ComponentsWithProps<Owner>>;
+
+interface BaseComponentData<Owner, Constructor> {
     owner: Owner,
-    class: ComponentConstructorType,
+    class: Constructor,
 }
 
-interface OptionsComponentProps<ComponentOptions> {
-    options: ComponentOptions,
+interface PropsComponentData<Props, Name> {
+    defaultProps: Props,
+    name: Name,
 }
 
-type ComponentProps<Owner, ComponentConstructorType, ComponentOptions> = ComponentOptions extends void
-    ? InitialComponentProps<Owner, ComponentConstructorType>
-    : InitialComponentProps<Owner, ComponentConstructorType> & OptionsComponentProps<ComponentOptions>;
+export type ComponentData<Owner, Constructor, Props, Name> = Props extends void
+    ? BaseComponentData<Owner, Constructor>
+    : BaseComponentData<Owner, Constructor> & PropsComponentData<Props, Name>;
 
 export class ComponentsOwner<Owner extends Record<keyof Owner, unknown>> implements OnTick {
     private components: UnknownComponent[] = [];
 
-    constructor() {
+    constructor(private externalProps: ExternalComponentsProps<Owner> = {}) {
     }
 
-    protected createComponent<
+    public createComponent<
         Components extends ComponentsOnly<Owner>,
-        ComponentName extends keyof Components,
-        ComponentType extends Components[ComponentName],
-        ComponentOptions extends ComponentType['options'],
-        ComponentConstructorType extends ClassType<ComponentOptions, ComponentType>,
+        ComponentKeys extends keyof Components,
+        ComponentType extends Components[ComponentKeys],
+        ComponentProps extends ComponentPropsType<ComponentType>,
+        ComponentConstructorType extends ComponentClassType<ComponentProps, ComponentType>,
     >(
-        props: ComponentProps<ComponentType['owner']['ref'], ComponentConstructorType, ComponentOptions>,
+        props: ComponentData<ComponentType['owner']['ref'], ComponentConstructorType, ComponentProps, ComponentKeys>,
     ): ComponentType {
-        const { owner, class: ComponentConstructor, options } = props;
-        const component = new ComponentConstructor(options as ComponentOptions);
+        const { owner, class: ComponentConstructor, defaultProps, name } = props;
+        const externalOptions = this.externalProps as unknown as Record<ComponentKeys, ComponentProps>;
+        const component = new ComponentConstructor(externalOptions[name] ?? defaultProps as ComponentProps);
 
         if (component.owner) {
             component.owner.ref = owner;

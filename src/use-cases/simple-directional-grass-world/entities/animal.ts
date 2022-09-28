@@ -1,4 +1,7 @@
-import { ComponentsOwner, ComponentsOptions } from '../../../domain/components/components-owner/components-owner';
+import {
+    ComponentsOwner,
+    ExternalComponentsProps,
+} from '../../../domain/components/components-owner/components-owner';
 import { CollisionOptions } from '../../../domain/property/collision/collision-options';
 import { CollisionProperty } from '../../../domain/property/collision/collision-property';
 import { DirectionMovementProperty, DirectionMovementValue } from '../../../domain/property/direction-movement/direction-movement-property';
@@ -33,10 +36,10 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
     public position: PointProperty;
     public size: NumberProperty = new NumberProperty();
     public metabolizeSpeed: number;
-    public direction: DirectionProperty;
-    public sight: DirectionSightProperty;
+    public direction: DirectionProperty = this.createComponent({ owner: this, class: DirectionProperty, name: 'direction', defaultProps: {} });
+    public sight: DirectionSightProperty = this.createComponent({ owner: this, class: DirectionSightProperty, name: 'sight', defaultProps: { range: [5, 2] } });
     public movement: DirectionMovementProperty = this.createComponent({ owner: this, class: DirectionMovementProperty });
-    public collision: CollisionProperty = this.createComponent({ owner: this, class: CollisionProperty, options: (options: CollisionOptions) => {
+    public collision: CollisionProperty = this.createComponent({ owner: this, class: CollisionProperty, name: 'collision', defaultProps: (options: CollisionOptions) => {
         this.handleCollision(options);
     }});
     public score = 0;
@@ -46,11 +49,9 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
 
     constructor(
         { position, sightRange = [5, 2], size = 10, metabolizeSpeed = 1 }: AnimalOptions,
-        options?: Partial<Omit<ComponentsOptions<Animal>, 'collision'>>,
+        options?: ExternalComponentsProps<Animal>,
     ) {
-        super();
-        this.sight = this.createComponent({ owner: this, class: DirectionSightProperty, options: options?.sight ?? { range: [5, 2] } });
-        this.direction = this.createComponent({ owner: this, class: DirectionProperty, options: options?.direction });
+        super(options ?? { sight: { range: sightRange }});
 
         this.position = new PointProperty(position);
         this.size.current = size;

@@ -9,7 +9,7 @@ import { CollisionOptions } from './collision-options';
 type Handler = (options: CollisionOptions) => void;
 
 export class CollisionProperty extends Component<Handler, Positionable> implements OnTick {
-    private handler: Handler = this.options;
+    private handler: Handler = this.getProps();
 
     public check<Entity extends Positionable>(list: EntityList<Entity | Positionable>): Entity[] {
         const ownPosition = this.owner.ref.position.current;
