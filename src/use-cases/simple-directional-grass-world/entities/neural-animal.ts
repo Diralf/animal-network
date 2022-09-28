@@ -7,7 +7,7 @@ import { AnimalDirectionGrassNetwork } from '../../../network/animal-direction-g
 import { Animal } from './animal';
 
 export class NeuralAnimal extends Animal {
-    public brain: DirectionBrainProperty = this.createComponent({ owner: this, class: DirectionBrainProperty, name: 'brain', props: {
+    public brain: DirectionBrainProperty = this.component({ owner: this, class: DirectionBrainProperty, name: 'brain', props: {
         handler: () => this.brainHandler(),
     }});
     private network = new AnimalDirectionGrassNetwork();

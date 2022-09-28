@@ -7,7 +7,7 @@ describe('ComponentsOwner', () => {
 
         it('should add default component to class', () => {
             class Actor extends ComponentsOwner<Actor> {
-                public component: DefaultComponent = this.createComponent({
+                public comp: DefaultComponent = this.component({
                     owner: this,
                     class: DefaultComponent,
                 });
@@ -16,7 +16,7 @@ describe('ComponentsOwner', () => {
             const actor = new Actor();
 
             expect(actor).toBeTruthy();
-            expect(actor.component).toBeTruthy();
+            expect(actor.comp).toBeTruthy();
         });
     });
 
@@ -25,39 +25,39 @@ describe('ComponentsOwner', () => {
         it('should add component with number option', () => {
             class NumberComponent extends Component<number> {}
             class Actor extends ComponentsOwner<Actor> {
-                public component: NumberComponent = this.createComponent({
+                public comp: NumberComponent = this.component({
                     owner: this,
                     class: NumberComponent,
                     props: 0,
-                    name: 'component',
+                    name: 'comp',
                 });
             }
 
             const actor = new Actor();
 
             expect(actor).toBeTruthy();
-            expect(actor.component).toBeTruthy();
-            expect(actor.component.getProps()).toEqual(0);
+            expect(actor.comp).toBeTruthy();
+            expect(actor.comp.getProps()).toEqual(0);
         });
 
         it('should add component with number and apply external value', () => {
             class NumberComponent extends Component<number> {}
             class Actor extends ComponentsOwner<Actor> {
-                public component: NumberComponent = this.createComponent({
+                public comp: NumberComponent = this.component({
                     owner: this,
                     class: NumberComponent,
                     props: 0,
-                    name: 'component',
+                    name: 'comp',
                 });
             }
 
             const actor = new Actor({
-                component: 5,
+                comp: 5,
             });
 
             expect(actor).toBeTruthy();
-            expect(actor.component).toBeTruthy();
-            expect(actor.component.getProps()).toEqual(5);
+            expect(actor.comp).toBeTruthy();
+            expect(actor.comp.getProps()).toEqual(5);
         });
 
         describe('value define level', () => {
@@ -72,8 +72,8 @@ describe('ComponentsOwner', () => {
                             }
                         }
                         class Actor extends ComponentsOwner<Actor> {
-                            public component: NumberComponent = this.createComponent({
-                                owner: this, class: NumberComponent, name: 'component',
+                            public comp: NumberComponent = this.component({
+                                owner: this, class: NumberComponent, name: 'comp',
                             });
                         }
                         return new Actor();
@@ -89,8 +89,8 @@ describe('ComponentsOwner', () => {
                             }
                         }
                         class Actor extends ComponentsOwner<Actor> {
-                            public component: NumberComponent = this.createComponent({
-                                owner: this, class: NumberComponent, name: 'component', props: 5,
+                            public comp: NumberComponent = this.component({
+                                owner: this, class: NumberComponent, name: 'comp', props: 5,
                             });
                         }
                         return new Actor();
@@ -106,11 +106,11 @@ describe('ComponentsOwner', () => {
                             }
                         }
                         class Actor extends ComponentsOwner<Actor> {
-                            public component: NumberComponent = this.createComponent({
-                                owner: this, class: NumberComponent, name: 'component', props: 5,
+                            public comp: NumberComponent = this.component({
+                                owner: this, class: NumberComponent, name: 'comp', props: 5,
                             });
                         }
-                        return new Actor({ component: 7 });
+                        return new Actor({ comp: 7 });
                     },
                 },
                 {
@@ -123,8 +123,8 @@ describe('ComponentsOwner', () => {
                             }
                         }
                         class Actor extends ComponentsOwner<Actor> {
-                            public component: NumberComponent = this.createComponent({
-                                owner: this, class: NumberComponent, name: 'component', props: 5,
+                            public comp: NumberComponent = this.component({
+                                owner: this, class: NumberComponent, name: 'comp', props: 5,
                             });
                         }
                         return new Actor();
@@ -134,8 +134,8 @@ describe('ComponentsOwner', () => {
                 const actor = getActor();
 
                 expect(actor).toBeTruthy();
-                expect(actor.component).toBeTruthy();
-                expect(actor.component.getProps()).toEqual(expected);
+                expect(actor.comp).toBeTruthy();
+                expect(actor.comp.getProps()).toEqual(expected);
             });
         });
 
@@ -144,7 +144,7 @@ describe('ComponentsOwner', () => {
             class OtherComponent extends Component<string> {}
 
             class Actor extends ComponentsOwner<Actor> {
-                public component: NumberComponent = this.createComponent({
+                public comp: NumberComponent = this.component({
                     owner: this,
                     // @ts-expect-error
                     class: OtherComponent,
@@ -158,11 +158,11 @@ describe('ComponentsOwner', () => {
 
             class Actor extends ComponentsOwner<Actor> {
                 // @ts-expect-error
-                public numberComponent: NumberComponent = this.createComponent(
+                public numberComponent: NumberComponent = this.component(
                     // @ts-expect-error
                     { owner: this, class: NumberComponent, props: 0, name: 'otherComponent' },
                 );
-                public otherComponent: OtherComponent = this.createComponent({
+                public otherComponent: OtherComponent = this.component({
                     owner: this,
                     class: OtherComponent,
                     props: '123',
@@ -183,29 +183,29 @@ describe('ComponentsOwner', () => {
             class Actor extends ComponentsOwner<Actor> implements Owner {
                 public name: string = 'Hello';
 
-                public component: OwnerComponent = this.createComponent({
+                public comp: OwnerComponent = this.component({
                     owner: this,
                     class: OwnerComponent,
                     props: 0,
-                    name: 'component',
+                    name: 'comp',
                 });
             }
 
             const actor = new Actor();
 
             expect(actor).toBeTruthy();
-            expect(actor.component).toBeTruthy();
-            expect(actor.component.getProps()).toEqual(0);
+            expect(actor.comp).toBeTruthy();
+            expect(actor.comp.getProps()).toEqual(0);
         });
 
         { /** should show TS error when owner is not compatible */
             class Actor extends ComponentsOwner<Actor> {
-                public component: OwnerComponent = this.createComponent({
+                public comp: OwnerComponent = this.component({
                     // @ts-expect-error
                     owner: this,
                     class: OwnerComponent,
                     props: 0,
-                    name: 'component',
+                    name: 'comp',
                 });
             }
         }

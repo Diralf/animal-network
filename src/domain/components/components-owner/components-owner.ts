@@ -47,7 +47,7 @@ export class ComponentsOwner<Owner extends Record<keyof Owner, unknown>> impleme
     constructor(private externalProps: ExternalComponentsProps<Owner> = {}) {
     }
 
-    public createComponent<
+    public component<
         Components extends ComponentsOnly<Owner>,
         ComponentKeys extends keyof Components,
         ComponentType extends Components[ComponentKeys],

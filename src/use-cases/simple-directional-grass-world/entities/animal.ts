@@ -34,13 +34,13 @@ export interface AnimalOptions {
 export class Animal extends ComponentsOwner<Animal> implements Positionable, Taggable, Directional, DirectionSightable, Visualable, OnTick, OnDestroy {
     public readonly tags = [InstanceTypes.ANIMAL];
     public readonly visual = 6;
-    public position: PointProperty = this.createComponent({ owner: this, class: PointProperty, name: 'position' });
-    public size: NumberProperty = this.createComponent({ owner: this, class: NumberProperty, name: 'size' });
-    public metabolizeSpeed: NumberProperty = this.createComponent({ owner: this, class: NumberProperty, name: 'metabolizeSpeed' });
-    public direction: DirectionProperty = this.createComponent({ owner: this, class: DirectionProperty, name: 'direction' });
-    public sight: DirectionSightProperty = this.createComponent({ owner: this, class: DirectionSightProperty, props: { range: [5, 2] }, name: 'sight' });
-    public movement: DirectionMovementProperty = this.createComponent({ owner: this, class: DirectionMovementProperty });
-    public collision: CollisionProperty = this.createComponent({ owner: this, class: CollisionProperty, name: 'collision', props: {
+    public position: PointProperty = this.component({ owner: this, class: PointProperty, name: 'position' });
+    public size: NumberProperty = this.component({ owner: this, class: NumberProperty, name: 'size' });
+    public metabolizeSpeed: NumberProperty = this.component({ owner: this, class: NumberProperty, name: 'metabolizeSpeed' });
+    public direction: DirectionProperty = this.component({ owner: this, class: DirectionProperty, name: 'direction' });
+    public sight: DirectionSightProperty = this.component({ owner: this, class: DirectionSightProperty, props: { range: [5, 2] }, name: 'sight' });
+    public movement: DirectionMovementProperty = this.component({ owner: this, class: DirectionMovementProperty });
+    public collision: CollisionProperty = this.component({ owner: this, class: CollisionProperty, name: 'collision', props: {
         handler: (options: CollisionOptions) => {
             this.handleCollision(options);
         },
@@ -48,7 +48,7 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
     public score = 0;
     public fitness = 0;
     public taste = 0;
-    public energy: NumberProperty = this.createComponent({ owner: this, class: NumberProperty, name: 'energy', props: {
+    public energy: NumberProperty = this.component({ owner: this, class: NumberProperty, name: 'energy', props: {
         min: 0, max: 100, defaultValue: 100,
     }});
     public brain!: DirectionBrainProperty;

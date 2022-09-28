@@ -4,7 +4,7 @@ import { World } from '../../../domain/world/world';
 import { Animal } from './animal';
 
 export class StaticAnimal extends Animal {
-    public brain: DirectionBrainProperty = this.createComponent({ owner: this, class: DirectionBrainProperty, name: 'brain', props: {
+    public brain: DirectionBrainProperty = this.component({ owner: this, class: DirectionBrainProperty, name: 'brain', props: {
         handler: () => DirectionMovementValue.FORWARD,
     }});
 
