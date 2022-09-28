@@ -202,7 +202,7 @@ describe('Directional SimpleGrassWorld', () => {
                 _,3,_,3,_
                 3,_,6,_,3
             `));
-            expect(animal.size.current).toEqual(2);
+            expect(animal.size.current).toEqual(11);
         });
 
         it('should eat grass by static animal with brain', () => {
@@ -241,7 +241,7 @@ describe('Directional SimpleGrassWorld', () => {
                 _,_,_,_,_
                 _,_,6,_,_
             `));
-            expect(animal.size.current).toEqual(2);
+            expect(animal.size.current).toEqual(11);
         });
 
         it('should dead at hole', () => {
@@ -315,20 +315,6 @@ describe('Directional SimpleGrassWorld', () => {
             });
         };
 
-        it('should generate world with and grass each two steps', () => {
-            const simpleGrassWorld = new SimpleGrassWorld();
-            startWorld(simpleGrassWorld);
-            const getGrassInstances = () => simpleGrassWorld.findByTag(InstanceTypes.GRASS) as Grass[];
-            const result = [];
-
-            for (let i = 0; i < 6; i++) {
-                result.push(getGrassInstances().length);
-                simpleGrassWorld.tick();
-            }
-
-            expect(result).toEqual([0, 1, 1, 2, 2, 3]);
-        });
-
         it('should generate randomly', () => {
             const simpleGrassWorld = new SimpleGrassWorld();
             startWorld(simpleGrassWorld);
@@ -339,7 +325,7 @@ describe('Directional SimpleGrassWorld', () => {
             }
             const grassInstances = simpleGrassWorld.findByTag(InstanceTypes.GRASS);
             console.log(world.print(world.getEntityList()));
-            expect(grassInstances).toHaveLength(3);
+            expect(grassInstances.length).toBeGreaterThan(10);
             grassInstances.forEach((instance) => {
                 const position = instance.position.current;
                 const result = world.getEntityList().find((inst) => inst.position.isEqualValue(position));
@@ -368,7 +354,7 @@ describe('Directional SimpleGrassWorld', () => {
                 simpleGrassWorld.tick();
             }
 
-            expect(result.toString()).toEqual([0, 1, 1, 0, 1, 1].toString());
+            expect(result.toString()).toEqual([0, 2, 2, 0, 1, 1].toString());
         });
 
         it('should generate one by one with animal', () => {

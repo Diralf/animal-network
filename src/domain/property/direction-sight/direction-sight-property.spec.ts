@@ -57,7 +57,7 @@ function makeDirectionSight(direction: RawPoint) {
             }),
             '5': (point: RawPoint) => ({
                 position: new PointProperty(point),
-                direction: new DirectionProperty(direction),
+                direction: new DirectionProperty({ initialDirection: direction }),
                 visual: 5,
             }),
         },

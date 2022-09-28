@@ -21,7 +21,7 @@ const getPropertiesContainer = (action: DirectionBrainCommand): Entity => {
         movement: new DirectionMovementProperty(),
         position: new PointProperty({ x: 0, y: 0 }),
         sight: new DirectionSightProperty({ range: [5, 2] }),
-        direction: new DirectionProperty({ x: 0, y: -1 }),
+        direction: new DirectionProperty({ initialDirection: { x: 0, y: -1 } }),
         visual: 2,
     };
     entity.sight.owner.ref = entity;

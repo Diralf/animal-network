@@ -36,11 +36,13 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
     public position: PointProperty;
     public size: NumberProperty = new NumberProperty();
     public metabolizeSpeed: number;
-    public direction: DirectionProperty = this.createComponent({ owner: this, class: DirectionProperty, name: 'direction', defaultProps: {} });
-    public sight: DirectionSightProperty = this.createComponent({ owner: this, class: DirectionSightProperty, name: 'sight', defaultProps: { range: [5, 2] } });
+    public direction: DirectionProperty = this.createComponent({ owner: this, class: DirectionProperty, name: 'direction' });
+    public sight: DirectionSightProperty = this.createComponent({ owner: this, class: DirectionSightProperty, name: 'sight', props: { range: [5, 2] } });
     public movement: DirectionMovementProperty = this.createComponent({ owner: this, class: DirectionMovementProperty });
-    public collision: CollisionProperty = this.createComponent({ owner: this, class: CollisionProperty, name: 'collision', defaultProps: (options: CollisionOptions) => {
-        this.handleCollision(options);
+    public collision: CollisionProperty = this.createComponent({ owner: this, class: CollisionProperty, name: 'collision', props: {
+        handler: (options: CollisionOptions) => {
+            this.handleCollision(options);
+        },
     }});
     public score = 0;
     public fitness = 0;
@@ -124,5 +126,6 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
     onDestroy(world: World<Animal>): void {
         world.savedEntityList.add(this);
         this.movement.publisher.unsubscribe(this.handleMovement);
+        super.onDestroy(world);
     }
 }

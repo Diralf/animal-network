@@ -14,7 +14,7 @@ const getEntity = ({ id, point }: { id: number, point: RawPoint }): Entity => {
     const entity = {
         id: new BaseProperty(id),
         position: new PointProperty(point),
-        collision: new CollisionProperty(jest.fn()),
+        collision: new CollisionProperty({ handler: jest.fn() }),
     };
     entity.collision.owner.ref = entity;
     return entity;
@@ -74,9 +74,9 @@ describe('CollisionProperty', () => {
 
         entity1.collision.collide(world);
 
-        expect(entity1.collision['handler']).toHaveBeenCalledTimes(1);
-        expect(entity1.collision['handler']).toHaveBeenCalledWith(expect.objectContaining({ other: [entity2] }));
-        expect(entity2.collision['handler']).not.toHaveBeenCalled();
-        expect(entity3.collision['handler']).not.toHaveBeenCalled();
+        expect(entity1.collision.getProps().handler).toHaveBeenCalledTimes(1);
+        expect(entity1.collision.getProps().handler).toHaveBeenCalledWith(expect.objectContaining({ other: [entity2] }));
+        expect(entity2.collision.getProps().handler).not.toHaveBeenCalled();
+        expect(entity3.collision.getProps().handler).not.toHaveBeenCalled();
     });
 });

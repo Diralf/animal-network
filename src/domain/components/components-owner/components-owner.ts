@@ -1,3 +1,4 @@
+import { OnDestroy } from '../../time-thread/on-destroy';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 import { Component } from '../component/component';
@@ -6,7 +7,7 @@ type UnknownComponent = Component<unknown>;
 
 export type ComponentClassType<Props, Result> = new (props: Props) => Result;
 
-type ComponentPropsType<Component extends UnknownComponent> = ReturnType<Component['getProps']>;
+export type ComponentPropsType<Component extends UnknownComponent> = ReturnType<Component['getProps']>;
 
 type ComponentsKeys<Owner extends Record<keyof Owner, unknown>> = {
     [Key in keyof Owner]: Owner[Key] extends UnknownComponent ? Key : never;
@@ -32,7 +33,7 @@ interface BaseComponentData<Owner, Constructor> {
 }
 
 interface PropsComponentData<Props, Name> {
-    defaultProps: Props,
+    props: Props,
     name: Name,
 }
 
@@ -40,7 +41,7 @@ export type ComponentData<Owner, Constructor, Props, Name> = Props extends void
     ? BaseComponentData<Owner, Constructor>
     : BaseComponentData<Owner, Constructor> & PropsComponentData<Props, Name>;
 
-export class ComponentsOwner<Owner extends Record<keyof Owner, unknown>> implements OnTick {
+export class ComponentsOwner<Owner extends Record<keyof Owner, unknown>> implements OnTick, OnDestroy {
     private components: UnknownComponent[] = [];
 
     constructor(private externalProps: ExternalComponentsProps<Owner> = {}) {
@@ -55,9 +56,10 @@ export class ComponentsOwner<Owner extends Record<keyof Owner, unknown>> impleme
     >(
         props: ComponentData<ComponentType['owner']['ref'], ComponentConstructorType, ComponentProps, ComponentKeys>,
     ): ComponentType {
-        const { owner, class: ComponentConstructor, defaultProps, name } = props;
-        const externalOptions = this.externalProps as unknown as Record<ComponentKeys, ComponentProps>;
-        const component = new ComponentConstructor(externalOptions[name] ?? defaultProps as ComponentProps);
+        const { owner, class: ComponentConstructor, props: staticProps, name } = props;
+        const externalProps = this.externalProps as unknown as Record<ComponentKeys, ComponentProps>;
+        const propsToApply = externalProps[name] ?? staticProps as ComponentProps;
+        const component = new ComponentConstructor(propsToApply);
 
         if (component.owner) {
             component.owner.ref = owner;
@@ -68,9 +70,16 @@ export class ComponentsOwner<Owner extends Record<keyof Owner, unknown>> impleme
         return component;
     }
 
-    tick(world: World, time: number): void {
+    public tick(world: World, time: number): void {
         this.components.forEach((component) => {
             component.tick(world, time);
         });
+    }
+
+    public onDestroy(world: World): void {
+        this.components.forEach((component) => {
+            component.onDestroy(world);
+        });
+        this.components = [];
     }
 }

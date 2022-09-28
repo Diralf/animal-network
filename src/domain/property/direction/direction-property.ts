@@ -8,15 +8,15 @@ export enum DirectionTurn {
 }
 
 interface Options {
-    initialDirection?: RawPoint;
+    initialDirection: RawPoint;
 }
 
 export class DirectionProperty extends Component<Options | undefined> {
     private current: RawPoint;
 
-    constructor(options?: Options) {
+    constructor(options: Options = { initialDirection: { x: 0, y: -1 } }) {
         super(options);
-        this.current = options?.initialDirection ?? { x: 0, y: -1 };
+        this.current = options.initialDirection;
     }
 
     turn(to: DirectionTurn) {

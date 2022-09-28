@@ -28,7 +28,7 @@ describe('ComponentsOwner', () => {
                 public component: NumberComponent = this.createComponent({
                     owner: this,
                     class: NumberComponent,
-                    defaultProps: 0,
+                    props: 0,
                     name: 'component',
                 });
             }
@@ -46,7 +46,7 @@ describe('ComponentsOwner', () => {
                 public component: NumberComponent = this.createComponent({
                     owner: this,
                     class: NumberComponent,
-                    defaultProps: 0,
+                    props: 0,
                     name: 'component',
                 });
             }
@@ -58,6 +58,31 @@ describe('ComponentsOwner', () => {
             expect(actor).toBeTruthy();
             expect(actor.component).toBeTruthy();
             expect(actor.component.getProps()).toEqual(5);
+        });
+
+        it('should add component with number and use default value', () => {
+            interface Props {
+                value: number;
+            }
+
+            class NumberComponent extends Component<Props | undefined> {
+                constructor(props: Props = { value: 3 }) {
+                    super(props);
+                }
+            }
+            class Actor extends ComponentsOwner<Actor> {
+                public component: NumberComponent = this.createComponent({
+                    owner: this,
+                    class: NumberComponent,
+                    name: 'component',
+                });
+            }
+
+            const actor = new Actor();
+
+            expect(actor).toBeTruthy();
+            expect(actor.component).toBeTruthy();
+            expect(actor.component.getProps()).toEqual({ value: 3 });
         });
 
         { /** expect TS error when specified other component */
@@ -81,12 +106,12 @@ describe('ComponentsOwner', () => {
                 // @ts-expect-error
                 public numberComponent: NumberComponent = this.createComponent(
                     // @ts-expect-error
-                    { owner: this, class: NumberComponent, defaultProps: 0, name: 'otherComponent' },
+                    { owner: this, class: NumberComponent, props: 0, name: 'otherComponent' },
                 );
                 public otherComponent: OtherComponent = this.createComponent({
                     owner: this,
                     class: OtherComponent,
-                    defaultProps: '123',
+                    props: '123',
                     name: 'otherComponent',
                 });
             }
@@ -107,7 +132,7 @@ describe('ComponentsOwner', () => {
                 public component: OwnerComponent = this.createComponent({
                     owner: this,
                     class: OwnerComponent,
-                    defaultProps: 0,
+                    props: 0,
                     name: 'component',
                 });
             }
