@@ -12,17 +12,17 @@ import { visualEntitiesAsString } from '../utils/visual-entities-as-string';
 
 type Owner = Positionable & Visualable & Directional;
 
-interface Options {
+interface Props {
     range: [number, number];
 }
 
-export class DirectionSightProperty extends Component<Options, Owner> implements OnTick {
+export class DirectionSightProperty extends Component<Props, Owner> implements OnTick {
     private readonly _range: [number, number];
     public current: number[][] = [];
 
-    constructor(options: Options) {
-        super(options);
-        this._range = options.range;
+    constructor(props: Props = { range: [1, 1] }) {
+        super(props);
+        this._range = props.range;
     }
 
     public get range(): [number, number] {

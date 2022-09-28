@@ -6,6 +6,7 @@ import { World } from '../../world/world';
 
 export abstract class Component<Props = void, Owner = unknown> implements PropertyWithOwner<Owner>, OnTick, OnDestroy {
     public owner: PropertyOwner<Owner> = new PropertyOwner<Owner>();
+    public __propsType: Props | undefined;
 
     constructor(protected props: Props) {}
 

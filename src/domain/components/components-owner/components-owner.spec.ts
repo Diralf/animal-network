@@ -60,29 +60,83 @@ describe('ComponentsOwner', () => {
             expect(actor.component.getProps()).toEqual(5);
         });
 
-        it('should add component with number and use default value', () => {
-            interface Props {
-                value: number;
-            }
+        describe('value define level', () => {
+            it.each([
+                {
+                    case: 'component default value',
+                    expected: 3,
+                    getActor: () => {
+                        class NumberComponent extends Component<number> {
+                            constructor(props: number = 3) {
+                                super(props);
+                            }
+                        }
+                        class Actor extends ComponentsOwner<Actor> {
+                            public component: NumberComponent = this.createComponent({
+                                owner: this, class: NumberComponent, name: 'component',
+                            });
+                        }
+                        return new Actor();
+                    },
+                },
+                {
+                    case: 'static props, component default value defined',
+                    expected: 5,
+                    getActor: () => {
+                        class NumberComponent extends Component<number> {
+                            constructor(props: number = 3) {
+                                super(props);
+                            }
+                        }
+                        class Actor extends ComponentsOwner<Actor> {
+                            public component: NumberComponent = this.createComponent({
+                                owner: this, class: NumberComponent, name: 'component', props: 5,
+                            });
+                        }
+                        return new Actor();
+                    },
+                },
+                {
+                    case: 'external props, static props and component default value defined',
+                    expected: 7,
+                    getActor: () => {
+                        class NumberComponent extends Component<number> {
+                            constructor(props: number = 3) {
+                                super(props);
+                            }
+                        }
+                        class Actor extends ComponentsOwner<Actor> {
+                            public component: NumberComponent = this.createComponent({
+                                owner: this, class: NumberComponent, name: 'component', props: 5,
+                            });
+                        }
+                        return new Actor({ component: 7 });
+                    },
+                },
+                {
+                    case: 'static props and component default value not defined',
+                    expected: 5,
+                    getActor: () => {
+                        class NumberComponent extends Component<number> {
+                            constructor(props: number) {
+                                super(props);
+                            }
+                        }
+                        class Actor extends ComponentsOwner<Actor> {
+                            public component: NumberComponent = this.createComponent({
+                                owner: this, class: NumberComponent, name: 'component', props: 5,
+                            });
+                        }
+                        return new Actor();
+                    },
+                },
+            ])('should use $case', ({ getActor, expected }) => {
+                const actor = getActor();
 
-            class NumberComponent extends Component<Props | undefined> {
-                constructor(props: Props = { value: 3 }) {
-                    super(props);
-                }
-            }
-            class Actor extends ComponentsOwner<Actor> {
-                public component: NumberComponent = this.createComponent({
-                    owner: this,
-                    class: NumberComponent,
-                    name: 'component',
-                });
-            }
-
-            const actor = new Actor();
-
-            expect(actor).toBeTruthy();
-            expect(actor.component).toBeTruthy();
-            expect(actor.component.getProps()).toEqual({ value: 3 });
+                expect(actor).toBeTruthy();
+                expect(actor.component).toBeTruthy();
+                expect(actor.component.getProps()).toEqual(expected);
+            });
         });
 
         { /** expect TS error when specified other component */
@@ -150,7 +204,7 @@ describe('ComponentsOwner', () => {
                     // @ts-expect-error
                     owner: this,
                     class: OwnerComponent,
-                    options: 0,
+                    props: 0,
                     name: 'component',
                 });
             }

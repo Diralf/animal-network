@@ -7,7 +7,7 @@ type UnknownComponent = Component<unknown>;
 
 export type ComponentClassType<Props, Result> = new (props: Props) => Result;
 
-export type ComponentPropsType<Component extends UnknownComponent> = ReturnType<Component['getProps']>;
+export type ComponentPropsType<Component extends UnknownComponent> = Component['__propsType'];
 
 type ComponentsKeys<Owner extends Record<keyof Owner, unknown>> = {
     [Key in keyof Owner]: Owner[Key] extends UnknownComponent ? Key : never;

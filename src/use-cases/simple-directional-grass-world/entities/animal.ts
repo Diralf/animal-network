@@ -38,7 +38,7 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
     public size: NumberProperty = this.createComponent({ owner: this, class: NumberProperty, name: 'size' });
     public metabolizeSpeed: NumberProperty = this.createComponent({ owner: this, class: NumberProperty, name: 'metabolizeSpeed' });
     public direction: DirectionProperty = this.createComponent({ owner: this, class: DirectionProperty, name: 'direction' });
-    public sight: DirectionSightProperty = this.createComponent({ owner: this, class: DirectionSightProperty, name: 'sight', props: { range: [5, 2] } });
+    public sight: DirectionSightProperty = this.createComponent({ owner: this, class: DirectionSightProperty, props: { range: [5, 2] }, name: 'sight' });
     public movement: DirectionMovementProperty = this.createComponent({ owner: this, class: DirectionMovementProperty });
     public collision: CollisionProperty = this.createComponent({ owner: this, class: CollisionProperty, name: 'collision', props: {
         handler: (options: CollisionOptions) => {
