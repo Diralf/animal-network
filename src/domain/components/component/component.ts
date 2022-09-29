@@ -4,17 +4,37 @@ import { OnDestroy } from '../../time-thread/on-destroy';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 
-export abstract class Component<Props = void, Owner = unknown> implements PropertyWithOwner<Owner>, OnTick, OnDestroy {
-    public owner: PropertyOwner<Owner> = new PropertyOwner<Owner>();
-    public __propsType: Props | undefined;
+type Opt<T> = T extends void ? null | undefined | void : T;
 
-    constructor(protected props: Props) {}
+export function Component<Props = void, Owner = unknown>() {
+    return class ComponentClass implements PropertyWithOwner<Opt<Owner>>, OnTick, OnDestroy {
+        public owner: PropertyOwner<Opt<Owner>> = new PropertyOwner<Opt<Owner>>();
+        protected props!: Opt<Props>;
 
-    public getProps(): Props {
-        return this.props;
+        constructor(props: Opt<Props>) {
+            this.props = props;
+        }
+
+        public getProps(): Opt<Props> {
+            return this.props;
+        }
+
+        public setProps(props: Opt<Props>): void {
+            this.props = props;
+        }
+
+        public tick(world: World, time: number): void {}
+
+        public onDestroy(world: World): void {}
+
+        static build(owner: Opt<Owner>, props: Opt<Props>) {
+            const inst = new this(props);
+            if (owner) {
+                inst.owner.ref = owner;
+            }
+            return inst;
+        }
+
+        public __propsType: Props | undefined;
     }
-
-    public tick(world: World, time: number): void {}
-
-    public onDestroy(world: World): void {}
 }

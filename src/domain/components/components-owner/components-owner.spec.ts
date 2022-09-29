@@ -1,16 +1,13 @@
 import { Component } from '../component/component';
-import { ComponentsOwner } from './components-owner';
+import { ComponentsOwner, ExternalComponentsProps } from './components-owner';
 
 describe('ComponentsOwner', () => {
     describe('default component', () => {
-        class DefaultComponent extends Component {}
+        class DefaultComponent extends Component() {}
 
         it('should add default component to class', () => {
             class Actor extends ComponentsOwner<Actor> {
-                public comp: DefaultComponent = this.component({
-                    owner: this,
-                    class: DefaultComponent,
-                });
+                public comp: DefaultComponent = DefaultComponent.build(this);
             }
 
             const actor = new Actor();
@@ -23,14 +20,9 @@ describe('ComponentsOwner', () => {
     describe('number component', () => {
 
         it('should add component with number option', () => {
-            class NumberComponent extends Component<number> {}
+            class NumberComponent extends Component<number>() {}
             class Actor extends ComponentsOwner<Actor> {
-                public comp: NumberComponent = this.component({
-                    owner: this,
-                    class: NumberComponent,
-                    props: 0,
-                    name: 'comp',
-                });
+                public comp: NumberComponent = NumberComponent.build(this, 0);
             }
 
             const actor = new Actor();
@@ -41,14 +33,13 @@ describe('ComponentsOwner', () => {
         });
 
         it('should add component with number and apply external value', () => {
-            class NumberComponent extends Component<number> {}
+            class NumberComponent extends Component<number>() {}
             class Actor extends ComponentsOwner<Actor> {
-                public comp: NumberComponent = this.component({
-                    owner: this,
-                    class: NumberComponent,
-                    props: 0,
-                    name: 'comp',
-                });
+                public comp: NumberComponent = NumberComponent.build(this, 0);
+                constructor(props: ExternalComponentsProps<Actor> = {}) {
+                    super(props);
+                    this.init();
+                }
             }
 
             const actor = new Actor({
@@ -66,15 +57,13 @@ describe('ComponentsOwner', () => {
                     case: 'component default value',
                     expected: 3,
                     getActor: () => {
-                        class NumberComponent extends Component<number> {
+                        class NumberComponent extends Component<number | undefined>() {
                             constructor(props: number = 3) {
                                 super(props);
                             }
                         }
                         class Actor extends ComponentsOwner<Actor> {
-                            public comp: NumberComponent = this.component({
-                                owner: this, class: NumberComponent, name: 'comp',
-                            });
+                            public comp: NumberComponent = NumberComponent.build(this);
                         }
                         return new Actor();
                     },
@@ -83,15 +72,13 @@ describe('ComponentsOwner', () => {
                     case: 'static props, component default value defined',
                     expected: 5,
                     getActor: () => {
-                        class NumberComponent extends Component<number> {
+                        class NumberComponent extends Component<number | undefined>() {
                             constructor(props: number = 3) {
                                 super(props);
                             }
                         }
                         class Actor extends ComponentsOwner<Actor> {
-                            public comp: NumberComponent = this.component({
-                                owner: this, class: NumberComponent, name: 'comp', props: 5,
-                            });
+                            public comp: NumberComponent = NumberComponent.build(this, 5);
                         }
                         return new Actor();
                     },
@@ -100,15 +87,17 @@ describe('ComponentsOwner', () => {
                     case: 'external props, static props and component default value defined',
                     expected: 7,
                     getActor: () => {
-                        class NumberComponent extends Component<number> {
+                        class NumberComponent extends Component<number | undefined>() {
                             constructor(props: number = 3) {
                                 super(props);
                             }
                         }
                         class Actor extends ComponentsOwner<Actor> {
-                            public comp: NumberComponent = this.component({
-                                owner: this, class: NumberComponent, name: 'comp', props: 5,
-                            });
+                            public comp: NumberComponent = NumberComponent.build(this, 5);
+                            constructor(props: ExternalComponentsProps<Actor> = {}) {
+                                super(props);
+                                this.init();
+                            }
                         }
                         return new Actor({ comp: 7 });
                     },
@@ -117,15 +106,13 @@ describe('ComponentsOwner', () => {
                     case: 'static props and component default value not defined',
                     expected: 5,
                     getActor: () => {
-                        class NumberComponent extends Component<number> {
+                        class NumberComponent extends Component<number>() {
                             constructor(props: number) {
                                 super(props);
                             }
                         }
                         class Actor extends ComponentsOwner<Actor> {
-                            public comp: NumberComponent = this.component({
-                                owner: this, class: NumberComponent, name: 'comp', props: 5,
-                            });
+                            public comp: NumberComponent = NumberComponent.build(this, 5);
                         }
                         return new Actor();
                     },
@@ -140,55 +127,39 @@ describe('ComponentsOwner', () => {
         });
 
         { /** expect TS error when specified other component */
-            class NumberComponent extends Component<number> {}
-            class OtherComponent extends Component<string> {}
-
-            class Actor extends ComponentsOwner<Actor> {
-                public comp: NumberComponent = this.component({
-                    owner: this,
-                    // @ts-expect-error
-                    class: OtherComponent,
-                });
-            }
-        }
-
-        { /** expect TS error when specified name of other component */
-            class NumberComponent extends Component<number> {}
-            class OtherComponent extends Component<string> {}
+            class NumberComponent extends Component<number>() {}
+            class OtherComponent extends Component<string>() {}
 
             class Actor extends ComponentsOwner<Actor> {
                 // @ts-expect-error
-                public numberComponent: NumberComponent = this.component(
-                    // @ts-expect-error
-                    { owner: this, class: NumberComponent, props: 0, name: 'otherComponent' },
-                );
-                public otherComponent: OtherComponent = this.component({
-                    owner: this,
-                    class: OtherComponent,
-                    props: '123',
-                    name: 'otherComponent',
-                });
+                public comp: NumberComponent = OtherComponent.build(this, 'comp', '123');
+            }
+        }
+
+        // TODO
+        { /** expect TS error when specified name of other component */
+            class NumberComponent extends Component<number>() {}
+            class OtherComponent extends Component<string>() {}
+
+            class Actor extends ComponentsOwner<Actor> {
+                public numberComponent: NumberComponent = NumberComponent.build(this, 0);
+                public otherComponent: OtherComponent = OtherComponent.build(this, '123');
             }
         }
     });
 
     describe('component with owner specified', () => {
         interface Owner {
-            name: string
+            someField: string
         }
 
-        class OwnerComponent extends Component<number, Owner> {}
+        class OwnerComponent extends Component<number, Owner>() {}
 
         it('should add component with owner specified', () => {
             class Actor extends ComponentsOwner<Actor> implements Owner {
-                public name: string = 'Hello';
+                public someField: string = 'Hello';
 
-                public comp: OwnerComponent = this.component({
-                    owner: this,
-                    class: OwnerComponent,
-                    props: 0,
-                    name: 'comp',
-                });
+                public comp: OwnerComponent = OwnerComponent.build(this, 0);
             }
 
             const actor = new Actor();
@@ -200,13 +171,8 @@ describe('ComponentsOwner', () => {
 
         { /** should show TS error when owner is not compatible */
             class Actor extends ComponentsOwner<Actor> {
-                public comp: OwnerComponent = this.component({
-                    // @ts-expect-error
-                    owner: this,
-                    class: OwnerComponent,
-                    props: 0,
-                    name: 'comp',
-                });
+                // @ts-expect-error
+                public comp: OwnerComponent = OwnerComponent.build(this, 0);
             }
         }
     });

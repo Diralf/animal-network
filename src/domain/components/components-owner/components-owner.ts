@@ -2,8 +2,11 @@ import { OnDestroy } from '../../time-thread/on-destroy';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 import { Component } from '../component/component';
+import { NullComponent } from '../component/null-component';
 
-type UnknownComponent = Component<unknown>;
+const UnknownComponentConstructor = Component<unknown>();
+
+type UnknownComponent = InstanceType<typeof UnknownComponentConstructor>;
 
 export type ComponentClassType<Props, Result> = new (props: Props) => Result;
 
@@ -27,59 +30,38 @@ export type ComponentsWithProps<Owner extends Record<keyof Owner, unknown>> = {
 
 export type ExternalComponentsProps<Owner extends Record<keyof Owner, unknown>> = Partial<ComponentsWithProps<Owner>>;
 
-interface BaseComponentData<Owner, Constructor> {
-    owner: Owner,
-    class: Constructor,
-}
-
-interface PropsComponentData<Props, Name> {
-    props: Props,
-    name: Name,
-}
-
-export type ComponentData<Owner, Constructor, Props, Name> = Props extends void
-    ? BaseComponentData<Owner, Constructor>
-    : BaseComponentData<Owner, Constructor> & PropsComponentData<Props, Name>;
-
 export class ComponentsOwner<Owner extends Record<keyof Owner, unknown>> implements OnTick, OnDestroy {
-    private components: UnknownComponent[] = [];
-
     constructor(private externalProps: ExternalComponentsProps<Owner> = {}) {
+        this.init();
     }
 
-    public component<
-        Components extends ComponentsOnly<Owner>,
-        ComponentKeys extends keyof Components,
-        ComponentType extends Components[ComponentKeys],
-        ComponentProps extends ComponentPropsType<ComponentType>,
-        ComponentConstructorType extends ComponentClassType<ComponentProps, ComponentType>,
-    >(
-        props: ComponentData<ComponentType['owner']['ref'], ComponentConstructorType, ComponentProps, ComponentKeys>,
-    ): ComponentType {
-        const { owner, class: ComponentConstructor, props: staticProps, name } = props;
-        const externalProps = this.externalProps as unknown as Record<ComponentKeys, ComponentProps>;
-        const propsToApply = externalProps[name] ?? staticProps as ComponentProps;
-        const component = new ComponentConstructor(propsToApply);
-
-        if (component.owner) {
-            component.owner.ref = owner;
-        }
-
-        this.components.push(component);
-
-        return component;
+    protected init(): void {
+        Object.keys(this.externalProps).forEach((key) => {
+            const componentOwner = this as unknown as Record<string, UnknownComponent>;
+            const externalProps = this.externalProps as unknown as Record<string, unknown>;
+            componentOwner[key]?.setProps?.(externalProps[key]);
+        });
     }
 
     public tick(world: World, time: number): void {
-        this.components.forEach((component) => {
-            component.tick(world, time);
+        this.forEachKey<Partial<OnTick>>((field) => {
+            field.tick?.(world, time);
         });
     }
 
     public onDestroy(world: World): void {
-        this.components.forEach((component) => {
-            component.onDestroy(world);
+        this.forEachKey<Partial<OnDestroy>>((field) => {
+            field.onDestroy?.(world);
         });
-        this.components = [];
+        this.forEachKey((field, key, instance) => {
+            instance[key] = new NullComponent();
+        });
+    }
+
+    private forEachKey<Field>(action: (field: Field, key: string, instance: Record<string, Field>) => void): void {
+        Object.keys(this).forEach((key) => {
+            const inst = this as unknown as Record<string, Field>;
+            action(inst[key], key, inst);
+        });
     }
 }
