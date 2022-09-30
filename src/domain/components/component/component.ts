@@ -41,6 +41,19 @@ export function Component<Comp, Props = void, Owner = unknown>() {
             };
         }
 
-        public __propsType: Props | undefined;
+        static builder() {
+            return (props: Opt<Props>) => {
+                return (owner: Opt<Owner>, externalProps?: Opt<Props>): Comp => {
+                    const inst = new this(externalProps ?? props);
+                    if (owner) {
+                        inst._owner.ref = owner;
+                    }
+                    return inst as unknown as Comp;
+                };
+            };
+        }
+
+        public __propsType!: Opt<Props>;
+        public __ownerType!: Owner;
     }
 }

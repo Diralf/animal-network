@@ -12,6 +12,7 @@ import { PointProperty } from '../../../domain/property/point/point-property';
 import { OnDestroy } from '../../../domain/time-thread/on-destroy';
 import { OnTick } from '../../../domain/time-thread/on-tick';
 import { World } from '../../../domain/world/world';
+import { componentBuilder } from '../components/component-builder';
 import { isTaggableGuard } from '../types/is-taggable-guard';
 import { Grass } from './grass';
 import { InstanceTypes } from '../types/instance-types';
@@ -45,28 +46,24 @@ export class Animal extends ComponentsOwner<Components> implements OnTick, OnDes
     }
 
     protected components(): ComponentsBuilders<Components> {
-        return {
-            tags: Property<InstanceTypes[]>().build([InstanceTypes.ANIMAL]),
-            visual: NumberProperty.build({ current: 6 }),
-            position: PointProperty.build(),
-            size: NumberProperty.build({ current: 10 }),
-            metabolizeSpeed: NumberProperty.build({ current: 1 }),
-            direction: DirectionProperty.build(),
-            sight: DirectionSightProperty.build({ range: [5, 2] }),
-            movement: DirectionMovementProperty.build(),
-            collision: CollisionProperty.build({
+        return componentBuilder()
+            .tags([InstanceTypes.ANIMAL])
+            .collision({
                 handler: (options: CollisionOptions) => {
                     this.handleCollision(options);
                 },
-            }),
-            energy: NumberProperty.build({
-                min: 0,
-                max: 100,
-                defaultValue: 100,
-            }),
-            taste: NumberProperty.build({ current: 0 }),
-            brain: DirectionBrainProperty.build({ handler: () => BrainCommandsOther.STAND }),
-        };
+            })
+            .direction()
+            .position()
+            .energy({ min: 0, max: 100, defaultValue: 100 })
+            .visual({ current: 6 })
+            .taste({ current: 0 })
+            .metabolizeSpeed({ current: 1 })
+            .movement()
+            .brain({ handler: () => BrainCommandsOther.STAND })
+            .size({ current: 10 })
+            .sight({ range: [5, 2] })
+            .build();
     }
 
     private handleMovement = (to: DirectionMovementValue) => {
