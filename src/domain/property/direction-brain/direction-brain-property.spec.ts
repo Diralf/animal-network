@@ -2,6 +2,7 @@ import { World } from '../../world/world';
 import { DirectionMovementProperty, DirectionMovementValue } from '../direction-movement/direction-movement-property';
 import { DirectionSightProperty } from '../direction-sight/direction-sight-property';
 import { DirectionProperty, DirectionTurn } from '../direction/direction-property';
+import { NumberProperty } from '../number/number-property';
 import { PointProperty } from '../point/point-property';
 import { RawPoint } from '../point/raw-point';
 import { DirectionBrainProperty, DirectionBrainCommand, BrainCommandsOther } from './direction-brain-property';
@@ -12,7 +13,7 @@ interface Entity {
     position: PointProperty;
     direction: DirectionProperty;
     sight: DirectionSightProperty;
-    visual: number;
+    visual: NumberProperty;
 }
 
 const getPropertiesContainer = (action: DirectionBrainCommand): Entity => {
@@ -22,11 +23,11 @@ const getPropertiesContainer = (action: DirectionBrainCommand): Entity => {
         position: new PointProperty({ x: 0, y: 0 }),
         sight: new DirectionSightProperty({ range: [5, 2] }),
         direction: new DirectionProperty({ initialDirection: { x: 0, y: -1 } }),
-        visual: 2,
+        visual: new NumberProperty({ current: 2 }),
     };
-    entity.sight.owner.ref = entity;
-    entity.brain.owner.ref = entity;
-    entity.movement.owner.ref = entity;
+    entity.sight.owner = entity;
+    entity.brain.owner = entity;
+    entity.movement.owner = entity;
     return entity;
 };
 

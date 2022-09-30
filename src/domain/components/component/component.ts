@@ -4,35 +4,41 @@ import { OnDestroy } from '../../time-thread/on-destroy';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 
-type Opt<T> = T extends void ? null | undefined | void : T;
+export type Opt<T> = T extends void ? null | undefined | void : T;
 
-export function Component<Props = void, Owner = unknown>() {
+export function Component<Comp, Props = void, Owner = unknown>() {
     return class ComponentClass implements PropertyWithOwner<Opt<Owner>>, OnTick, OnDestroy {
-        public owner: PropertyOwner<Opt<Owner>> = new PropertyOwner<Opt<Owner>>();
+        public _owner: PropertyOwner<Opt<Owner>> = new PropertyOwner<Opt<Owner>>();
         protected props!: Opt<Props>;
 
         constructor(props: Opt<Props>) {
             this.props = props;
         }
 
-        public getProps(): Opt<Props> {
-            return this.props;
+        public get owner(): Opt<Owner> {
+            return this._owner.ref;
         }
 
-        public setProps(props: Opt<Props>): void {
-            this.props = props;
+        public set owner(newOwner: Opt<Owner>) {
+            this._owner.ref = newOwner;
+        }
+
+        public getProps(): Opt<Props> {
+            return this.props;
         }
 
         public tick(world: World, time: number): void {}
 
         public onDestroy(world: World): void {}
 
-        static build(owner: Opt<Owner>, props: Opt<Props>) {
-            const inst = new this(props);
-            if (owner) {
-                inst.owner.ref = owner;
-            }
-            return inst;
+        static build(props: Opt<Props>) {
+            return (owner: Opt<Owner>, externalProps?: Opt<Props>): Comp => {
+                const inst = new this(externalProps ?? props);
+                if (owner) {
+                    inst._owner.ref = owner;
+                }
+                return inst as unknown as Comp;
+            };
         }
 
         public __propsType: Props | undefined;

@@ -1,22 +1,25 @@
+import { Entity } from '../../components/components-owner/components-owner';
 import { World } from '../../world/world';
-import { BaseProperty } from '../base/base-property';
+import { NumberProperty } from '../number/number-property';
 import { PointProperty } from '../point/point-property';
 import { RawPoint } from '../point/raw-point';
 import { CollisionProperty } from './collision-property';
 
-interface Entity {
-    id: BaseProperty<number>;
+interface Components {
+    id: NumberProperty;
     collision: CollisionProperty;
     position: PointProperty;
 }
 
-const getEntity = ({ id, point }: { id: number, point: RawPoint }): Entity => {
-    const entity: Entity = {
-        id: new BaseProperty(id),
-        position: new PointProperty(point),
-        collision: new CollisionProperty({ handler: jest.fn() }),
+const getEntity = ({ id, point }: { id: number, point: RawPoint }): Entity<Components> => {
+    const entity: Entity<Components> = {
+        component: {
+            id: new NumberProperty({ current: id }),
+            position: new PointProperty(point),
+            collision: new CollisionProperty({ handler: jest.fn() }),
+        }
     };
-    entity.collision.owner.ref = entity;
+    entity.component.collision.owner = entity.component;
     return entity;
 };
 
@@ -42,7 +45,7 @@ const prepareContext = () => {
             y: 1,
         },
     });
-    const world = new World<Entity>();
+    const world = new World<Components>();
     world.addEntity(entity1, entity2, entity3);
     return {
         entity1,
@@ -60,8 +63,8 @@ describe('CollisionProperty', () => {
             world,
         } = prepareContext();
 
-        const result = entity1.collision.check(world.getEntityList());
-        expect(result.map((entity) => entity.id)).toEqual([entity2.id]);
+        const result = entity1.component.collision.check(world.getEntityList());
+        expect(result.map((entity) => entity.component.id)).toEqual([entity2.component.id]);
     });
 
     it('should emit collision event for collided entities', () => {
@@ -72,11 +75,11 @@ describe('CollisionProperty', () => {
             world,
         } = prepareContext();
 
-        entity1.collision.collide(world);
+        entity1.component.collision.collide(world);
 
-        expect(entity1.collision.getProps().handler).toHaveBeenCalledTimes(1);
-        expect(entity1.collision.getProps().handler).toHaveBeenCalledWith(expect.objectContaining({ other: [entity2] }));
-        expect(entity2.collision.getProps().handler).not.toHaveBeenCalled();
-        expect(entity3.collision.getProps().handler).not.toHaveBeenCalled();
+        expect(entity1.component.collision.getProps().handler).toHaveBeenCalledTimes(1);
+        expect(entity1.component.collision.getProps().handler).toHaveBeenCalledWith(expect.objectContaining({ other: [entity2] }));
+        expect(entity2.component.collision.getProps().handler).not.toHaveBeenCalled();
+        expect(entity3.component.collision.getProps().handler).not.toHaveBeenCalled();
     });
 });

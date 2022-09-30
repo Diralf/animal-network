@@ -1,4 +1,5 @@
 import { Component } from '../../components/component/component';
+import { Entity } from '../../components/components-owner/components-owner';
 import { EntityList } from '../../property-container-list/entity-list';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
@@ -10,15 +11,15 @@ interface Props {
     handler(options: CollisionOptions): void;
 }
 
-export class CollisionProperty extends Component<Props, Positionable> implements OnTick {
-    public check<Entity extends Positionable>(list: EntityList<Entity | Positionable>): Entity[] {
-        const ownPosition = this.owner.ref.position.current;
+export class CollisionProperty extends Component<CollisionProperty, Props, Positionable>() implements OnTick {
+    public check<Components extends Positionable>(list: EntityList<Components | Positionable>): Entity<Components>[] {
+        const ownPosition = this.owner.position.current;
         const entitiesWithPositions = list.findWithType<Positionable>(
             positionableGuard,
-            (instance) => instance.position.isEqualValue(ownPosition),
+            (instance) => instance.component.position.isEqualValue(ownPosition),
         )
-            .filter((entity) => entity !== this.owner.ref);
-        return entitiesWithPositions as Entity[];
+            .filter((entity) => entity.component !== this.owner);
+        return entitiesWithPositions as Entity<Components>[];
     }
 
     public collide(world: World<Positionable>): void {

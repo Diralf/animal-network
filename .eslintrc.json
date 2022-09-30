@@ -401,7 +401,7 @@
       "error",
       "always-multiline"
     ],
-    "new-cap": "error",
+    "new-cap": "off",
     "new-parens": "error",
     "newline-per-chained-call": "error",
     "no-alert": "error",

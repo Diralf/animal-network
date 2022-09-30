@@ -26,12 +26,12 @@ interface Props {
     handler: DirectionBrainHandler;
 }
 
-export class DirectionBrainProperty extends Component<Props, DirectionBrainOwner> implements PropertyWithOwner<DirectionBrainOwner>, OnTick {
+export class DirectionBrainProperty extends Component<DirectionBrainProperty, Props, DirectionBrainOwner>() implements PropertyWithOwner<DirectionBrainOwner>, OnTick {
     public lastCommand: DirectionBrainCommand | null = null;
 
     public decide(world: World): DirectionBrainCommand {
         return this.props.handler({
-            owner: this.owner.ref,
+            owner: this.owner,
             world,
         });
     }
@@ -39,10 +39,10 @@ export class DirectionBrainProperty extends Component<Props, DirectionBrainOwner
     public applyDecision(world: World): void {
         const nextStep = this.decide(world);
         if (nextStep in DirectionMovementValue) {
-            this.owner.ref.movement.move(nextStep as DirectionMovementValue);
+            this.owner.movement.move(nextStep as DirectionMovementValue);
         }
         if (nextStep in DirectionTurn) {
-            this.owner.ref.direction.turn(nextStep as DirectionTurn);
+            this.owner.direction.turn(nextStep as DirectionTurn);
         }
         this.lastCommand = nextStep;
     }

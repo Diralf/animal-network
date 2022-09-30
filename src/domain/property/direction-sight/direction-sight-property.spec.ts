@@ -1,6 +1,8 @@
 import { FieldBuilder } from '../../../clients/console/utils/field-builder';
+import { Entity } from '../../components/components-owner/components-owner';
 import { World } from '../../world/world';
 import { DirectionProperty } from '../direction/direction-property';
+import { NumberProperty } from '../number/number-property';
 import { PointProperty } from '../point/point-property';
 import { RawPoint } from '../point/raw-point';
 import { visualEntitiesAsString } from '../utils/visual-entities-as-string';
@@ -8,8 +10,8 @@ import { DirectionSightProperty } from './direction-sight-property';
 
 export interface FieldOptions {
     stringField: string;
-    availableEntities: Record<string, (point: RawPoint) => unknown>;
-    staticEntities?: Array<() => unknown>;
+    availableEntities: Record<string, (point: RawPoint) => Entity<unknown>>;
+    staticEntities?: Array<() => Entity<unknown>>;
 }
 
 const buildWorld = ({ stringField, availableEntities, staticEntities }: FieldOptions): World => {
@@ -40,31 +42,40 @@ function makeDirectionSight(direction: RawPoint) {
                 `),
         availableEntities: {
             '7': (point: RawPoint) => ({
-                position: new PointProperty(point),
-                visual: 7,
+                component: {
+                    position: new PointProperty(point),
+                    visual: new NumberProperty({ current: 7 }),
+                },
             }),
             '2': (point: RawPoint) => ({
-                position: new PointProperty(point),
-                visual: 2,
+                component: {
+                    position: new PointProperty(point),
+                    visual: new NumberProperty({ current: 2 }),
+                },
             }),
             '3': (point: RawPoint) => ({
-                position: new PointProperty(point),
-                visual: 3,
+                component: {
+                    position: new PointProperty(point),
+                    visual: new NumberProperty({ current: 3 }),
+                },
             }),
             '4': (point: RawPoint) => ({
-                position: new PointProperty(point),
-                visual: 4,
+                component: {
+                    position: new PointProperty(point),
+                    visual: new NumberProperty({ current: 4 }),
+                },
             }),
             '5': (point: RawPoint) => ({
-                position: new PointProperty(point),
-                direction: new DirectionProperty({ initialDirection: direction }),
-                visual: 5,
+                component: {
+                    position: new PointProperty(point),
+                    direction: new DirectionProperty({ initialDirection: direction }),
+                    visual: new NumberProperty({ current: 5 }),
+                },
             }),
         },
     });
-    const owner = world.getEntityList()
-        .find((instance: any) => instance.visual === 5)[0];
-    directionSight.owner.ref = owner as any;
+    const owner = world.getEntityList().find((instance: Entity<any>) => instance.component.visual.current === 5)[0];
+    directionSight.owner = owner.component as any;
     return {
         directionSight,
         world,

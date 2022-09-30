@@ -1,18 +1,23 @@
+import { ComponentOwnerDecorator } from '../../../domain/components/components-owner/component-owner.decorator';
+import { ComponentsOwner, ComponentsBuilders } from '../../../domain/components/components-owner/components-owner';
+import { Property } from '../../../domain/property/base/base-property';
 import { NumberProperty } from '../../../domain/property/number/number-property';
 import { PointProperty } from '../../../domain/property/point/point-property';
-import { Positionable } from '../../../domain/property/point/positionable';
-import { RawPoint } from '../../../domain/property/point/raw-point';
-import { Visualable } from '../../../domain/property/sight/visualable';
-import { Taggable } from '../types/taggable';
 import { InstanceTypes } from '../types/instance-types';
 
-export class Grass implements Positionable, Taggable, Visualable {
-    public readonly tags = [InstanceTypes.GRASS];
-    public readonly visual = 3;
-    public position: PointProperty;
-    public size: NumberProperty = new NumberProperty({ current: 10 });
+interface Components {
+    tags: Property<InstanceTypes[]>;
+    visual: NumberProperty;
+    position: PointProperty;
+    size: NumberProperty;
+}
 
-    constructor({ position }: { position: RawPoint }) {
-        this.position = new PointProperty(position);
-    }
+@ComponentOwnerDecorator()
+export class Grass extends ComponentsOwner<Components> {
+    protected components = (): ComponentsBuilders<Components> => ({
+        tags: Property<InstanceTypes[]>().build([InstanceTypes.GRASS]),
+        size: NumberProperty.build({ current: 10 }),
+        position: PointProperty.build(),
+        visual: NumberProperty.build({ current: 3 }),
+    });
 }

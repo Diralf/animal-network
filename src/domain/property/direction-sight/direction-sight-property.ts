@@ -2,7 +2,9 @@ import { Component } from '../../components/component/component';
 import { EntityList } from '../../property-container-list/entity-list';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
-import { Directional } from '../direction/directional';
+import { DirectionProperty } from '../direction/direction-property';
+import { NumberProperty } from '../number/number-property';
+import { PointProperty } from '../point/point-property';
 import { Positionable } from '../point/positionable';
 import { RawPoint } from '../point/raw-point';
 import { Visualable } from '../sight/visualable';
@@ -10,23 +12,25 @@ import { rotateMatrix } from '../utils/rotate-matrix';
 import { rotateVector } from '../utils/rotate-vector';
 import { visualEntitiesAsString } from '../utils/visual-entities-as-string';
 
-type Owner = Positionable & Visualable & Directional;
+interface Owner {
+    position: PointProperty;
+    direction: DirectionProperty;
+    visual: NumberProperty;
+}
 
 interface Props {
     range: [number, number];
 }
 
-export class DirectionSightProperty extends Component<Props, Owner> implements OnTick {
-    private readonly _range: [number, number];
+export class DirectionSightProperty extends Component<DirectionSightProperty, Props, Owner>() implements OnTick {
     public current: number[][] = [];
 
     constructor(props: Props = { range: [1, 1] }) {
         super(props);
-        this._range = props.range;
     }
 
     public get range(): [number, number] {
-        return this._range;
+        return this.props.range;
     }
 
     public getSightMask() {
@@ -39,7 +43,7 @@ export class DirectionSightProperty extends Component<Props, Owner> implements O
     }
 
     public getRotatedSightMask() {
-        const directionProperty = this.owner.ref.direction;
+        const directionProperty = this.owner.direction;
         const angle = directionProperty.getAsAngle();
         const { maskStart, maskEnd } = this.getSightMask();
         // const [maskS, maskE] = [{ x: 0, y: forward }, { x: 0, y: 0 }];
@@ -51,7 +55,7 @@ export class DirectionSightProperty extends Component<Props, Owner> implements O
     }
 
     public getSightFieldArea(): [RawPoint, RawPoint] {
-        const { x, y } = this.owner.ref.position.current;
+        const { x, y } = this.owner.position.current;
         const [rotS, rotE] = this.getRotatedSightMask();
         const [sx, sy] = [x + Math.min(rotS.x, rotE.x), y + Math.min(rotS.y, rotE.y)];
         const [ex, ey] = [x + Math.max(rotS.x, rotE.x), y + Math.max(rotS.y, rotE.y)];
@@ -63,11 +67,11 @@ export class DirectionSightProperty extends Component<Props, Owner> implements O
         for (let j = sy; j <= ey; j++) {
             const row = [];
             for (let i = sx; i <= ex; i++) {
-                const [entity] = list.find((instance) => instance.position.isEqualValue({
+                const [entity] = list.find((instance) => instance.component.position.isEqualValue({
                     x: i,
                     y: j,
                 }));
-                const cell = entity?.visual ?? 1;
+                const cell = entity?.component.visual.current ?? 1;
                 row.push(cell);
             }
             newCurrent.push(row);
@@ -77,7 +81,7 @@ export class DirectionSightProperty extends Component<Props, Owner> implements O
     }
 
     public rotateFieldSight(newCurrent: number[][]) {
-        const directionProperty = this.owner.ref.direction;
+        const directionProperty = this.owner.direction;
         const angle = directionProperty.getAsAngle() / 90;
         switch (angle) {
             case 1:

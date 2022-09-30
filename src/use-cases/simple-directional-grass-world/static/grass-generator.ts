@@ -1,3 +1,4 @@
+import { ComponentsOwner, ComponentsBuilders } from '../../../domain/components/components-owner/components-owner';
 import { Positionable } from '../../../domain/property/point/positionable';
 import { OnTick } from '../../../domain/time-thread/on-tick';
 import { World } from '../../../domain/world/world';
@@ -5,13 +6,18 @@ import { Taggable } from '../types/taggable';
 import { Grass } from '../entities/grass';
 import { InstanceTypes } from '../types/instance-types';
 
-export class GrassGenerator implements OnTick {
+export class GrassGenerator extends ComponentsOwner<any> implements OnTick {
     private initial = true;
     constructor(private rate: number, private maxGrassAtOnce: number = 100) {
+        super();
+    }
+
+    protected components(): ComponentsBuilders<any> {
+        return {};
     }
 
     public tick(world: World<Taggable & Positionable>, time: number): void {
-        const grassInstances = world.getEntityList().find((instance) => instance.tags.includes(InstanceTypes.GRASS));
+        const grassInstances = world.getEntityList().find((instance) => instance.component.tags.current.includes(InstanceTypes.GRASS));
         if (this.initial) {
             this.spawnMany(this.maxGrassAtOnce, world);
             this.initial = false;
@@ -37,7 +43,7 @@ export class GrassGenerator implements OnTick {
             x: Math.floor(Math.random() * world.width),
             y: Math.floor(Math.random() * world.height),
         };
-        const entitiesByPosition = world.getEntityList().find((instance) => instance.position.isEqualValue(newPoint));
+        const entitiesByPosition = world.getEntityList().find((instance) => instance.component.position.isEqualValue(newPoint));
 
         if (entitiesByPosition.length === 0) {
             world.addEntity(new Grass({ position: newPoint }));

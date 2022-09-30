@@ -2,13 +2,18 @@ import * as tf from '@tensorflow/tfjs-node';
 import * as fs from 'fs';
 import { DirectionBrainCommand, BrainCommandsOther } from '../../domain/property/direction-brain/direction-brain-property';
 import { DirectionMovementValue } from '../../domain/property/direction-movement/direction-movement-property';
-import { DirectionSightable } from '../../domain/property/direction-sight/direction-sightable';
+import { DirectionSightProperty } from '../../domain/property/direction-sight/direction-sight-property';
 import { DirectionTurn } from '../../domain/property/direction/direction-property';
 import { NumberProperty } from '../../domain/property/number/number-property';
 import { memo } from '../../domain/property/utils/memo';
 import { visualEntitiesAsString } from '../../domain/property/utils/visual-entities-as-string';
 
-export type AnimalGrassNetworkPredictInput = DirectionSightable & { size: NumberProperty, taste: number, energy: NumberProperty };
+export interface AnimalGrassNetworkPredictInput {
+    sight: DirectionSightProperty;
+    size: NumberProperty;
+    taste: NumberProperty;
+    energy: NumberProperty;
+}
 
 interface LifeFrame {
     sight: number[][][];
@@ -74,14 +79,14 @@ export class AnimalDirectionGrassNetwork {
 
     public predict({ sight, size, taste, energy }: AnimalGrassNetworkPredictInput): DirectionBrainCommand {
         return tf.tidy(() => {
-            const normalizedSight = this.getNormalizedSight(sight.current, size.current, taste, energy.current);
+            const normalizedSight = this.getNormalizedSight(sight.current, size.current, taste.current, energy.current);
 
             const { command, output } = this.memoPredict.call(normalizedSight);
 
             this.lifeFrames.push({
                 sight: normalizedSight,
                 output,
-                taste,
+                taste: taste.current,
                 energy: energy.current,
             });
 

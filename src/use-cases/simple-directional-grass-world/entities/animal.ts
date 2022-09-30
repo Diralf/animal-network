@@ -1,62 +1,72 @@
-import {
-    ComponentsOwner,
-    ExternalComponentsProps,
-} from '../../../domain/components/components-owner/components-owner';
+import { ComponentOwnerDecorator } from '../../../domain/components/components-owner/component-owner.decorator';
+import { ComponentsOwner, ComponentsBuilders } from '../../../domain/components/components-owner/components-owner';
+import { Property } from '../../../domain/property/base/base-property';
 import { CollisionOptions } from '../../../domain/property/collision/collision-options';
 import { CollisionProperty } from '../../../domain/property/collision/collision-property';
-import { DirectionBrainProperty } from '../../../domain/property/direction-brain/direction-brain-property';
+import { DirectionBrainProperty, BrainCommandsOther } from '../../../domain/property/direction-brain/direction-brain-property';
 import { DirectionMovementProperty, DirectionMovementValue } from '../../../domain/property/direction-movement/direction-movement-property';
 import { DirectionSightProperty } from '../../../domain/property/direction-sight/direction-sight-property';
-import { DirectionSightable } from '../../../domain/property/direction-sight/direction-sightable';
 import { DirectionProperty } from '../../../domain/property/direction/direction-property';
-import { Directional } from '../../../domain/property/direction/directional';
 import { NumberProperty } from '../../../domain/property/number/number-property';
 import { PointProperty } from '../../../domain/property/point/point-property';
-import { Positionable } from '../../../domain/property/point/positionable';
-import { RawPoint } from '../../../domain/property/point/raw-point';
-import { Visualable } from '../../../domain/property/sight/visualable';
 import { OnDestroy } from '../../../domain/time-thread/on-destroy';
 import { OnTick } from '../../../domain/time-thread/on-tick';
 import { World } from '../../../domain/world/world';
 import { isTaggableGuard } from '../types/is-taggable-guard';
-import { Taggable } from '../types/taggable';
 import { Grass } from './grass';
 import { InstanceTypes } from '../types/instance-types';
 import { Hole } from './hole';
 
-export interface AnimalOptions {
-    position: RawPoint;
-    sightRange?: [number, number];
-    size?: number;
-    metabolizeSpeed?: number;
+interface Components {
+    tags: Property<InstanceTypes[]>;
+    visual: NumberProperty;
+    position: PointProperty;
+    size: NumberProperty;
+    metabolizeSpeed: NumberProperty;
+    direction: DirectionProperty;
+    sight: DirectionSightProperty;
+    movement: DirectionMovementProperty;
+    collision: CollisionProperty;
+    energy: NumberProperty;
+    brain: DirectionBrainProperty;
+    taste: NumberProperty;
 }
 
-export class Animal extends ComponentsOwner<Animal> implements Positionable, Taggable, Directional, DirectionSightable, Visualable, OnTick, OnDestroy {
-    public readonly tags = [InstanceTypes.ANIMAL];
-    public readonly visual = 6;
-    public position: PointProperty = this.component({ owner: this, class: PointProperty, name: 'position' });
-    public size: NumberProperty = this.component({ owner: this, class: NumberProperty, name: 'size' });
-    public metabolizeSpeed: NumberProperty = this.component({ owner: this, class: NumberProperty, name: 'metabolizeSpeed' });
-    public direction: DirectionProperty = this.component({ owner: this, class: DirectionProperty, name: 'direction' });
-    public sight: DirectionSightProperty = this.component({ owner: this, class: DirectionSightProperty, props: { range: [5, 2] }, name: 'sight' });
-    public movement: DirectionMovementProperty = this.component({ owner: this, class: DirectionMovementProperty });
-    public collision: CollisionProperty = this.component({ owner: this, class: CollisionProperty, name: 'collision', props: {
-        handler: (options: CollisionOptions) => {
-            this.handleCollision(options);
-        },
-    }});
+export type AnimalComponents = Components;
+
+@ComponentOwnerDecorator()
+export class Animal extends ComponentsOwner<Components> implements OnTick, OnDestroy {
     public score = 0;
     public fitness = 0;
     public taste = 0;
-    public energy: NumberProperty = this.component({ owner: this, class: NumberProperty, name: 'energy', props: {
-        min: 0, max: 100, defaultValue: 100,
-    }});
-    public brain!: DirectionBrainProperty;
 
-    constructor(options?: ExternalComponentsProps<Animal>) {
-        super(options);
+    protected onInit(): void {
+        this.component.movement.publisher.subscribe(this.handleMovement);
+    }
 
-        this.movement.publisher.subscribe(this.handleMovement);
+    protected components(): ComponentsBuilders<Components> {
+        return {
+            tags: Property<InstanceTypes[]>().build([InstanceTypes.ANIMAL]),
+            visual: NumberProperty.build({ current: 6 }),
+            position: PointProperty.build(),
+            size: NumberProperty.build(),
+            metabolizeSpeed: NumberProperty.build(),
+            direction: DirectionProperty.build(),
+            sight: DirectionSightProperty.build({ range: [5, 2] }),
+            movement: DirectionMovementProperty.build(),
+            collision: CollisionProperty.build({
+                handler: (options: CollisionOptions) => {
+                    this.handleCollision(options);
+                },
+            }),
+            energy: NumberProperty.build({
+                min: 0,
+                max: 100,
+                defaultValue: 100,
+            }),
+            taste: NumberProperty.build({ current: 0 }),
+            brain: DirectionBrainProperty.build({ handler: () => BrainCommandsOther.STAND }),
+        };
     }
 
     private handleMovement = (to: DirectionMovementValue) => {
@@ -76,7 +86,7 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
     private handleCollision({ other, world }: CollisionOptions): void {
         const holes = other.filter((entity) => {
             if (isTaggableGuard(entity)) {
-                return entity.tags.includes(InstanceTypes.HOLE);
+                return entity.tags.current.includes(InstanceTypes.HOLE);
             }
             return false;
         }) as Hole[];
@@ -85,7 +95,7 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
         }
         const grass = other.filter((entity) => {
             if (isTaggableGuard(entity)) {
-                return entity.tags.includes(InstanceTypes.GRASS);
+                return entity.tags.current.includes(InstanceTypes.GRASS);
             }
             return false;
         }) as Grass[];
@@ -93,36 +103,36 @@ export class Animal extends ComponentsOwner<Animal> implements Positionable, Tag
             this.taste = 1;
             this.addEnergy(10);
         }
-        const totalScore = grass.reduce((acc, entity) => acc + entity.size.current, 0);
-        this.size.current += totalScore;
+        const totalScore = grass.reduce((acc, entity) => acc + entity.component.size.current, 0);
+        this.component.size.current += totalScore;
         world.removeEntity(...grass);
     }
 
-    public tick(world: World<Animal>, time: number): void {
+    public tick(world: World<Components>, time: number): void {
         super.tick(world, time);
         this.taste = 0;
         this.score += 1;
-        this.size.current -= this.metabolizeSpeed.current;
-        if (this.size.current < 0) {
+        this.component.size.current -= this.component.metabolizeSpeed.current;
+        if (this.component.size.current < 0) {
             world.removeEntity(this);
         }
-        this.movement.active = this.energy.current > 10;
+        this.component.movement.active = this.component.energy.current > 10;
         this.addEnergy(1);
     }
 
     private addEnergy(energy: number, onFailed?: number) {
         try {
-            this.energy.current += energy;
+            this.component.energy.current += energy;
         } catch (e) {
             if (onFailed) {
-                this.energy.current = onFailed;
+                this.component.energy.current = onFailed;
             }
         }
     }
 
-    onDestroy(world: World<Animal>): void {
+    onDestroy(world: World<Components>): void {
         world.savedEntityList.add(this);
-        this.movement.publisher.unsubscribe(this.handleMovement);
+        this.component.movement.publisher.unsubscribe(this.handleMovement);
         super.onDestroy(world);
     }
 }

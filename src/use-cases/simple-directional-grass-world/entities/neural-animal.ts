@@ -1,15 +1,20 @@
+import { ComponentOwnerDecorator } from '../../../domain/components/components-owner/component-owner.decorator';
 import {
     DirectionBrainProperty,
     DirectionBrainCommand,
 } from '../../../domain/property/direction-brain/direction-brain-property';
 import { World } from '../../../domain/world/world';
 import { AnimalDirectionGrassNetwork } from '../../../network/animal-direction-grass-network/animal-direction-grass-network';
-import { Animal } from './animal';
+import { Animal, AnimalComponents } from './animal';
 
+@ComponentOwnerDecorator()
 export class NeuralAnimal extends Animal {
-    public brain: DirectionBrainProperty = this.component({ owner: this, class: DirectionBrainProperty, name: 'brain', props: {
-        handler: () => this.brainHandler(),
-    }});
+    protected components() {
+        return ({
+            ...super.components(),
+            brain: DirectionBrainProperty.build({ handler: () => this.brainHandler() }),
+        });
+    }
     private network = new AnimalDirectionGrassNetwork();
 
     async loadFromFile() {
@@ -28,13 +33,8 @@ export class NeuralAnimal extends Animal {
         this.network = await network?.copyByFile(false);
     }
 
-    public tick(world: World<Animal>, time: number): void {
-        super.tick(world, time);
-        this.brain.tick(world);
-    }
-
     private brainHandler(): DirectionBrainCommand {
-        return this.network.predict(this);
+        return this.network.predict(this.component);
     }
 
     dispose() {

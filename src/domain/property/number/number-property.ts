@@ -7,10 +7,10 @@ interface Props {
     current?: number;
 }
 
-export class NumberProperty extends BaseProperty<number, Props | undefined> {
-    private readonly _default: number;
-    private readonly _min: number;
-    private readonly _max: number;
+export class NumberProperty extends BaseProperty<NumberProperty, number, Props | undefined>() {
+    private _default!: number;
+    private _min!: number;
+    private _max!: number;
 
     constructor(options: Props = {}) {
         super(options);
@@ -19,6 +19,14 @@ export class NumberProperty extends BaseProperty<number, Props | undefined> {
 
         this._default = this.validate(options.defaultValue ?? 0);
         this.current = this.validate(options.current ?? this._default);
+    }
+
+    protected getCurrent(): number {
+        return this.props?.current ?? this._default;
+    }
+
+    protected setCurrent(value: number): void {
+        this.props!.current = value;
     }
 
     public get current(): number {

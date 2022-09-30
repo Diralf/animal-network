@@ -1,3 +1,4 @@
+import { Entity } from '../../domain/components/components-owner/components-owner';
 import { Positionable } from '../../domain/property/point/positionable';
 import { RawPoint } from '../../domain/property/point/raw-point';
 import { Visualable } from '../../domain/property/sight/visualable';
@@ -10,11 +11,12 @@ import { InstanceTypes } from './types/instance-types';
 import { Taggable } from './types/taggable';
 
 type SimpleGrassWorldEntityTypes = Positionable & Taggable & Visualable;
+type SimpleGrassWorldEntity = Entity<Positionable & Taggable & Visualable>;
 
 export interface FieldOptions {
     stringField: string;
-    availableEntities: Record<string, (point: RawPoint) => SimpleGrassWorldEntityTypes>;
-    staticEntities: Array<() => unknown>;
+    availableEntities: Record<string, (point: RawPoint) => SimpleGrassWorldEntity>;
+    staticEntities: Array<() => Entity<unknown>>;
 }
 
 export class SimpleGrassWorld {
@@ -30,8 +32,8 @@ export class SimpleGrassWorld {
         this.world.tick();
     }
 
-    public findByTag(tag: InstanceTypes): SimpleGrassWorldEntityTypes[] {
-        return this.world.getEntityList().find((instance) => instance.tags.includes(tag));
+    public findByTag(tag: InstanceTypes): SimpleGrassWorldEntity[] {
+        return this.world.getEntityList().find((instance) => instance.component.tags.current.includes(tag));
     }
 
     async startOneByOne(param: { width: number; height: number, maxGrass: number, network?: AnimalDirectionGrassNetwork }) {
@@ -63,8 +65,8 @@ export class SimpleGrassWorld {
     public getEntitiesByRect(
         start: RawPoint,
         end: RawPoint,
-        factory: (position: RawPoint) => SimpleGrassWorldEntityTypes,
-    ): SimpleGrassWorldEntityTypes[] {
+        factory: (position: RawPoint) => SimpleGrassWorldEntity,
+    ): SimpleGrassWorldEntity[] {
         const entities = [];
 
         for (let i = start.y; i <= end.y; i++) {

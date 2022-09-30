@@ -7,16 +7,16 @@ export enum DirectionTurn {
     TURN_RIGHT = 'TURN_RIGHT',
 }
 
-interface Options {
+interface Props {
     initialDirection: RawPoint;
 }
 
-export class DirectionProperty extends Component<Options | undefined> {
-    private current: RawPoint;
+export class DirectionProperty extends Component<DirectionProperty, Props | undefined>() {
+    private current!: RawPoint;
 
-    constructor(options: Options = { initialDirection: { x: 0, y: -1 } }) {
-        super(options);
-        this.current = options.initialDirection;
+    constructor(props: Props = { initialDirection: { x: 0, y: -1 } }) {
+        super(props);
+        this.current = props.initialDirection;
     }
 
     turn(to: DirectionTurn) {

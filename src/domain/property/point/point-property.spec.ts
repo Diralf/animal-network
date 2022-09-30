@@ -1,5 +1,4 @@
 import { PointProperty } from './point-property';
-import { BaseProperty } from '../base/base-property';
 
 describe('PointProperty', () => {
     it('should be truthy', () => {
@@ -17,7 +16,7 @@ describe('PointProperty', () => {
             y: 0,
         });
 
-        expect(point).toBeInstanceOf(BaseProperty);
+        expect(point).toBeInstanceOf(PointProperty);
     });
 
     it.each([

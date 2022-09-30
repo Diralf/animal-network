@@ -1,3 +1,4 @@
+import { Entity } from '../components/components-owner/components-owner';
 import { EntityList } from '../property-container-list/entity-list';
 import { Positionable } from '../property/point/positionable';
 import { RawPoint } from '../property/point/raw-point';
@@ -7,8 +8,8 @@ import { OnDestroy } from '../time-thread/on-destroy';
 import { isOnTickGuard, OnTick } from '../time-thread/on-tick';
 import { TimeThread } from '../time-thread/time-thread';
 
-export class World<Entity = unknown, Static = unknown> {
-    private entityList: EntityList<Entity> = new EntityList();
+export class World<Components = unknown, Static = unknown> {
+    private entityList: EntityList<Components> = new EntityList();
     private staticList: EntityList<Static> = new EntityList();
     private timeThread = new TimeThread();
     private time = 0;
@@ -17,24 +18,24 @@ export class World<Entity = unknown, Static = unknown> {
     public height: number = 0;
     public savedEntityList = new EntityList();
 
-    private entityMap: Map<string, (point: RawPoint) => Entity> = new Map();
+    private entityMap: Map<string, (point: RawPoint) => Entity<Components>> = new Map();
 
     constructor() {
     }
 
-    public addEntity(...instances: Entity[]): void {
+    public addEntity(...instances: Entity<Components>[]): void {
         this.entityList.add(...instances);
         const onTickInstances = instances.filter((instance) => isOnTickGuard(instance)) as unknown as OnTick[];
         this.timeThread.addListener(...onTickInstances);
     }
 
-    public addStatic(...instances: Static[]): void {
+    public addStatic(...instances: Entity<Static>[]): void {
         this.staticList.add(...instances);
         const onTickInstances = instances.filter((instance) => isOnTickGuard(instance)) as unknown as OnTick[];
         this.timeThread.addListener(...onTickInstances);
     }
 
-    public removeEntity(...instances: Entity[]): void {
+    public removeEntity(...instances: Entity<Components>[]): void {
         this.entityList.remove(...instances);
         const onTickInstances = instances.filter((instance) => isOnTickGuard(instance)) as unknown as OnTick[];
         this.timeThread.removeListener(...onTickInstances);
@@ -50,11 +51,11 @@ export class World<Entity = unknown, Static = unknown> {
         return this.staticList;
     }
 
-    registerEntities(entityMap: Map<string, (point: RawPoint) => Entity>) {
+    registerEntities(entityMap: Map<string, (point: RawPoint) => Entity<Components>>) {
         this.entityMap = entityMap;
     }
 
-    registerStatic(staticList: Array<() => Static>) {
+    registerStatic(staticList: Array<() => Entity<Static>>) {
         staticList.forEach((factory) => {
             this.addStatic(factory() as any);
         });
@@ -91,10 +92,10 @@ export class World<Entity = unknown, Static = unknown> {
             const row: number[] = [];
             for (let x = 0; x < this.width; x++) {
                 const entity = entityList.findWithType<Positionable & Visualable>(
-                    (instance): instance is Positionable & Visualable => 'position' in instance && 'visual' in instance,
-                    (instance) => instance.position.isEqualValue({ x, y }),
+                    (instance): instance is Entity<Positionable & Visualable> => 'position' in instance && 'visual' in instance,
+                    (instance) => instance.component.position.isEqualValue({ x, y }),
                 );
-                row.push(entity[0]?.visual ?? 1);
+                row.push(entity[0]?.component.visual.current ?? 1);
             }
             matrix.push(row);
         }

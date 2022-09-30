@@ -10,7 +10,7 @@ export enum DirectionMovementValue {
 
 type Owner = Directional & Positionable;
 
-export class DirectionMovementProperty extends Component<void, Owner> {
+export class DirectionMovementProperty extends Component<DirectionMovementProperty, void, Owner>() {
     public publisher = new Publisher<[DirectionMovementValue]>();
     public active = true;
 
@@ -27,9 +27,9 @@ export class DirectionMovementProperty extends Component<void, Owner> {
                 speed = -1;
                 break;
         }
-        const currentDirection = this.owner.ref.direction.getCurrent();
-        const currentPoint = this.owner.ref.position.current;
-        this.owner.ref.position.current = {
+        const currentDirection = this.owner.direction.getCurrent();
+        const currentPoint = this.owner.position.current;
+        this.owner.position.current = {
             x: currentPoint.x + (currentDirection.x * speed),
             y: currentPoint.y + (currentDirection.y * speed),
         };

@@ -23,7 +23,7 @@ export class PropertiesContainer<Properties extends PropertiesContainerBase<Prop
         this.set = this.propertiesToSetInstance(propertyKeys);
         allProperties.forEach(([, property]) => {
             if (isPropertyWithOwner(property)) {
-                property.owner.ref = this;
+                property.owner = this;
             }
             if (isOnTickGuard(property)) {
                 this.listeners.push(property);
