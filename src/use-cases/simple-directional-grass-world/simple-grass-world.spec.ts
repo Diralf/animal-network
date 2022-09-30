@@ -266,6 +266,8 @@ describe('Directional SimpleGrassWorld', () => {
             );
             const [animal] = simpleGrassWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
 
+            const sight = animal.component.sight;
+
             simpleGrassWorld.tick();
             expect(animal.component.sight.asString()).toEqual(FieldBuilder.build(`
                 _,_,_,_,_
@@ -277,10 +279,18 @@ describe('Directional SimpleGrassWorld', () => {
             `));
 
             simpleGrassWorld.tick();
+            expect(animal.component.sight.asString()).toEqual(FieldBuilder.build(`
+                _,_,_,_,_
+                _,_,_,_,_
+                _,_,_,_,_
+                _,_,_,_,_
+                9,9,9,9,9
+                9,_,6,_,9
+            `));
             simpleGrassWorld.tick();
             simpleGrassWorld.tick();
 
-            expect(animal.component.sight.asString()).toEqual(FieldBuilder.build(`
+            expect(sight.asString()).toEqual(FieldBuilder.build(`
                 _,_,_,_,_
                 _,_,_,_,_
                 _,_,_,_,_

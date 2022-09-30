@@ -4,7 +4,6 @@ export function ComponentOwnerDecorator() {
     return function<
         Components extends Record<keyof Components, UnknownComponent>,
         Actor extends ComponentsOwner<Components>,
-        Child extends Actor,
         Ctor extends new (...args: any) => Actor
     >(
         Constructor: Ctor,

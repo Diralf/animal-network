@@ -86,7 +86,7 @@ export class Animal extends ComponentsOwner<Components> implements OnTick, OnDes
     private handleCollision({ other, world }: CollisionOptions): void {
         const holes = other.filter((entity) => {
             if (isTaggableGuard(entity)) {
-                return entity.tags.current.includes(InstanceTypes.HOLE);
+                return entity.component.tags.current.includes(InstanceTypes.HOLE);
             }
             return false;
         }) as Hole[];
@@ -95,7 +95,7 @@ export class Animal extends ComponentsOwner<Components> implements OnTick, OnDes
         }
         const grass = other.filter((entity) => {
             if (isTaggableGuard(entity)) {
-                return entity.tags.current.includes(InstanceTypes.GRASS);
+                return entity.component.tags.current.includes(InstanceTypes.GRASS);
             }
             return false;
         }) as Grass[];

@@ -92,7 +92,7 @@ export class World<Components = unknown, Static = unknown> {
             const row: number[] = [];
             for (let x = 0; x < this.width; x++) {
                 const entity = entityList.findWithType<Positionable & Visualable>(
-                    (instance): instance is Entity<Positionable & Visualable> => 'position' in instance && 'visual' in instance,
+                    (instance): instance is Entity<Positionable & Visualable> => 'position' in instance.component && 'visual' in instance.component,
                     (instance) => instance.component.position.isEqualValue({ x, y }),
                 );
                 row.push(entity[0]?.component.visual.current ?? 1);
