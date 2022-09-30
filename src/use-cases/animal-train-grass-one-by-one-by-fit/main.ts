@@ -6,14 +6,14 @@ import { InstanceTypes } from '../simple-directional-grass-world/types/instance-
 
 function displayWorld(simpleWorld: SimpleGrassWorld) {
     const animals = simpleWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
-    const sizes = animals.map((animal) => animal.size.current);
+    const sizes = animals.map((animal) => animal.component.size.current);
     const time = simpleWorld.world.getTime();
 
     console.log(tf.memory());
     console.log(`ID: ${simpleWorld.world.id} `.padEnd(40, '-'));
-    console.log(`size: ${sizes}`, `time: ${time}`, `taste: ${animals[0].taste}`, `energy: ${animals[0].energy.current}`);
-    console.log((animals[0] as NeuralAnimal).brain.lastCommand);
-    console.log(animals[0].sight.asString());
+    console.log(`size: ${sizes}`, `time: ${time}`, `taste: ${animals[0].taste}`, `energy: ${animals[0].component.energy.current}`);
+    console.log((animals[0] as NeuralAnimal).component.brain.lastCommand);
+    console.log(animals[0].component.sight.asString());
     console.log(simpleWorld.world.print(simpleWorld.world.getEntityList()), ' ');
 }
 
@@ -38,7 +38,7 @@ export async function main() {
     }
 
     async function step() {
-        isGenerationView = generation % 100 === 0;
+        isGenerationView = generation % 1 === 0;
         activeWorlds.forEach((world, index) => {
             world.tick();
 
