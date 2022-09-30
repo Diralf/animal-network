@@ -167,25 +167,20 @@ describe('ComponentsOwner', () => {
             });
         });
 
-        /* { /!** expect TS error when specified other component *!/
+        { /** expect TS error when specified other component */
             class NumberComponent extends Component<NumberComponent, number>() {}
             class OtherComponent extends Component<OtherComponent, string>() {}
 
-            @ComponentOwnerDecorator()
-            class Actor extends ComponentsOwner<Actor> {
-                // @ts-expect-error
-                public comp: NumberComponent = OtherComponent.build(this, '123');
+            interface Components {
+                comp: NumberComponent;
             }
-        }
-
-        { /!** expect TS error when specified other component *!/
-        class NumberComponent extends Component<NumberComponent, number>() {}
-            class OtherComponent extends Component<OtherComponent, string>() {}
 
             @ComponentOwnerDecorator()
-            class Actor extends ComponentsOwner<Actor> {
-                // @ts-expect-error
-                public comp: NumberComponent = OtherComponent.build(this, '123');
+            class Actor extends ComponentsOwner<Components> {
+                protected components = (): ComponentsBuilders<Components> => ({
+                    // @ts-expect-error
+                    comp: OtherComponent.build('123'),
+                });
             }
 
             new Actor({
@@ -193,18 +188,6 @@ describe('ComponentsOwner', () => {
                 comp: '123',
             });
         }
-
-        // TODO
-        { /!** expect TS error when specified name of other component *!/
-            class NumberComponent extends Component<NumberComponent, number>() {}
-            class OtherComponent extends Component<OtherComponent, string>() {}
-
-            @ComponentOwnerDecorator()
-            class Actor extends ComponentsOwner<Actor> {
-                public numberComponent: NumberComponent = NumberComponent.build(this, 0);
-                public otherComponent: OtherComponent = OtherComponent.build(this, '123');
-            }
-        } */
     });
 
     describe('component with owner specified', () => {
