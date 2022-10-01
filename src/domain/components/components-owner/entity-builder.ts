@@ -1,7 +1,7 @@
 import { UnknownComponent, ComponentPropsType } from './components-owner';
 
 type Factory<Component extends UnknownComponent> = (owner: Component['__ownerType'], props?: Component['__propsType']) => Component;
-type FactorySet<Components extends Record<keyof Components, UnknownComponent>> = {
+export type FactorySet<Components extends Record<keyof Components, UnknownComponent>> = {
     [Key in keyof Components]: Factory<Components[Key]>;
 };
 
