@@ -43,7 +43,7 @@ export class DirectionSightProperty extends Component<DirectionSightProperty, Pr
     }
 
     public getRotatedSightMask() {
-        const directionProperty = this.owner.direction;
+        const directionProperty = this.owner.component.direction;
         const angle = directionProperty.getAsAngle();
         const { maskStart, maskEnd } = this.getSightMask();
         // const [maskS, maskE] = [{ x: 0, y: forward }, { x: 0, y: 0 }];
@@ -55,7 +55,7 @@ export class DirectionSightProperty extends Component<DirectionSightProperty, Pr
     }
 
     public getSightFieldArea(): [RawPoint, RawPoint] {
-        const { x, y } = this.owner.position.current;
+        const { x, y } = this.owner.component.position.current;
         const [rotS, rotE] = this.getRotatedSightMask();
         const [sx, sy] = [x + Math.min(rotS.x, rotE.x), y + Math.min(rotS.y, rotE.y)];
         const [ex, ey] = [x + Math.max(rotS.x, rotE.x), y + Math.max(rotS.y, rotE.y)];
@@ -81,7 +81,7 @@ export class DirectionSightProperty extends Component<DirectionSightProperty, Pr
     }
 
     public rotateFieldSight(newCurrent: number[][]) {
-        const directionProperty = this.owner.direction;
+        const directionProperty = this.owner.component.direction;
         const angle = directionProperty.getAsAngle() / 90;
         switch (angle) {
             case 1:

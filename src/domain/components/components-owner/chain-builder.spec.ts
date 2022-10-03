@@ -1,7 +1,7 @@
 import { NumberProperty } from '../../property/number/number-property';
-import { builder } from './entity-builder';
+import { chainBuilder } from './chain-builder';
 
-describe('EntityBuilder', () => {
+describe('ChainBuilder', () => {
     it('should build components', () => {
         interface Foo {
             field1: NumberProperty;
@@ -10,7 +10,7 @@ describe('EntityBuilder', () => {
             field4: NumberProperty;
         }
 
-        const componentBuilder = () => builder<Foo>({
+        const componentBuilder = () => chainBuilder<Foo>({
             field1: NumberProperty.builder(),
             field2: NumberProperty.builder(),
             field3: NumberProperty.builder(),
@@ -29,7 +29,7 @@ describe('EntityBuilder', () => {
         // @ts-expect-error
         entity.field4;
 
-        expect(entity.field1(null).current).toEqual(1);
-        expect(entity.field2(null).current).toEqual(0);
+        expect(entity.field1().current).toEqual(1);
+        expect(entity.field2().current).toEqual(0);
     });
 });

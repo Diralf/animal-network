@@ -1,20 +1,12 @@
-import { ComponentOwnerDecorator } from '../../../domain/components/components-owner/component-owner.decorator';
-import {
-    DirectionBrainProperty,
-    DirectionBrainCommand,
-} from '../../../domain/property/direction-brain/direction-brain-property';
+import { entityBuilder } from '../../../domain/components/entity-builder/entity-builder';
+import { Component } from '../../../domain/components/component/component';
+import { DirectionBrainCommand } from '../../../domain/property/direction-brain/direction-brain-property';
 import { World } from '../../../domain/world/world';
 import { AnimalDirectionGrassNetwork } from '../../../network/animal-direction-grass-network/animal-direction-grass-network';
-import { Animal, AnimalComponents } from './animal';
+import { Owner } from '../components/component-builder';
+import { Animal } from './animal';
 
-@ComponentOwnerDecorator()
-export class NeuralAnimal extends Animal {
-    protected components() {
-        return ({
-            ...super.components(),
-            brain: DirectionBrainProperty.build({ handler: () => this.brainHandler() }),
-        });
-    }
+class NeuralBrainComponent extends Component<NeuralBrainComponent, void, Owner<'brain' | 'sight' | 'size' | 'taste' | 'energy'>>() {
     private network = new AnimalDirectionGrassNetwork();
 
     async loadFromFile() {
@@ -34,7 +26,7 @@ export class NeuralAnimal extends Animal {
     }
 
     private brainHandler(): DirectionBrainCommand {
-        return this.network.predict(this.component);
+        return this.network.predict(this.owner.component);
     }
 
     dispose() {
@@ -44,4 +36,16 @@ export class NeuralAnimal extends Animal {
     getNetwork() {
         return this.network;
     }
+
+    tick(world: World, time: number) {
+        super.tick(world, time);
+        this.owner.component.brain.applyDecision(this.brainHandler());
+    }
 }
+
+export const NeuralAnimal = entityBuilder({
+    ...Animal.factorySet,
+    neuralBrain: NeuralBrainComponent.build(),
+});
+
+export type NeuralAnimal = ReturnType<typeof NeuralAnimal.build>;

@@ -27,9 +27,9 @@ export class DirectionMovementProperty extends Component<DirectionMovementProper
                 speed = -1;
                 break;
         }
-        const currentDirection = this.owner.direction.getCurrent();
-        const currentPoint = this.owner.position.current;
-        this.owner.position.current = {
+        const currentDirection = this.owner.component.direction.getCurrent();
+        const currentPoint = this.owner.component.position.current;
+        this.owner.component.position.current = {
             x: currentPoint.x + (currentDirection.x * speed),
             y: currentPoint.y + (currentDirection.y * speed),
         };

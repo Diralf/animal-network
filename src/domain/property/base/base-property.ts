@@ -1,4 +1,4 @@
-import { Component, Opt } from '../../components/component/component';
+import { Component } from '../../components/component/component';
 
 export function BaseProperty<Comp, Value, Props = Value>() {
     return class BaseProp extends Component<Comp, Props>() {
@@ -7,7 +7,7 @@ export function BaseProperty<Comp, Value, Props = Value>() {
         }
 
         protected setCurrent(value: Value): void {
-            this.props = value as unknown as Opt<Props>;
+            this.props = value as unknown as Props;
         }
 
         public get current(): Value {

@@ -2,8 +2,7 @@ import { OnDestroy } from '../../time-thread/on-destroy';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 import { NullComponent } from '../component/null-component';
-import { UnknownComponent } from '../components-owner/components-owner';
-import { FactorySet } from '../components-owner/entity-builder';
+import { FactorySet, UnknownComponent } from '../components-owner/chain-builder';
 
 export type ComponentPropsType<Component extends UnknownComponent> = Component['__propsType'];
 
@@ -15,23 +14,18 @@ export type ComponentsWithProps<Components extends Record<keyof Components, Unkn
     [Key in ComponentsWithPropsKeys<Components>]: ComponentPropsType<Components[Key]>;
 };
 
-export class ComponentManager<Components extends Record<keyof Components, UnknownComponent>> {
-    public component!: Components;
+export class Entity<Components extends Record<keyof Components, UnknownComponent>> {
+    private components: Components;
 
-    constructor(private factorySet: FactorySet<Components>) {
+    constructor(private factorySet: FactorySet<Components>, private externalProps: Partial<ComponentsWithProps<Components>> = {}) {
+        this.components = this.buildComponents(factorySet, externalProps);
     }
 
-    public buildComponents(externalProps: Partial<ComponentsWithProps<Components>> = {}): void {
-        const builders = this.factorySet;
-        const keys: Array<keyof Components> = Object.keys(builders) as any;
-        this.component = {} as Components;
-        keys.forEach((key) => {
-            this.component[key] = builders[key](this.component, externalProps[key as ComponentsWithPropsKeys<Components>]);
-        });
-        this.onInit();
+    public get component(): Components {
+        return this.components;
     }
 
-    protected onInit(): void {
+    public onInit(): void {
         this.forEachKey<Partial<{ onInit: () => void }>>((field) => {
             field?.onInit?.();
         });
@@ -52,22 +46,33 @@ export class ComponentManager<Components extends Record<keyof Components, Unknow
         });
     }
 
+    private buildComponents(factorySet: FactorySet<Components>, externalProps: Partial<ComponentsWithProps<Components>> = {}): Components {
+        const builders = factorySet;
+        const keys: Array<keyof Components> = Object.keys(builders) as any;
+        const comps = {} as Components;
+        keys.forEach((key) => {
+            comps[key] = builders[key](this, externalProps[key as ComponentsWithPropsKeys<Components>]);
+        });
+        return comps;
+    }
+
     private forEachKey<Field>(action: (field: Field, key: string, instance: Record<string, Field>) => void): void {
-        Object.keys(this.component).forEach((key) => {
-            const inst = this.component as unknown as Record<string, Field>;
+        Object.keys(this.components).forEach((key) => {
+            const inst = this.components as unknown as Record<string, Field>;
             action(inst[key], key, inst);
         });
     }
 }
 
-export function componentManager<Components extends Record<keyof Components, UnknownComponent>>(
+export function entityBuilder<Components extends Record<keyof Components, UnknownComponent>>(
     factorySet: FactorySet<Components>,
 ) {
     return {
-        build: (externalProps?: Partial<ComponentsWithProps<Components>>) => {
-            const manager = new ComponentManager(factorySet);
-            manager.buildComponents(externalProps);
-            return manager;
+        factorySet,
+        build: (externalProps: Partial<ComponentsWithProps<Components>> = {}) => {
+            const entity = new Entity<Components>(factorySet, externalProps);
+            entity.onInit();
+            return entity;
         },
     };
 }

@@ -1,4 +1,5 @@
-import { Entity } from '../../components/components-owner/components-owner';
+import { EntityType } from '../../components/component/component';
+import { entityBuilder } from '../../components/entity-builder/entity-builder';
 import { World } from '../../world/world';
 import { NumberProperty } from '../number/number-property';
 import { PointProperty } from '../point/point-property';
@@ -11,16 +12,12 @@ interface Components {
     position: PointProperty;
 }
 
-const getEntity = ({ id, point }: { id: number, point: RawPoint }): Entity<Components> => {
-    const entity: Entity<Components> = {
-        component: {
-            id: new NumberProperty({ current: id }),
-            position: new PointProperty(point),
-            collision: new CollisionProperty({ handler: jest.fn() }),
-        }
-    };
-    entity.component.collision.owner = entity.component;
-    return entity;
+const getEntity = ({ id, point }: { id: number, point: RawPoint }): EntityType<Components> => {
+    return entityBuilder({
+        id: NumberProperty.build({ current: id }),
+        position: PointProperty.build(point),
+        collision: CollisionProperty.build({ handler: jest.fn() }),
+    }).build();
 };
 
 const prepareContext = () => {

@@ -1,4 +1,5 @@
-import { ComponentsOwner, ComponentsBuilders } from '../../../domain/components/components-owner/components-owner';
+import { Component } from '../../../domain/components/component/component';
+import { entityBuilder } from '../../../domain/components/entity-builder/entity-builder';
 import { Positionable } from '../../../domain/property/point/positionable';
 import { OnTick } from '../../../domain/time-thread/on-tick';
 import { World } from '../../../domain/world/world';
@@ -6,23 +7,22 @@ import { Taggable } from '../types/taggable';
 import { Grass } from '../entities/grass';
 import { InstanceTypes } from '../types/instance-types';
 
-export class GrassGenerator extends ComponentsOwner<any> implements OnTick {
-    private initial = true;
-    constructor(private rate: number, private maxGrassAtOnce: number = 100) {
-        super();
-    }
+interface Props {
+    rate?: number;
+    maxGrassAtOnce?: number;
+}
 
-    protected components(): ComponentsBuilders<any> {
-        return {};
-    }
+export class GrassGeneratorComponent extends Component<GrassGeneratorComponent, Props>() implements OnTick {
+    private initial = true;
 
     public tick(world: World<Taggable & Positionable>, time: number): void {
+        const { rate = 1, maxGrassAtOnce = 100 } = this.props;
         const grassInstances = world.getEntityList().find((instance) => instance.component.tags.current.includes(InstanceTypes.GRASS));
         if (this.initial) {
-            this.spawnMany(this.maxGrassAtOnce, world);
+            this.spawnMany(maxGrassAtOnce, world);
             this.initial = false;
         }
-        if (grassInstances.length < this.maxGrassAtOnce && time % this.rate === 0) {
+        if (grassInstances.length < maxGrassAtOnce && time % rate === 0) {
             let success = false;
             let attempt = 0;
             do {
@@ -46,9 +46,15 @@ export class GrassGenerator extends ComponentsOwner<any> implements OnTick {
         const entitiesByPosition = world.getEntityList().find((instance) => instance.component.position.isEqualValue(newPoint));
 
         if (entitiesByPosition.length === 0) {
-            world.addEntity(new Grass({ position: newPoint }));
+            world.addEntity(Grass.build({ position: newPoint }));
             return true;
         }
         return false;
     }
 }
+
+export const GrassGenerator = entityBuilder({
+    grassGenerator: GrassGeneratorComponent.build({ rate: 1, maxGrassAtOnce: 100 }),
+});
+
+export type GrassGenerator = ReturnType<typeof GrassGenerator.build>;

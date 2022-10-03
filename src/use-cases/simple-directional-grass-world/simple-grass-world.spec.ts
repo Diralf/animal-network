@@ -1,5 +1,5 @@
 import { FieldBuilder } from '../../clients/console/utils/field-builder';
-import { Entity } from '../../domain/components/components-owner/components-owner';
+import { EntityType } from '../../domain/components/component/component';
 import { DirectionMovementValue } from '../../domain/property/direction-movement/direction-movement-property';
 import { DirectionTurn } from '../../domain/property/direction/direction-property';
 import { Positionable } from '../../domain/property/point/positionable';
@@ -29,8 +29,8 @@ describe('Directional SimpleGrassWorld', () => {
                 _,_,_,_,_,_,_,_,_,_
             `),
                 availableEntities: {
-                    '3': (point: RawPoint) => new Grass({ position: point }),
-                    '6': (point: RawPoint) => new Animal({ position: point, size: { current: 1 }, metabolizeSpeed: { current: 0 } }),
+                    '3': (point: RawPoint) => Grass.build({ position: point }),
+                    '6': (point: RawPoint) => Animal.build({ position: point, size: { current: 1 }, metabolizeSpeed: { current: 0 } }),
                 },
                 staticEntities: [],
                 ...options,
@@ -51,7 +51,7 @@ describe('Directional SimpleGrassWorld', () => {
             const simpleGrassWorld = new SimpleGrassWorld();
             startWorld(simpleGrassWorld);
             const { world } = simpleGrassWorld;
-            const allInstances = world.getEntityList().getAll() as Entity<Positionable>[];
+            const allInstances = world.getEntityList().getAll() as EntityType<Positionable>[];
 
             expect(allInstances).toHaveLength(6);
             allInstances.forEach((instance) => {
@@ -70,7 +70,7 @@ describe('Directional SimpleGrassWorld', () => {
             const { world } = simpleGrassWorld;
             const grassInstances = simpleGrassWorld.findByTag(InstanceTypes.GRASS);
             const animalInstances = simpleGrassWorld.findByTag(InstanceTypes.ANIMAL);
-            const allInstances = world.getEntityList().getAll() as Array<Entity<Positionable>>;
+            const allInstances = world.getEntityList().getAll() as Array<EntityType<Positionable>>;
 
             expect(grassInstances).toHaveLength(5);
             expect(animalInstances).toHaveLength(1);
@@ -212,8 +212,8 @@ describe('Directional SimpleGrassWorld', () => {
                 simpleGrassWorld,
                 {
                     availableEntities: {
-                        '3': (point: RawPoint) => new Grass({ position: point }),
-                        '6': (point: RawPoint) => new StaticAnimal({ position: point, size: { current: 1 }, metabolizeSpeed: { current: 0 } }),
+                        '3': (point: RawPoint) => Grass.build({ position: point }),
+                        '6': (point: RawPoint) => StaticAnimal.build({ position: point, size: { current: 1 }, metabolizeSpeed: { current: 0 } }),
                     },
                 },
             );
@@ -224,9 +224,9 @@ describe('Directional SimpleGrassWorld', () => {
                 _,_,_,_,_
                 _,_,_,_,_
                 _,_,_,_,_
+                _,_,_,_,_
                 _,3,3,3,_
-                3,_,_,_,3
-                _,_,6,_,_
+                3,_,6,_,3
             `));
             expect(animal.component.size.current).toEqual(1);
 
@@ -258,25 +258,15 @@ describe('Directional SimpleGrassWorld', () => {
                         9,9,9,9,9
                     `),
                     availableEntities: {
-                        '3': (point: RawPoint) => new Grass({ position: point }),
-                        '6': (point: RawPoint) => new StaticAnimal({ position: point }),
-                        '9': (point: RawPoint) => new Hole({ position: point }),
+                        '3': (point: RawPoint) => Grass.build({ position: point }),
+                        '6': (point: RawPoint) => StaticAnimal.build({ position: point }),
+                        '9': (point: RawPoint) => Hole.build({ position: point }),
                     },
                 },
             );
             const [animal] = simpleGrassWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
 
             const sight = animal.component.sight;
-
-            simpleGrassWorld.tick();
-            expect(animal.component.sight.asString()).toEqual(FieldBuilder.build(`
-                _,_,_,_,_
-                _,_,_,_,_
-                _,_,_,_,_
-                9,9,9,9,9
-                9,_,_,_,9
-                9,_,6,_,9
-            `));
 
             simpleGrassWorld.tick();
             expect(animal.component.sight.asString()).toEqual(FieldBuilder.build(`
@@ -317,10 +307,10 @@ describe('Directional SimpleGrassWorld', () => {
                     _,_,_,_,_,_,_,_,_,_
                 `),
                 availableEntities: {
-                    '3': (point: RawPoint) => new Grass({ position: point }),
+                    '3': (point: RawPoint) => Grass.build({ position: point }),
                 },
                 staticEntities: [
-                    () => new GrassGenerator(2),
+                    () => GrassGenerator.build({ grassGenerator: { rate: 2 } }),
                 ],
                 ...options,
             });
@@ -349,7 +339,7 @@ describe('Directional SimpleGrassWorld', () => {
             const simpleGrassWorld = new SimpleGrassWorld();
             startWorld(simpleGrassWorld, {
                 staticEntities: [
-                    () => new GrassGenerator(3, 1),
+                    () => GrassGenerator.build({ grassGenerator: { rate: 3, maxGrassAtOnce: 1 } }),
                 ],
             });
             const { world } = simpleGrassWorld;
@@ -400,7 +390,7 @@ describe('Directional SimpleGrassWorld', () => {
             const rect = simpleGrassWorld.getEntitiesByRect(
                 { x: 1, y: 2 },
                 { x: 4, y: 4 },
-                (position) => new Hole({ position }),
+                (position) => Hole.build({ position }),
             );
             simpleGrassWorld.world.width = 6;
             simpleGrassWorld.world.height = 6;

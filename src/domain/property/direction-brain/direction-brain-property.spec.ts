@@ -1,3 +1,5 @@
+import { EntityType } from '../../components/component/component';
+import { entityBuilder } from '../../components/entity-builder/entity-builder';
 import { World } from '../../world/world';
 import { DirectionMovementProperty, DirectionMovementValue } from '../direction-movement/direction-movement-property';
 import { DirectionSightProperty } from '../direction-sight/direction-sight-property';
@@ -16,19 +18,15 @@ interface Entity {
     visual: NumberProperty;
 }
 
-const getPropertiesContainer = (action: DirectionBrainCommand): Entity => {
-    const entity = {
-        brain: new DirectionBrainProperty({ handler: () => action }),
-        movement: new DirectionMovementProperty(),
-        position: new PointProperty({ x: 0, y: 0 }),
-        sight: new DirectionSightProperty({ range: [5, 2] }),
-        direction: new DirectionProperty({ initialDirection: { x: 0, y: -1 } }),
-        visual: new NumberProperty({ current: 2 }),
-    };
-    entity.sight.owner = entity;
-    entity.brain.owner = entity;
-    entity.movement.owner = entity;
-    return entity;
+const getEntity = (action: DirectionBrainCommand): EntityType<Entity> => {
+    return entityBuilder({
+        brain: DirectionBrainProperty.build({ handler: () => action }),
+        movement: DirectionMovementProperty.build(),
+        position: PointProperty.build({ x: 0, y: 0 }),
+        sight: DirectionSightProperty.build({ range: [5, 2] }),
+        direction: DirectionProperty.build({ initialDirection: { x: 0, y: -1 } }),
+        visual: NumberProperty.build({ current: 2 }),
+    }).build();
 };
 
 describe('DirectionBrainProperty', () => {
@@ -39,11 +37,11 @@ describe('DirectionBrainProperty', () => {
         [DirectionTurn.TURN_LEFT, { x: 0, y: 0 }, { x: -1, y: 0 }],
         [DirectionTurn.TURN_RIGHT, { x: 0, y: 0 }, { x: 1, y: 0 }],
     ])('should move entity when %p', (action, expectedPoint, expectedDirection) => {
-        const entity = getPropertiesContainer(action);
+        const entity = getEntity(action);
 
-        entity.brain.applyDecision(new World());
+        entity.component.brain.applyDecision(entity.component.brain.decide(new World()));
 
-        expect(entity.position.current).toEqual(expectedPoint);
-        expect(entity.direction.getCurrent()).toEqual(expectedDirection);
+        expect(entity.component.position.current).toEqual(expectedPoint);
+        expect(entity.component.direction.getCurrent()).toEqual(expectedDirection);
     });
 });

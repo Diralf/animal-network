@@ -1,6 +1,11 @@
-import { UnknownComponent, ComponentPropsType } from './components-owner';
+import { Component } from '../component/component';
 
-type Factory<Component extends UnknownComponent> = (owner: Component['__ownerType'], props?: Component['__propsType']) => Component;
+const UnknownComponentConstructor = Component<unknown, unknown>();
+export type UnknownComponent = InstanceType<typeof UnknownComponentConstructor>;
+
+export type ComponentPropsType<Component extends UnknownComponent> = Component['__propsType'];
+
+type Factory<Component extends UnknownComponent> = (owner?: Component['__ownerType'], props?: Component['__propsType']) => Component;
 export type FactorySet<Components extends Record<keyof Components, UnknownComponent>> = {
     [Key in keyof Components]: Factory<Components[Key]>;
 };
@@ -17,7 +22,7 @@ type InitBuilders<Components extends Record<keyof Components, UnknownComponent>>
     [Key in keyof Components]: (props: ComponentPropsType<Components[Key]>) => Factory<Components[Key]>
 };
 
-export function builder<Components extends Record<keyof Components, UnknownComponent>>(initBuilder: InitBuilders<Components>): Builder<Components> {
+export function chainBuilder<Components extends Record<keyof Components, UnknownComponent>>(initBuilder: InitBuilders<Components>): Builder<Components> {
     const result = {} as unknown as FactorySet<Components>;
     const build: Build<Components, Components> = {
         build: () => result,

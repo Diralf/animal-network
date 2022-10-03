@@ -1,4 +1,4 @@
-import { Entity } from '../../domain/components/components-owner/components-owner';
+import { EntityType } from '../../domain/components/component/component';
 import { Positionable } from '../../domain/property/point/positionable';
 import { RawPoint } from '../../domain/property/point/raw-point';
 import { Visualable } from '../../domain/property/sight/visualable';
@@ -11,12 +11,12 @@ import { InstanceTypes } from './types/instance-types';
 import { Taggable } from './types/taggable';
 
 type SimpleGrassWorldEntityTypes = Positionable & Taggable & Visualable;
-type SimpleGrassWorldEntity = Entity<Positionable & Taggable & Visualable>;
+type SimpleGrassWorldEntity = EntityType<SimpleGrassWorldEntityTypes>;
 
 export interface FieldOptions {
     stringField: string;
     availableEntities: Record<string, (point: RawPoint) => SimpleGrassWorldEntity>;
-    staticEntities: Array<() => Entity<unknown>>;
+    staticEntities: Array<() => EntityType<any>>;
 }
 
 export class SimpleGrassWorld {
@@ -37,8 +37,8 @@ export class SimpleGrassWorld {
     }
 
     async startOneByOne(param: { width: number; height: number, maxGrass: number, network?: AnimalDirectionGrassNetwork }) {
-        this.world.addStatic(new GrassGenerator(1, param.maxGrass));
-        const neuralAnimal = new NeuralAnimal({
+        this.world.addStatic(GrassGenerator.build({ grassGenerator: { rate: 1, maxGrassAtOnce: param.maxGrass } }));
+        const neuralAnimal = NeuralAnimal.build({
             position: {
                 x: Math.floor(param.width / 2),
                 y: Math.floor(param.height / 2),
@@ -46,9 +46,9 @@ export class SimpleGrassWorld {
             sight: { range: [7, 3] },
         });
         if (param.network) {
-            await neuralAnimal.setNetwork(param.network);
+            await neuralAnimal.component.neuralBrain.setNetwork(param.network);
         } else {
-            await neuralAnimal.loadFromFile();
+            await neuralAnimal.component.neuralBrain.loadFromFile();
         }
         this.world.addEntity(neuralAnimal);
         this.world.width = param.width;
@@ -57,7 +57,7 @@ export class SimpleGrassWorld {
             ...this.getEntitiesByRect(
                 { x: 0, y: 0 },
                 { x: param.width - 1, y: param.height - 1 },
-                (position) => new Hole({ position }),
+                (position) => Hole.build({ position }),
             ),
         );
     }
@@ -83,14 +83,9 @@ export class SimpleGrassWorld {
     dispose() {
         const entities: NeuralAnimal[] = this.world.savedEntityList.getAll() as any;
         entities.forEach((entity) => {
-            entity.dispose();
+            entity.component.neuralBrain.dispose();
         });
         this.world.savedEntityList.clear();
-    }
-
-    getFitnessOfEntity() {
-        const entity = this.getSavedNeuralEntity();
-        return entity.fitness;
     }
 
     private getSavedNeuralEntity(): NeuralAnimal {
@@ -99,22 +94,12 @@ export class SimpleGrassWorld {
 
     getSavedNetwort() {
         const entity = this.getSavedNeuralEntity();
-        return entity.getNetwork();
+        return entity.component.neuralBrain.getNetwork();
     }
 
     async trainSavedNetwork() {
         const network = this.getSavedNetwort();
         network.compile();
         await network.fit();
-    }
-
-    getScore() {
-        const entity = this.getSavedNeuralEntity();
-        return entity.score;
-    }
-
-    setFitness(fitness: number) {
-        const entity = this.getSavedNeuralEntity();
-        entity.fitness = fitness;
     }
 }

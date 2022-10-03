@@ -1,4 +1,4 @@
-import { builder } from '../../../domain/components/components-owner/entity-builder';
+import { chainBuilder } from '../../../domain/components/components-owner/chain-builder';
 import { Property } from '../../../domain/property/base/base-property';
 import { CollisionProperty } from '../../../domain/property/collision/collision-property';
 import { DirectionBrainProperty } from '../../../domain/property/direction-brain/direction-brain-property';
@@ -9,7 +9,7 @@ import { NumberProperty } from '../../../domain/property/number/number-property'
 import { PointProperty } from '../../../domain/property/point/point-property';
 import { InstanceTypes } from '../types/instance-types';
 
-interface Components {
+export interface Components {
     tags: Property<InstanceTypes[]>;
     visual: NumberProperty;
     position: PointProperty;
@@ -24,7 +24,7 @@ interface Components {
     taste: NumberProperty;
 }
 
-export const componentBuilder = () => builder<Components>({
+export const componentBuilder = () => chainBuilder<Components>({
     tags: Property<InstanceTypes[]>().builder(),
     visual: NumberProperty.builder(),
     position: PointProperty.builder(),
@@ -38,3 +38,5 @@ export const componentBuilder = () => builder<Components>({
     brain: DirectionBrainProperty.builder(),
     taste: NumberProperty.builder(),
 });
+
+export type Owner<ComponentKeys extends keyof Components> = Pick<Components, ComponentKeys>;

@@ -1,5 +1,6 @@
 import { FieldBuilder } from '../../../clients/console/utils/field-builder';
-import { Entity } from '../../components/components-owner/components-owner';
+import { EntityType } from '../../components/component/component';
+import { entityBuilder } from '../../components/entity-builder/entity-builder';
 import { World } from '../../world/world';
 import { DirectionProperty } from '../direction/direction-property';
 import { NumberProperty } from '../number/number-property';
@@ -10,8 +11,8 @@ import { DirectionSightProperty } from './direction-sight-property';
 
 export interface FieldOptions {
     stringField: string;
-    availableEntities: Record<string, (point: RawPoint) => Entity<unknown>>;
-    staticEntities?: Array<() => Entity<unknown>>;
+    availableEntities: Record<string, (point: RawPoint) => EntityType<any>>;
+    staticEntities?: Array<() => EntityType<any>>;
 }
 
 const buildWorld = ({ stringField, availableEntities, staticEntities }: FieldOptions): World => {
@@ -25,8 +26,6 @@ const buildWorld = ({ stringField, availableEntities, staticEntities }: FieldOpt
 };
 
 function makeDirectionSight(direction: RawPoint) {
-    const directionSight = new DirectionSightProperty({ range: [5, 2] });
-
     const world = buildWorld({
         stringField: FieldBuilder.build(`
                     _,_,_,_,_,_,_,_,_,_
@@ -41,43 +40,35 @@ function makeDirectionSight(direction: RawPoint) {
                     _,_,_,_,_,_,_,_,_,_
                 `),
         availableEntities: {
-            '7': (point: RawPoint) => ({
-                component: {
-                    position: new PointProperty(point),
-                    visual: new NumberProperty({ current: 7 }),
-                },
-            }),
-            '2': (point: RawPoint) => ({
-                component: {
-                    position: new PointProperty(point),
-                    visual: new NumberProperty({ current: 2 }),
-                },
-            }),
-            '3': (point: RawPoint) => ({
-                component: {
-                    position: new PointProperty(point),
-                    visual: new NumberProperty({ current: 3 }),
-                },
-            }),
-            '4': (point: RawPoint) => ({
-                component: {
-                    position: new PointProperty(point),
-                    visual: new NumberProperty({ current: 4 }),
-                },
-            }),
-            '5': (point: RawPoint) => ({
-                component: {
-                    position: new PointProperty(point),
-                    direction: new DirectionProperty({ initialDirection: direction }),
-                    visual: new NumberProperty({ current: 5 }),
-                },
-            }),
+            '7': (point: RawPoint) => entityBuilder({
+                position: PointProperty.build(point),
+                visual: NumberProperty.build({ current: 7 }),
+            }).build(),
+            '2': (point: RawPoint) => entityBuilder({
+                position: PointProperty.build(point),
+                visual: NumberProperty.build({ current: 2 }),
+            }).build(),
+            '3': (point: RawPoint) => entityBuilder({
+                position: PointProperty.build(point),
+                visual: NumberProperty.build({ current: 3 }),
+            }).build(),
+            '4': (point: RawPoint) => entityBuilder({
+                position: PointProperty.build(point),
+                visual: NumberProperty.build({ current: 4 }),
+            }).build(),
+            '5': (point: RawPoint) => entityBuilder({
+                position: PointProperty.build(point),
+                visual: NumberProperty.build({ current: 5 }),
+                direction: DirectionProperty.build({ initialDirection: direction }),
+                sight: DirectionSightProperty.build({ range: [5, 2] }),
+            }).build(),
         },
     });
-    const owner = world.getEntityList().find((instance: Entity<any>) => instance.component.visual.current === 5)[0];
-    directionSight.owner = owner.component as any;
+    const owner: EntityType<{ sight: DirectionSightProperty }> = world.getEntityList()
+        .find((instance: EntityType<any>) => instance.component.visual.current === 5)[0] as EntityType<any>;
+
     return {
-        directionSight,
+        directionSight: owner.component.sight,
         world,
     };
 }
