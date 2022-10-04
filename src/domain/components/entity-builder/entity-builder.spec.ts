@@ -2,7 +2,7 @@ import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 import { Component } from '../component/component';
 import { chainBuilder } from '../components-owner/chain-builder';
-import { entityBuilder, Entity } from './entity-builder';
+import { entityBuilder } from './entity-builder';
 
 describe('EntityBuilder', () => {
     class StringComponent extends Component<StringComponent, string>() implements OnTick {
@@ -50,7 +50,7 @@ describe('ComponentsOwner', () => {
         }
     }
     class OtherComponent extends Component<OtherComponent, string>() {}
-    class OwnerComponent extends Component<OwnerComponent, number, Entity<Pick<Components, 'numberComponent'>>>() {}
+    class OwnerComponent extends Component<OwnerComponent, number, Pick<Components, 'numberComponent'>>() {}
 
     interface Components {
         defaultComponent: DefaultComponent;
@@ -193,9 +193,10 @@ describe('ComponentsOwner', () => {
 
         // TODO highlight not compatible owners
         { /** should show TS error when owner is not compatible */
-            const Actor = entityBuilder(componentBuilder()
+            const result = componentBuilder()
                 .ownerComponent(5)
-                .build());
+                .build();
+            const Actor = entityBuilder(result);
 
             const actor = Actor.build();
         }
