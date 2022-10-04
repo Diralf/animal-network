@@ -2,7 +2,7 @@ import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 import { Component, componentBuilder } from '../component/component';
 import { chainBuilder } from '../components-owner/chain-builder';
-import { entityBuilder } from './entity-builder';
+import { entityBuilder, ComponentsDeps } from './entity-builder';
 
 describe('EntityBuilder', () => {
     class StringComponent extends Component<string> implements OnTick {
@@ -76,6 +76,22 @@ describe('ComponentsOwner', () => {
         ownerComponent: componentBuilder(OwnerComponent),
     });
 
+    {
+        class Owner2Component extends Component<number, Pick<Components, 'numberComponent' | 'otherComponent'>> {
+            public value = 0;
+            public onPropsInit(props: number): void {
+                this.value = props;
+            }
+        }
+
+        const deps1: ComponentsDeps<{ ownerComponent: OwnerComponent, owner2Component: Owner2Component }> = {
+            numberComponent: componentBuilder(NumberComponent)()({ owner: { component: {} } }),
+            otherComponent: componentBuilder(OtherComponent)('123')({ owner: { component: {} } }),
+        };
+
+        // @ts-expect-error
+        const deps2: ComponentsDeps<{ ownerComponent: OwnerComponent, owner2Component: Owner2Component }> = {};
+    }
 
     describe('default component', () => {
 
@@ -197,10 +213,10 @@ describe('ComponentsOwner', () => {
 
         // TODO highlight not compatible owners
         { /** should show TS error when owner is not compatible */
-            const result = testBuilder()
+            // @ts-expect-error
+            const Actor = entityBuilder(testBuilder()
                 .ownerComponent(5)
-                .build();
-            const Actor = entityBuilder(result);
+                .build());
 
             Actor.build();
         }

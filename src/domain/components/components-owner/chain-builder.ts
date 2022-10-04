@@ -13,6 +13,10 @@ export type FactorySet<Components extends Record<keyof Components, UnknownCompon
     [Key in keyof Components]: ComponentFactory<Components[Key], ComponentPropsType<Components[Key]>, ComponentDepsType<Components[Key]>>;
 };
 
+export type FactoryKeysSet<Components> = {
+    [Key in keyof Components]: unknown;
+};
+
 interface Build<Remain, Original extends Record<keyof Original, UnknownComponent>> {
     build: () => FactorySet<Pick<Original, keyof Omit<Original, keyof Remain>>>;
 }

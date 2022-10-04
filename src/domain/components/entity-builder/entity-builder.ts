@@ -1,9 +1,9 @@
 import { OnDestroy } from '../../time-thread/on-destroy';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
-import { ComponentPropsType, componentBuilder } from '../component/component';
+import { ComponentPropsType, componentBuilder, ComponentDepsType } from '../component/component';
 import { NullComponent } from '../component/null-component';
-import { FactorySet, UnknownComponent } from '../components-owner/chain-builder';
+import { FactorySet, UnknownComponent, FactoryKeysSet } from '../components-owner/chain-builder';
 
 type ComponentsWithPropsKeys<Components extends Record<keyof Components, UnknownComponent>> = {
     [Key in keyof Components]: ComponentPropsType<Components[Key]> extends void ? never : Key;
@@ -12,6 +12,12 @@ type ComponentsWithPropsKeys<Components extends Record<keyof Components, Unknown
 export type ComponentsWithProps<Components extends Record<keyof Components, UnknownComponent>> = {
     [Key in ComponentsWithPropsKeys<Components>]: ComponentPropsType<Components[Key]>;
 };
+
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
+
+export type ComponentsDeps<Components extends Record<keyof Components, UnknownComponent>> = UnionToIntersection<{
+    [Key in keyof Components]: ComponentDepsType<Components[Key]>;
+}[keyof Components]>;
 
 export class Entity<Components extends Record<keyof Components, UnknownComponent>> {
     private components: Components;
@@ -63,8 +69,8 @@ export class Entity<Components extends Record<keyof Components, UnknownComponent
     }
 }
 
-export function entityBuilder<Components extends Record<keyof Components, UnknownComponent>>(
-    factorySet: FactorySet<Components>,
+export function entityBuilder<Components extends Record<keyof Components, UnknownComponent>, CompDeps extends ComponentsDeps<Components>>(
+    factorySet: FactorySet<Components> & FactoryKeysSet<CompDeps>,
 ) {
     return {
         factorySet,
