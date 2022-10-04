@@ -23,7 +23,7 @@ export interface ComponentOptionsOptProps<Props, Owner> {
 export type ComponentPropsType<Component extends UnknownComponent> = Component['__propsType'];
 export type ComponentDepsType<Component extends UnknownComponent> = Component['__depsType'];
 
-export class Component<Props = void, Deps = unknown> implements OnTick, OnDestroy {
+export class Component<Props = void, Deps = {}> implements OnTick, OnDestroy {
     private _owner: PropertyOwner<EntityType<Deps>> = new PropertyOwner<EntityType<Deps>>();
     public __propsType!: Props;
     public __depsType!: Deps;

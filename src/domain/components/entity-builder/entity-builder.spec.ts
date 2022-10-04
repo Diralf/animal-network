@@ -84,13 +84,21 @@ describe('ComponentsOwner', () => {
             }
         }
 
-        const deps1: ComponentsDeps<{ ownerComponent: OwnerComponent, owner2Component: Owner2Component }> = {
+        interface ComponentsDepsTest {
+            defaultComponent: DefaultComponent;
+            numberComponent: NumberComponent;
+            otherComponent: OtherComponent;
+            ownerComponent: OwnerComponent;
+            owner2Component: Owner2Component;
+        }
+
+        const deps1: ComponentsDeps<ComponentsDepsTest> = {
             numberComponent: componentBuilder(NumberComponent)()({ owner: { component: {} } }),
             otherComponent: componentBuilder(OtherComponent)('123')({ owner: { component: {} } }),
         };
 
         // @ts-expect-error
-        const deps2: ComponentsDeps<{ ownerComponent: OwnerComponent, owner2Component: Owner2Component }> = {};
+        const deps2: ComponentsDeps<ComponentsDepsTest> = {};
     }
 
     describe('default component', () => {
@@ -211,7 +219,6 @@ describe('ComponentsOwner', () => {
             expect(actor.component.ownerComponent.value).toEqual(5);
         });
 
-        // TODO highlight not compatible owners
         { /** should show TS error when owner is not compatible */
             // @ts-expect-error
             const Actor = entityBuilder(testBuilder()

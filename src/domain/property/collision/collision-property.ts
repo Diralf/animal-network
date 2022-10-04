@@ -2,6 +2,7 @@ import { Component, EntityType } from '../../components/component/component';
 import { EntityList } from '../../property-container-list/entity-list';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
+import { PointProperty } from '../point/point-property';
 import { Positionable } from '../point/positionable';
 import { positionableGuard } from '../point/positionable.guard';
 import { Publisher } from '../utils/observer';
@@ -11,7 +12,11 @@ interface Props {
     handler?(options: CollisionOptions): void;
 }
 
-export class CollisionProperty extends Component<Props, Positionable> implements OnTick {
+interface Deps {
+    position: PointProperty;
+}
+
+export class CollisionProperty extends Component<Props, Deps> implements OnTick {
     public publisher = new Publisher<[CollisionOptions]>();
     private handler!: (options: CollisionOptions) => void;
 
