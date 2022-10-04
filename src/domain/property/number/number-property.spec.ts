@@ -1,22 +1,24 @@
+import { componentBuilder } from '../../components/component/component';
 import { NumberProperty } from './number-property';
 
 describe('NumberProperty', () => {
+    const owner = { component: {} };
     describe('should have default value', () => {
         it('when no options', () => {
-            const numberProperty = new NumberProperty();
+            const numberProperty = componentBuilder(NumberProperty)()({ owner });
 
             expect(numberProperty.default).toEqual(0);
         });
 
         it('when no default in options', () => {
-            const numberProperty = new NumberProperty({});
+            const numberProperty = componentBuilder(NumberProperty)({})({ owner });
 
             expect(numberProperty.default).toEqual(0);
         });
 
         it('when default in options', () => {
             const defaultValue = 10;
-            const numberProperty = new NumberProperty({ defaultValue });
+            const numberProperty = componentBuilder(NumberProperty)({ defaultValue })({ owner });
 
             expect(numberProperty.default).toEqual(defaultValue);
         });
@@ -25,39 +27,39 @@ describe('NumberProperty', () => {
             const min = 10;
             const defaultValue = 5;
 
-            expect(() => new NumberProperty({
+            expect(() => componentBuilder(NumberProperty)({
                 defaultValue,
                 min,
-            })).toThrowError();
+            })({ owner })).toThrowError();
         });
 
         it('when default is greater than max', () => {
             const max = 10;
             const defaultValue = 50;
 
-            expect(() => new NumberProperty({
+            expect(() => componentBuilder(NumberProperty)({
                 defaultValue,
                 max,
-            })).toThrowError();
+            })({ owner })).toThrowError();
         });
     });
 
     describe('should have min value', () => {
         it('when no options', () => {
-            const numberProperty = new NumberProperty();
+            const numberProperty = componentBuilder(NumberProperty)()({ owner });
 
             expect(numberProperty.min).toEqual(-Number.MAX_SAFE_INTEGER);
         });
 
         it('when no min in options', () => {
-            const numberProperty = new NumberProperty({});
+            const numberProperty = componentBuilder(NumberProperty)({})({ owner });
 
             expect(numberProperty.min).toEqual(-Number.MAX_SAFE_INTEGER);
         });
 
         it('when min in options', () => {
             const minValue = -10;
-            const numberProperty = new NumberProperty({ min: minValue });
+            const numberProperty = componentBuilder(NumberProperty)({ min: minValue })({ owner });
 
             expect(numberProperty.min).toEqual(minValue);
         });
@@ -65,20 +67,20 @@ describe('NumberProperty', () => {
 
     describe('should have max value', () => {
         it('when no options', () => {
-            const numberProperty = new NumberProperty();
+            const numberProperty = componentBuilder(NumberProperty)()({ owner });
 
             expect(numberProperty.max).toEqual(Number.MAX_SAFE_INTEGER);
         });
 
         it('when no max in options', () => {
-            const numberProperty = new NumberProperty({});
+            const numberProperty = componentBuilder(NumberProperty)({})({ owner });
 
             expect(numberProperty.max).toEqual(Number.MAX_SAFE_INTEGER);
         });
 
         it('when max in options', () => {
             const maxValue = 10;
-            const numberProperty = new NumberProperty({ max: maxValue });
+            const numberProperty = componentBuilder(NumberProperty)({ max: maxValue })({ owner });
 
             expect(numberProperty.max).toEqual(maxValue);
         });
@@ -86,27 +88,27 @@ describe('NumberProperty', () => {
 
     describe('should have current value', () => {
         it('when no options', () => {
-            const numberProperty = new NumberProperty();
+            const numberProperty = componentBuilder(NumberProperty)()({ owner });
 
             expect(numberProperty.current).toEqual(numberProperty.default);
         });
 
         it('when no default in options', () => {
-            const numberProperty = new NumberProperty({});
+            const numberProperty = componentBuilder(NumberProperty)({})({ owner });
 
             expect(numberProperty.current).toEqual(numberProperty.default);
         });
 
         it('when default in options', () => {
             const defaultValue = 10;
-            const numberProperty = new NumberProperty({ defaultValue });
+            const numberProperty = componentBuilder(NumberProperty)({ defaultValue })({ owner });
 
             expect(numberProperty.current).toEqual(defaultValue);
         });
 
         it('when new value is valid', () => {
             const newNumber = 5;
-            const numberProperty = new NumberProperty();
+            const numberProperty = componentBuilder(NumberProperty)()({ owner });
 
             numberProperty.current = newNumber;
 
@@ -116,7 +118,7 @@ describe('NumberProperty', () => {
         it('when new value is lower than min', () => {
             const min = -10;
             const newValue = -50;
-            const numberProperty = new NumberProperty({ min });
+            const numberProperty = componentBuilder(NumberProperty)({ min })({ owner });
 
             expect(() => {
                 numberProperty.current = newValue;
@@ -126,7 +128,7 @@ describe('NumberProperty', () => {
         it('when new value is greater than max', () => {
             const max = 10;
             const newValue = 50;
-            const numberProperty = new NumberProperty({ max });
+            const numberProperty = componentBuilder(NumberProperty)({ max })({ owner });
 
             expect(() => {
                 numberProperty.current = newValue;
@@ -139,10 +141,10 @@ describe('NumberProperty', () => {
             const max = 10;
             const min = -10;
             const value = 20;
-            const numberProperty = new NumberProperty({
+            const numberProperty = componentBuilder(NumberProperty)({
                 max,
                 min,
-            });
+            })({ owner });
 
             const error = numberProperty.getOutOfRangeError(value);
 

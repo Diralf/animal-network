@@ -1,4 +1,4 @@
-import { Entity } from '../../../domain/components/entity-builder/entity-builder';
+import { EntityType } from '../../../domain/components/component/component';
 import { Taggable } from './taggable';
 
-export const isTaggableGuard = (entity: Entity<any>): entity is Entity<Taggable> => 'tags' in entity.component;
+export const isTaggableGuard = (entity: EntityType<any>): entity is EntityType<Taggable> => 'tags' in entity.component;

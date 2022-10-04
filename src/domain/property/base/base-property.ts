@@ -1,33 +1,25 @@
 import { Component } from '../../components/component/component';
 
-export function BaseProperty<Comp, Value, Props = Value>() {
-    return class BaseProp extends Component<Comp, Props>() {
-        protected getCurrent(): Value {
-            return this.props as unknown as Value;
-        }
+export class Property<Value, Props = Value> extends Component<Props> {
+    private _current!: Value;
 
-        protected setCurrent(value: Value): void {
-            this.props = value as unknown as Props;
-        }
+    public onPropsInit(props: Props): void {
+        this._current = props as unknown as Value;
+    }
 
-        public get current(): Value {
-            return this.getCurrent();
-        }
+    public get current(): Value {
+        return this._current;
+    }
 
-        public set current(value: Value) {
-            this.setCurrent(value);
-        }
+    public set current(value: Value) {
+        this._current = value;
+    }
 
-        public isEqual(other: BaseProp): boolean {
-            return this.isEqualValue(other.current);
-        }
+    public isEqual(other: Property<Value>): boolean {
+        return this.isEqualValue(other.current);
+    }
 
-        public isEqualValue(otherValue: Value): boolean {
-            return this.getCurrent() === otherValue;
-        }
-    };
+    public isEqualValue(otherValue: Value): boolean {
+        return this._current === otherValue;
+    }
 }
-
-const PropertyConstructor = <Value>() => BaseProperty<unknown, Value>();
-export type Property<Value> = InstanceType<ReturnType<typeof PropertyConstructor<Value>>>;
-export const Property = <Value>() => BaseProperty<Property<Value>, Value>();

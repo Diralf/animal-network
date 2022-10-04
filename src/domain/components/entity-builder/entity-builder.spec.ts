@@ -1,17 +1,21 @@
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
-import { Component } from '../component/component';
+import { Component, componentBuilder } from '../component/component';
 import { chainBuilder } from '../components-owner/chain-builder';
 import { entityBuilder } from './entity-builder';
 
 describe('EntityBuilder', () => {
-    class StringComponent extends Component<StringComponent, string>() implements OnTick {
+    class StringComponent extends Component<string> implements OnTick {
+        public value = '';
+        public onPropsInit(props: string): void {
+            this.value = props;
+        }
         tick(world: World, time: number) {}
     }
     interface Owner {
         street: StringComponent;
     }
-    class NumberComponent extends Component<NumberComponent, number, Owner>() {}
+    class NumberComponent extends Component<number, Owner> {}
 
     interface Components {
         name: StringComponent;
@@ -19,14 +23,14 @@ describe('EntityBuilder', () => {
         age: NumberComponent;
     }
 
-    const componentBuilder = () => chainBuilder<Components>({
-        name: StringComponent.builder(),
-        age: NumberComponent.builder(),
-        street: StringComponent.builder(),
+    const testBuilder = () => chainBuilder<Components>({
+        name: componentBuilder(StringComponent),
+        age: componentBuilder(NumberComponent),
+        street: componentBuilder(StringComponent),
     });
 
     it('using functional paradigm', () => {
-        const Actor = entityBuilder(componentBuilder()
+        const Actor = entityBuilder(testBuilder()
             .age(2)
             .street('Avenue')
             .build());
@@ -38,19 +42,25 @@ describe('EntityBuilder', () => {
             name: '123',
         });
 
-        expect(actor.component.street.getProps()).toEqual('123');
+        expect(actor.component.street.value).toEqual('123');
     });
 });
 
 describe('ComponentsOwner', () => {
-    class DefaultComponent extends Component<DefaultComponent>() {}
-    class NumberComponent extends Component<NumberComponent, number>() {
-        constructor(props: number = 3) {
-            super(props);
+    class DefaultComponent extends Component {}
+    class NumberComponent extends Component<number> {
+        public value = 0;
+        public onPropsInit(props = 3): void {
+            this.value = props;
         }
     }
-    class OtherComponent extends Component<OtherComponent, string>() {}
-    class OwnerComponent extends Component<OwnerComponent, number, Pick<Components, 'numberComponent'>>() {}
+    class OtherComponent extends Component<string> {}
+    class OwnerComponent extends Component<number, Pick<Components, 'numberComponent'>> {
+        public value = 0;
+        public onPropsInit(props: number): void {
+            this.value = props;
+        }
+    }
 
     interface Components {
         defaultComponent: DefaultComponent;
@@ -59,18 +69,18 @@ describe('ComponentsOwner', () => {
         ownerComponent: OwnerComponent;
     }
 
-    const componentBuilder = () => chainBuilder<Components>({
-        numberComponent: NumberComponent.builder(),
-        defaultComponent: DefaultComponent.builder(),
-        otherComponent: OtherComponent.builder(),
-        ownerComponent: OwnerComponent.builder(),
+    const testBuilder = () => chainBuilder<Components>({
+        numberComponent: componentBuilder(NumberComponent),
+        defaultComponent: componentBuilder(DefaultComponent),
+        otherComponent: componentBuilder(OtherComponent),
+        ownerComponent: componentBuilder(OwnerComponent),
     });
 
 
     describe('default component', () => {
 
         it('should add default component to class', () => {
-            const Actor = entityBuilder(componentBuilder()
+            const Actor = entityBuilder(testBuilder()
                 .defaultComponent()
                 .build());
 
@@ -84,7 +94,7 @@ describe('ComponentsOwner', () => {
     describe('number component', () => {
 
         it('should add component with number option', () => {
-            const Actor = entityBuilder(componentBuilder()
+            const Actor = entityBuilder(testBuilder()
                 .numberComponent(0)
                 .build());
 
@@ -92,12 +102,13 @@ describe('ComponentsOwner', () => {
 
             expect(actor).toBeTruthy();
             expect(actor.component.numberComponent).toBeTruthy();
-            expect(actor.component.numberComponent.getProps()).toEqual(0);
+            expect(actor.component.numberComponent.value).toEqual(0);
         });
 
         it('should add component with number and apply external value', () => {
-            const Actor = entityBuilder(componentBuilder()
+            const Actor = entityBuilder(testBuilder()
                 .numberComponent(0)
+                .otherComponent('123')
                 .build());
 
             const actor = Actor.build({
@@ -106,7 +117,7 @@ describe('ComponentsOwner', () => {
 
             expect(actor).toBeTruthy();
             expect(actor.component.numberComponent).toBeTruthy();
-            expect(actor.component.numberComponent.getProps()).toEqual(5);
+            expect(actor.component.numberComponent.value).toEqual(5);
         });
 
         describe('value define level', () => {
@@ -115,7 +126,7 @@ describe('ComponentsOwner', () => {
                     case: 'component default value',
                     expected: 3,
                     getActor: () => {
-                        const Actor = entityBuilder(componentBuilder()
+                        const Actor = entityBuilder(testBuilder()
                             .numberComponent()
                             .build());
 
@@ -126,7 +137,7 @@ describe('ComponentsOwner', () => {
                     case: 'static props, component default value defined',
                     expected: 5,
                     getActor: () => {
-                        const Actor = entityBuilder(componentBuilder()
+                        const Actor = entityBuilder(testBuilder()
                             .numberComponent(5)
                             .build());
 
@@ -137,7 +148,7 @@ describe('ComponentsOwner', () => {
                     case: 'external props, static props and component default value defined',
                     expected: 7,
                     getActor: () => {
-                        const Actor = entityBuilder(componentBuilder()
+                        const Actor = entityBuilder(testBuilder()
                             .numberComponent(5)
                             .build());
 
@@ -151,12 +162,12 @@ describe('ComponentsOwner', () => {
 
                 expect(actor).toBeTruthy();
                 expect(actor.component.numberComponent).toBeTruthy();
-                expect(actor.component.numberComponent.getProps()).toEqual(expected);
+                expect(actor.component.numberComponent.value).toEqual(expected);
             });
         });
 
         { /** expect TS error when specified other type of value */
-            const Actor = entityBuilder(componentBuilder()
+            const Actor = entityBuilder(testBuilder()
                 // @ts-expect-error
                 .numberComponent('123')
                 .build());
@@ -169,15 +180,8 @@ describe('ComponentsOwner', () => {
     });
 
     describe('component with owner specified', () => {
-        interface Owner {
-            numberComponent: NumberComponent;
-        }
-
-        class OwnerComponent extends Component<OwnerComponent, number, Owner>() {}
-        class NumberComponent extends Component<NumberComponent, number>() {}
-
         it('should add component with owner specified', () => {
-            const Actor = entityBuilder(componentBuilder()
+            const Actor = entityBuilder(testBuilder()
                 .numberComponent(0)
                 .ownerComponent(5)
                 .build());
@@ -186,19 +190,19 @@ describe('ComponentsOwner', () => {
 
             expect(actor).toBeTruthy();
             expect(actor.component.numberComponent).toBeTruthy();
-            expect(actor.component.numberComponent.getProps()).toEqual(0);
+            expect(actor.component.numberComponent.value).toEqual(0);
             expect(actor.component.ownerComponent).toBeTruthy();
-            expect(actor.component.ownerComponent.getProps()).toEqual(5);
+            expect(actor.component.ownerComponent.value).toEqual(5);
         });
 
         // TODO highlight not compatible owners
         { /** should show TS error when owner is not compatible */
-            const result = componentBuilder()
+            const result = testBuilder()
                 .ownerComponent(5)
                 .build();
             const Actor = entityBuilder(result);
 
-            const actor = Actor.build();
+            Actor.build();
         }
     });
 });

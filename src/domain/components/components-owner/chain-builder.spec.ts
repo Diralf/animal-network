@@ -1,24 +1,45 @@
-import { NumberProperty } from '../../property/number/number-property';
+import { Component, componentBuilder } from '../component/component';
 import { chainBuilder } from './chain-builder';
 
 describe('ChainBuilder', () => {
     it('should build components', () => {
-        interface Foo {
-            field1: NumberProperty;
-            field2: NumberProperty;
-            field3: NumberProperty;
-            field4: NumberProperty;
+        class NumberComponent extends Component<number> {
+            public value: number = 0;
+            public onPropsInit(props: number) {
+                this.value = props;
+            }
         }
 
-        const componentBuilder = () => chainBuilder<Foo>({
-            field1: NumberProperty.builder(),
-            field2: NumberProperty.builder(),
-            field3: NumberProperty.builder(),
-            field4: NumberProperty.builder(),
+        class OptNumberComponent extends Component<number> {
+            public value: number = 0;
+            public onPropsInit(props: number = 5) {
+                this.value = props;
+            }
+        }
+
+        interface Foo {
+            field1: NumberComponent;
+            field2: OptNumberComponent;
+            field3: NumberComponent;
+            field4: NumberComponent;
+        }
+
+        const defaultOwner = { component: {} };
+
+        const testBuilder = chainBuilder<Foo>({
+            field1: componentBuilder(NumberComponent),
+            field2: componentBuilder(OptNumberComponent),
+            field3: componentBuilder(NumberComponent),
+            field4: componentBuilder(NumberComponent),
         });
 
-        const entity = componentBuilder()
-            .field1({ current: 1 })
+        testBuilder
+            // @ts-expect-error
+            .field1()
+            .build();
+
+        const entity = testBuilder
+            .field1(1)
             .field2()
             .build();
 
@@ -29,7 +50,7 @@ describe('ChainBuilder', () => {
         // @ts-expect-error
         entity.field4;
 
-        expect(entity.field1().current).toEqual(1);
-        expect(entity.field2().current).toEqual(0);
+        expect(entity.field1({ owner: defaultOwner }).value).toEqual(1);
+        expect(entity.field2({ owner: defaultOwner }).value).toEqual(5);
     });
 });

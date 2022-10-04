@@ -1,3 +1,4 @@
+import { componentBuilder } from '../../../domain/components/component/component';
 import { chainBuilder } from '../../../domain/components/components-owner/chain-builder';
 import { Property } from '../../../domain/property/base/base-property';
 import { CollisionProperty } from '../../../domain/property/collision/collision-property';
@@ -24,19 +25,19 @@ export interface Components {
     taste: NumberProperty;
 }
 
-export const componentBuilder = () => chainBuilder<Components>({
-    tags: Property<InstanceTypes[]>().builder(),
-    visual: NumberProperty.builder(),
-    position: PointProperty.builder(),
-    size: NumberProperty.builder(),
-    metabolizeSpeed: NumberProperty.builder(),
-    direction: DirectionProperty.builder(),
-    sight: DirectionSightProperty.builder(),
-    movement: DirectionMovementProperty.builder(),
-    collision: CollisionProperty.builder(),
-    energy: NumberProperty.builder(),
-    brain: DirectionBrainProperty.builder(),
-    taste: NumberProperty.builder(),
+export const simpleBuilder = () => chainBuilder<Components>({
+    tags: componentBuilder(Property<InstanceTypes[]>),
+    visual: componentBuilder(NumberProperty),
+    position: componentBuilder(PointProperty),
+    size: componentBuilder(NumberProperty),
+    metabolizeSpeed: componentBuilder(NumberProperty),
+    direction: componentBuilder(DirectionProperty),
+    sight: componentBuilder(DirectionSightProperty),
+    movement: componentBuilder(DirectionMovementProperty),
+    collision: componentBuilder(CollisionProperty),
+    energy: componentBuilder(NumberProperty),
+    brain: componentBuilder(DirectionBrainProperty),
+    taste: componentBuilder(NumberProperty),
 });
 
 export type Owner<ComponentKeys extends keyof Components> = Pick<Components, ComponentKeys>;

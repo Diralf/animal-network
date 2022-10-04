@@ -11,10 +11,15 @@ interface Props {
     handler?(options: CollisionOptions): void;
 }
 
-export class CollisionProperty extends Component<CollisionProperty, Props, Positionable>() implements OnTick {
+export class CollisionProperty extends Component<Props, Positionable> implements OnTick {
     public publisher = new Publisher<[CollisionOptions]>();
+    private handler!: (options: CollisionOptions) => void;
 
-    public check<Components extends Record<keyof Components, unknown>>(list: EntityList<Components>): EntityType<Components>[] {
+    public onPropsInit(props: Props = { handler: () => {}}): void {
+        this.handler = props.handler ?? (() => {});
+    }
+
+    public check<Components extends Record<keyof Components, unknown>>(list: EntityList<Components>): Array<EntityType<Components>> {
         const ownPosition = this.owner.component.position.current;
         const entitiesWithPositions = (list as EntityList<any>).findWithType<Positionable>(
             positionableGuard,
@@ -26,7 +31,7 @@ export class CollisionProperty extends Component<CollisionProperty, Props, Posit
 
     public collide(world: World<Positionable>): void {
         const result = this.check(world.getEntityList());
-        this.props?.handler?.({ other: result, world });
+        this.handler({ other: result, world });
         this.publisher.notify({ other: result, world });
     }
 

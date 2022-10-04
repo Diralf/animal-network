@@ -1,3 +1,4 @@
+import { componentBuilder } from '../../components/component/component';
 import { DirectionProperty, DirectionTurn } from './direction-property';
 
 describe('DirectionProperty', () => {
@@ -13,7 +14,7 @@ describe('DirectionProperty', () => {
         { start: { x: 0, y: -1 }, turn: DirectionTurn.TURN_RIGHT, result: { x: 1, y: 0 } },
         { start: { x: 1, y: 0 }, turn: DirectionTurn.TURN_RIGHT, result: { x: 0, y: 1 } },
     ])('should rotate $start to $turn and get $result', ({ start, turn, result }) => {
-        const property = new DirectionProperty({ initialDirection: start });
+        const property = componentBuilder(DirectionProperty)({ initialDirection: start })({ owner: { component: {} } });
 
         property.turn(turn);
 
@@ -26,7 +27,7 @@ describe('DirectionProperty', () => {
         { direction: { x: 0, y: 1 }, expected: 90 },
         { direction: { x: 1, y: 0 }, expected: 0 },
     ])('should get $direction as angle $expected', ({ direction, expected }) => {
-        const property = new DirectionProperty({ initialDirection: direction });
+        const property = componentBuilder(DirectionProperty)({ initialDirection: direction })({ owner: { component: {} } });
 
         expect(property.getAsAngle()).toEqual(expected);
     });

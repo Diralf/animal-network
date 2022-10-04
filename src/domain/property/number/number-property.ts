@@ -1,4 +1,4 @@
-import { BaseProperty } from '../base/base-property';
+import { Property } from '../base/base-property';
 
 interface Props {
     defaultValue?: number;
@@ -7,26 +7,25 @@ interface Props {
     current?: number;
 }
 
-export class NumberProperty extends BaseProperty<NumberProperty, number, Props | undefined>() {
+export class NumberProperty extends Property<number, Props> {
     private _default!: number;
     private _min!: number;
     private _max!: number;
 
-    constructor(options: Props = {}) {
-        super(options);
-        this._min = options.min ?? -Number.MAX_SAFE_INTEGER;
-        this._max = options.max ?? Number.MAX_SAFE_INTEGER;
+    onPropsInit(props: Props = {}) {
+        this._min = props.min ?? -Number.MAX_SAFE_INTEGER;
+        this._max = props.max ?? Number.MAX_SAFE_INTEGER;
 
-        this._default = this.validate(options.defaultValue ?? 0);
-        this.current = this.validate(options.current ?? this._default);
+        this._default = this.validate(props.defaultValue ?? 0);
+        this.current = this.validate(props.current ?? this._default);
     }
 
     protected getCurrent(): number {
-        return this.props?.current ?? this._default;
+        return this.current;
     }
 
     protected setCurrent(value: number): void {
-        this.props!.current = value;
+        this.current = value;
     }
 
     public get current(): number {

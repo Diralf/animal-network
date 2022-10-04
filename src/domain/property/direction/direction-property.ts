@@ -11,15 +11,14 @@ interface Props {
     initialDirection: RawPoint;
 }
 
-export class DirectionProperty extends Component<DirectionProperty, Props | undefined>() {
+export class DirectionProperty extends Component<Props> {
     private current!: RawPoint;
 
-    constructor(props: Props = { initialDirection: { x: 0, y: -1 } }) {
-        super(props);
+    public onPropsInit(props: Props = { initialDirection: { x: 0, y: -1 } }): void {
         this.current = props.initialDirection;
     }
 
-    turn(to: DirectionTurn) {
+    public turn(to: DirectionTurn): void {
         let angle;
         switch (to) {
             case DirectionTurn.TURN_LEFT:
@@ -36,11 +35,11 @@ export class DirectionProperty extends Component<DirectionProperty, Props | unde
         this.current = rotateVector(p, angle);
     }
 
-    getCurrent() {
+    public getCurrent(): RawPoint {
         return this.current;
     }
 
-    getAsAngle() {
+    public getAsAngle(): number {
         return angleOfVector(this.current);
     }
 }

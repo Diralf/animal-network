@@ -1,8 +1,8 @@
-import { Entity } from '../../components/components-owner/components-owner';
+import { EntityType } from '../../components/component/component';
 import { World } from '../../world/world';
 import { Positionable } from '../point/positionable';
 
 export interface CollisionOptions {
-    other: Array<Entity<Positionable>>;
+    other: Array<EntityType<Positionable>>;
     world: World<Positionable>;
 }

@@ -1,4 +1,4 @@
-import { EntityType } from '../../components/component/component';
+import { EntityType, componentBuilder } from '../../components/component/component';
 import { entityBuilder } from '../../components/entity-builder/entity-builder';
 import { World } from '../../world/world';
 import { NumberProperty } from '../number/number-property';
@@ -14,9 +14,9 @@ interface Components {
 
 const getEntity = ({ id, point }: { id: number, point: RawPoint }): EntityType<Components> => {
     return entityBuilder({
-        id: NumberProperty.build({ current: id }),
-        position: PointProperty.build(point),
-        collision: CollisionProperty.build({ handler: jest.fn() }),
+        id: componentBuilder(NumberProperty)({ current: id }),
+        position: componentBuilder(PointProperty)(point),
+        collision: componentBuilder(CollisionProperty)({ handler: jest.fn() }),
     }).build();
 };
 
@@ -74,9 +74,9 @@ describe('CollisionProperty', () => {
 
         entity1.component.collision.collide(world);
 
-        expect(entity1.component.collision.getProps().handler).toHaveBeenCalledTimes(1);
-        expect(entity1.component.collision.getProps().handler).toHaveBeenCalledWith(expect.objectContaining({ other: [entity2] }));
-        expect(entity2.component.collision.getProps().handler).not.toHaveBeenCalled();
-        expect(entity3.component.collision.getProps().handler).not.toHaveBeenCalled();
+        expect(entity1.component.collision['handler']).toHaveBeenCalledTimes(1);
+        expect(entity1.component.collision['handler']).toHaveBeenCalledWith(expect.objectContaining({ other: [entity2] }));
+        expect(entity2.component.collision['handler']).not.toHaveBeenCalled();
+        expect(entity3.component.collision['handler']).not.toHaveBeenCalled();
     });
 });

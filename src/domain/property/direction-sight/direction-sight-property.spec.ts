@@ -1,5 +1,5 @@
 import { FieldBuilder } from '../../../clients/console/utils/field-builder';
-import { EntityType } from '../../components/component/component';
+import { EntityType, componentBuilder } from '../../components/component/component';
 import { entityBuilder } from '../../components/entity-builder/entity-builder';
 import { World } from '../../world/world';
 import { DirectionProperty } from '../direction/direction-property';
@@ -41,26 +41,26 @@ function makeDirectionSight(direction: RawPoint) {
                 `),
         availableEntities: {
             '7': (point: RawPoint) => entityBuilder({
-                position: PointProperty.build(point),
-                visual: NumberProperty.build({ current: 7 }),
+                position: componentBuilder(PointProperty)(point),
+                visual: componentBuilder(NumberProperty)({ current: 7 }),
             }).build(),
             '2': (point: RawPoint) => entityBuilder({
-                position: PointProperty.build(point),
-                visual: NumberProperty.build({ current: 2 }),
+                position: componentBuilder(PointProperty)(point),
+                visual: componentBuilder(NumberProperty)({ current: 2 }),
             }).build(),
             '3': (point: RawPoint) => entityBuilder({
-                position: PointProperty.build(point),
-                visual: NumberProperty.build({ current: 3 }),
+                position: componentBuilder(PointProperty)(point),
+                visual: componentBuilder(NumberProperty)({ current: 3 }),
             }).build(),
             '4': (point: RawPoint) => entityBuilder({
-                position: PointProperty.build(point),
-                visual: NumberProperty.build({ current: 4 }),
+                position: componentBuilder(PointProperty)(point),
+                visual: componentBuilder(NumberProperty)({ current: 4 }),
             }).build(),
             '5': (point: RawPoint) => entityBuilder({
-                position: PointProperty.build(point),
-                visual: NumberProperty.build({ current: 5 }),
-                direction: DirectionProperty.build({ initialDirection: direction }),
-                sight: DirectionSightProperty.build({ range: [5, 2] }),
+                position: componentBuilder(PointProperty)(point),
+                visual: componentBuilder(NumberProperty)({ current: 5 }),
+                direction: componentBuilder(DirectionProperty)({ initialDirection: direction }),
+                sight: componentBuilder(DirectionSightProperty)({ range: [5, 2] }),
             }).build(),
         },
     });
@@ -77,7 +77,7 @@ describe('DirectionSightProperty', () => {
 
     describe('getSightMask', () => {
         it('should get start mask', () => {
-            const directionSight = new DirectionSightProperty({ range: [5, 2] });
+            const { directionSight } = makeDirectionSight({ x: 1, y: 0 });
 
             expect(directionSight.getSightMask()).toEqual({
                 maskStart: { x: 0, y: -2 },

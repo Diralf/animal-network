@@ -10,7 +10,7 @@ export enum DirectionMovementValue {
 
 type Owner = Directional & Positionable;
 
-export class DirectionMovementProperty extends Component<DirectionMovementProperty, void, Owner>() {
+export class DirectionMovementProperty extends Component<void, Owner> {
     public publisher = new Publisher<[DirectionMovementValue]>();
     public active = true;
 

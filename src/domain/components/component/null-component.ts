@@ -1,3 +1,3 @@
 import { Component } from './component';
 
-export const NullComponent = Component<void>();
+export class NullComponent extends Component {}

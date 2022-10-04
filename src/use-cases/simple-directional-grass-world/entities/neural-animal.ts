@@ -1,12 +1,12 @@
 import { entityBuilder } from '../../../domain/components/entity-builder/entity-builder';
-import { Component } from '../../../domain/components/component/component';
+import { Component, componentBuilder } from '../../../domain/components/component/component';
 import { DirectionBrainCommand } from '../../../domain/property/direction-brain/direction-brain-property';
 import { World } from '../../../domain/world/world';
 import { AnimalDirectionGrassNetwork } from '../../../network/animal-direction-grass-network/animal-direction-grass-network';
 import { Owner } from '../components/component-builder';
 import { Animal } from './animal';
 
-class NeuralBrainComponent extends Component<NeuralBrainComponent, void, Owner<'brain' | 'sight' | 'size' | 'taste' | 'energy'>>() {
+class NeuralBrainComponent extends Component<void, Owner<'brain' | 'sight' | 'size' | 'taste' | 'energy'>> {
     private network = new AnimalDirectionGrassNetwork();
 
     async loadFromFile() {
@@ -45,7 +45,7 @@ class NeuralBrainComponent extends Component<NeuralBrainComponent, void, Owner<'
 
 export const NeuralAnimal = entityBuilder({
     ...Animal.factorySet,
-    neuralBrain: NeuralBrainComponent.build(),
+    neuralBrain: componentBuilder(NeuralBrainComponent)(),
 });
 
 export type NeuralAnimal = ReturnType<typeof NeuralAnimal.build>;

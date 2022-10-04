@@ -1,11 +1,11 @@
 import { entityBuilder } from '../../../domain/components/entity-builder/entity-builder';
 import { DirectionMovementValue } from '../../../domain/property/direction-movement/direction-movement-property';
-import { componentBuilder } from '../components/component-builder';
+import { simpleBuilder } from '../components/component-builder';
 import { Animal } from './animal';
 
 export const StaticAnimal = entityBuilder({
     ...Animal.factorySet,
-    ...componentBuilder()
+    ...simpleBuilder()
         .brain({ handler: () => DirectionMovementValue.FORWARD })
         .build(),
 });

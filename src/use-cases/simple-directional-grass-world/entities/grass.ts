@@ -1,8 +1,8 @@
 import { entityBuilder } from '../../../domain/components/entity-builder/entity-builder';
-import { componentBuilder } from '../components/component-builder';
+import { simpleBuilder } from '../components/component-builder';
 import { InstanceTypes } from '../types/instance-types';
 
-export const Grass = entityBuilder(componentBuilder()
+export const Grass = entityBuilder(simpleBuilder()
     .tags([InstanceTypes.GRASS])
     .size({ current: 10 })
     .position()

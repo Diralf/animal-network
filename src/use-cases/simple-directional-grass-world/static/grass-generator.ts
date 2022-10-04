@@ -1,4 +1,4 @@
-import { Component } from '../../../domain/components/component/component';
+import { Component, componentBuilder } from '../../../domain/components/component/component';
 import { entityBuilder } from '../../../domain/components/entity-builder/entity-builder';
 import { Positionable } from '../../../domain/property/point/positionable';
 import { OnTick } from '../../../domain/time-thread/on-tick';
@@ -12,17 +12,23 @@ interface Props {
     maxGrassAtOnce?: number;
 }
 
-export class GrassGeneratorComponent extends Component<GrassGeneratorComponent, Props>() implements OnTick {
+export class GrassGeneratorComponent extends Component<Props> implements OnTick {
     private initial = true;
+    private rate!: number;
+    private maxGrassAtOnce!: number;
+
+    onPropsInit(props: Props = {}) {
+        this.rate = props.rate ?? 1;
+        this.maxGrassAtOnce = props.maxGrassAtOnce ?? 100;
+    }
 
     public tick(world: World<Taggable & Positionable>, time: number): void {
-        const { rate = 1, maxGrassAtOnce = 100 } = this.props;
         const grassInstances = world.getEntityList().find((instance) => instance.component.tags.current.includes(InstanceTypes.GRASS));
         if (this.initial) {
-            this.spawnMany(maxGrassAtOnce, world);
+            this.spawnMany(this.maxGrassAtOnce, world);
             this.initial = false;
         }
-        if (grassInstances.length < maxGrassAtOnce && time % rate === 0) {
+        if (grassInstances.length < this.maxGrassAtOnce && time % this.rate === 0) {
             let success = false;
             let attempt = 0;
             do {
@@ -54,7 +60,7 @@ export class GrassGeneratorComponent extends Component<GrassGeneratorComponent, 
 }
 
 export const GrassGenerator = entityBuilder({
-    grassGenerator: GrassGeneratorComponent.build({ rate: 1, maxGrassAtOnce: 100 }),
+    grassGenerator: componentBuilder(GrassGeneratorComponent)(),
 });
 
 export type GrassGenerator = ReturnType<typeof GrassGenerator.build>;

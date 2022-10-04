@@ -1,15 +1,15 @@
 import { entityBuilder } from '../../../domain/components/entity-builder/entity-builder';
-import { Component } from '../../../domain/components/component/component';
+import { Component, componentBuilder } from '../../../domain/components/component/component';
 import { CollisionOptions } from '../../../domain/property/collision/collision-options';
 import { DirectionMovementValue } from '../../../domain/property/direction-movement/direction-movement-property';
 import { World } from '../../../domain/world/world';
-import { componentBuilder, Owner } from '../components/component-builder';
+import { Owner, simpleBuilder } from '../components/component-builder';
 import { isTaggableGuard } from '../types/is-taggable-guard';
 import { Grass } from './grass';
 import { InstanceTypes } from '../types/instance-types';
 import { Hole } from './hole';
 
-class AnimalCollisionComponent extends Component<AnimalCollisionComponent, void, Owner<'collision' | 'taste' | 'size' | 'energy' | 'position'>>() {
+class AnimalCollisionComponent extends Component<void, Owner<'collision' | 'taste' | 'size' | 'energy' | 'position'>> {
     onInit() {
         super.onInit();
         this.owner.component.collision.publisher.subscribe(({ other, world }: CollisionOptions): void => {
@@ -41,7 +41,7 @@ class AnimalCollisionComponent extends Component<AnimalCollisionComponent, void,
     }
 }
 
-class AnimalMovementComponent extends Component<AnimalMovementComponent, void, Owner<'movement' | 'energy'>>() {
+class AnimalMovementComponent extends Component<void, Owner<'movement' | 'energy'>> {
     onInit() {
         super.onInit();
         this.owner.component.movement.publisher.subscribe(this.handleMovement);
@@ -70,7 +70,7 @@ class AnimalMovementComponent extends Component<AnimalMovementComponent, void, O
     }
 }
 
-class AnimalCommonComponent extends Component<AnimalCommonComponent, void, Owner<'taste' | 'size' | 'metabolizeSpeed' | 'movement' | 'energy'>>() {
+class AnimalCommonComponent extends Component<void, Owner<'taste' | 'size' | 'metabolizeSpeed' | 'movement' | 'energy'>> {
     public tick(world: World, time: number): void {
         super.tick(world, time);
         this.owner.component.taste.current = 0;
@@ -86,14 +86,14 @@ class AnimalCommonComponent extends Component<AnimalCommonComponent, void, Owner
 }
 
 export const Animal = entityBuilder({
-    animalCommon: AnimalCommonComponent.build(),
-    animalMovement: AnimalMovementComponent.build(),
-    animalCollision: AnimalCollisionComponent.build(),
-    ...componentBuilder()
+    animalCommon: componentBuilder(AnimalCommonComponent)(),
+    animalMovement: componentBuilder(AnimalMovementComponent)(),
+    animalCollision: componentBuilder(AnimalCollisionComponent)(),
+    ...simpleBuilder()
         .tags([InstanceTypes.ANIMAL])
+        .position()
         .collision()
         .direction()
-        .position()
         .energy({ min: 0, max: 100, defaultValue: 100 })
         .visual({ current: 6 })
         .taste({ current: 0 })

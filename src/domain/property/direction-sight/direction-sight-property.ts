@@ -12,7 +12,7 @@ import { rotateMatrix } from '../utils/rotate-matrix';
 import { rotateVector } from '../utils/rotate-vector';
 import { visualEntitiesAsString } from '../utils/visual-entities-as-string';
 
-interface Owner {
+interface Deps {
     position: PointProperty;
     direction: DirectionProperty;
     visual: NumberProperty;
@@ -22,15 +22,12 @@ interface Props {
     range: [number, number];
 }
 
-export class DirectionSightProperty extends Component<DirectionSightProperty, Props, Owner>() implements OnTick {
+export class DirectionSightProperty extends Component<Props, Deps> implements OnTick {
     public current: number[][] = [];
+    private range!: Props['range'];
 
-    constructor(props: Props = { range: [1, 1] }) {
-        super(props);
-    }
-
-    public get range(): [number, number] {
-        return this.props.range;
+    onPropsInit(props: Props = { range: [1, 1] }) {
+        this.range = props.range;
     }
 
     public getSightMask() {
@@ -111,7 +108,7 @@ export class DirectionSightProperty extends Component<DirectionSightProperty, Pr
         );
     }
 
-    public tick(world: World<Owner>): void {
+    public tick(world: World<Deps>): void {
         this.update(world.getEntityList());
     }
 }

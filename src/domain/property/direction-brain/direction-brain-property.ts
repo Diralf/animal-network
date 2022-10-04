@@ -26,12 +26,17 @@ interface Props {
     handler?: DirectionBrainHandler;
 }
 
-export class DirectionBrainProperty extends Component<DirectionBrainProperty, Props, DirectionBrainOwner>() implements OnTick {
+export class DirectionBrainProperty extends Component<Props, DirectionBrainOwner> implements OnTick {
     public publisher = new Publisher<[DirectionBrainCommand]>();
     public lastCommand: DirectionBrainCommand | null = null;
+    private handler?: DirectionBrainHandler;
+
+    public onPropsInit(props: Props): void {
+        this.handler = props.handler;
+    }
 
     public decide(world: World): DirectionBrainCommand {
-        return this.props?.handler?.({
+        return this.handler?.({
             owner: this.owner,
             world,
         }) ?? BrainCommandsOther.STAND;
@@ -49,8 +54,8 @@ export class DirectionBrainProperty extends Component<DirectionBrainProperty, Pr
     }
 
     public tick(world: World): void {
-        if (this.props?.handler) {
-            this.applyDecision(this.props.handler({
+        if (this.handler) {
+            this.applyDecision(this.handler({
                 owner: this.owner,
                 world,
             }));

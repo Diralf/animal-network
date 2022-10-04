@@ -1,10 +1,9 @@
 import { OnDestroy } from '../../time-thread/on-destroy';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
+import { ComponentPropsType, componentBuilder } from '../component/component';
 import { NullComponent } from '../component/null-component';
 import { FactorySet, UnknownComponent } from '../components-owner/chain-builder';
-
-export type ComponentPropsType<Component extends UnknownComponent> = Component['__propsType'];
 
 type ComponentsWithPropsKeys<Components extends Record<keyof Components, UnknownComponent>> = {
     [Key in keyof Components]: ComponentPropsType<Components[Key]> extends void ? never : Key;
@@ -42,7 +41,7 @@ export class Entity<Components extends Record<keyof Components, UnknownComponent
             field?.onDestroy?.(world);
         });
         this.forEachKey((field, key, instance) => {
-            instance[key] = new NullComponent();
+            instance[key] = componentBuilder(NullComponent)()({ owner: this });
         });
     }
 
@@ -51,7 +50,7 @@ export class Entity<Components extends Record<keyof Components, UnknownComponent
         const keys: Array<keyof Components> = Object.keys(builders) as any;
         const comps = {} as Components;
         keys.forEach((key) => {
-            comps[key] = builders[key](this, externalProps[key as ComponentsWithPropsKeys<Components>]);
+            comps[key] = builders[key]({ owner: this, props: externalProps[key as ComponentsWithPropsKeys<Components>] });
         });
         return comps;
     }
