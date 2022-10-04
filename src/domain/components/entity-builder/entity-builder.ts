@@ -15,6 +15,28 @@ export type ComponentsWithProps<Components extends Record<keyof Components, Unkn
 
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
 
+/**
+ *   initial {
+ *       point: PointComponent;
+ *       material: MaterialComponent;
+ *       direction: DirectionComponent;
+ *       collision: CollisionComponent; // deps: point, material
+ *       sight: SightComponent; // deps: point, direction
+ *   }
+ *
+ *   step 1 {
+ *       point: {};
+ *       direction: {};
+ *       collision: { point: PointComponent, material: MaterialComponent };
+ *       sight: { point: PointComponent, direction: DirectionComponent };
+ *   }
+ *
+ *   step 2 {} | {} | { point: PointComponent, material: MaterialComponent } | { point: PointComponent, direction: DirectionComponent }
+ *
+ *   step 3 {} & {} & { point: PointComponent, material: MaterialComponent } & { point: PointComponent, direction: DirectionComponent }
+ *
+ *   result { point: PointComponent, material: MaterialComponent, direction: DirectionComponent }
+ */
 export type ComponentsDeps<Components extends Record<keyof Components, UnknownComponent>> = UnionToIntersection<{
     [Key in keyof Components]: ComponentDepsType<Components[Key]>;
 }[keyof Components]>;
