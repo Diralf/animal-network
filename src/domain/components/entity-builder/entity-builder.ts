@@ -1,7 +1,7 @@
 import { OnDestroy } from '../../time-thread/on-destroy';
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
-import { ComponentPropsType, componentBuilder, ComponentDepsType } from '../component/component';
+import { ComponentPropsType, ComponentDepsType } from '../component/component';
 import { NullComponent } from '../component/null-component';
 import { FactorySet, UnknownComponent, FactoryKeysSet } from '../components-owner/chain-builder';
 
@@ -69,7 +69,7 @@ export class Entity<Components extends Record<keyof Components, UnknownComponent
             field?.onDestroy?.(world);
         });
         this.forEachKey((field, key, instance) => {
-            instance[key] = componentBuilder(NullComponent)()({ owner: this });
+            instance[key] = NullComponent.builder()()({ owner: this });
         });
     }
 

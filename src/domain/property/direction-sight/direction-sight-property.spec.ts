@@ -1,5 +1,5 @@
 import { FieldBuilder } from '../../../clients/console/utils/field-builder';
-import { EntityType, componentBuilder } from '../../components/component/component';
+import { EntityType } from '../../components/component/component';
 import { entityBuilder } from '../../components/entity-builder/entity-builder';
 import { World } from '../../world/world';
 import { DirectionProperty } from '../direction/direction-property';
@@ -41,26 +41,26 @@ function makeDirectionSight(direction: RawPoint) {
                 `),
         availableEntities: {
             '7': (point: RawPoint) => entityBuilder({
-                position: componentBuilder(PointProperty)(point),
-                visual: componentBuilder(NumberProperty)({ current: 7 }),
+                position: PointProperty.factory(point),
+                visual: NumberProperty.factory({ current: 7 }),
             }).build(),
             '2': (point: RawPoint) => entityBuilder({
-                position: componentBuilder(PointProperty)(point),
-                visual: componentBuilder(NumberProperty)({ current: 2 }),
+                position: PointProperty.factory(point),
+                visual: NumberProperty.factory({ current: 2 }),
             }).build(),
             '3': (point: RawPoint) => entityBuilder({
-                position: componentBuilder(PointProperty)(point),
-                visual: componentBuilder(NumberProperty)({ current: 3 }),
+                position: PointProperty.factory(point),
+                visual: NumberProperty.factory({ current: 3 }),
             }).build(),
             '4': (point: RawPoint) => entityBuilder({
-                position: componentBuilder(PointProperty)(point),
-                visual: componentBuilder(NumberProperty)({ current: 4 }),
+                position: PointProperty.factory(point),
+                visual: NumberProperty.factory({ current: 4 }),
             }).build(),
             '5': (point: RawPoint) => entityBuilder({
-                position: componentBuilder(PointProperty)(point),
-                visual: componentBuilder(NumberProperty)({ current: 5 }),
-                direction: componentBuilder(DirectionProperty)({ initialDirection: direction }),
-                sight: componentBuilder(DirectionSightProperty)({ range: [5, 2] }),
+                position: PointProperty.factory(point),
+                visual: NumberProperty.factory({ current: 5 }),
+                direction: DirectionProperty.factory({ initialDirection: direction }),
+                sight: DirectionSightProperty.factory({ range: [5, 2] }),
             }).build(),
         },
     });

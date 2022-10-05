@@ -1,5 +1,5 @@
 import { entityBuilder } from '../../../domain/components/entity-builder/entity-builder';
-import { Component, componentBuilder } from '../../../domain/components/component/component';
+import { Component } from '../../../domain/components/component/component';
 import { DirectionBrainCommand } from '../../../domain/property/direction-brain/direction-brain-property';
 import { World } from '../../../domain/world/world';
 import { AnimalDirectionGrassNetwork } from '../../../network/animal-direction-grass-network/animal-direction-grass-network';
@@ -45,7 +45,7 @@ class NeuralBrainComponent extends Component<void, Owner<'brain' | 'sight' | 'si
 
 export const NeuralAnimal = entityBuilder({
     ...Animal.factorySet,
-    neuralBrain: componentBuilder(NeuralBrainComponent)(),
+    neuralBrain: NeuralBrainComponent.builder()(),
 });
 
 export type NeuralAnimal = ReturnType<typeof NeuralAnimal.build>;

@@ -1,4 +1,4 @@
-import { EntityType, componentBuilder } from '../../components/component/component';
+import { EntityType } from '../../components/component/component';
 import { entityBuilder } from '../../components/entity-builder/entity-builder';
 import { World } from '../../world/world';
 import { DirectionMovementProperty, DirectionMovementValue } from '../direction-movement/direction-movement-property';
@@ -20,12 +20,12 @@ interface Entity {
 
 const getEntity = (action: DirectionBrainCommand): EntityType<Entity> => {
     return entityBuilder({
-        brain: componentBuilder(DirectionBrainProperty)({ handler: () => action }),
-        movement: componentBuilder(DirectionMovementProperty)(),
-        position: componentBuilder(PointProperty)({ x: 0, y: 0 }),
-        sight: componentBuilder(DirectionSightProperty)({ range: [5, 2] }),
-        direction: componentBuilder(DirectionProperty)({ initialDirection: { x: 0, y: -1 } }),
-        visual: componentBuilder(NumberProperty)({ current: 2 }),
+        brain: DirectionBrainProperty.factory({ handler: () => action }),
+        movement: DirectionMovementProperty.factory(),
+        position: PointProperty.factory({ x: 0, y: 0 }),
+        sight: DirectionSightProperty.factory({ range: [5, 2] }),
+        direction: DirectionProperty.factory({ initialDirection: { x: 0, y: -1 } }),
+        visual: NumberProperty.factory({ current: 2 }),
     }).build();
 };
 

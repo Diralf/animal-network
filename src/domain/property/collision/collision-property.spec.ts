@@ -1,4 +1,4 @@
-import { EntityType, componentBuilder } from '../../components/component/component';
+import { EntityType } from '../../components/component/component';
 import { entityBuilder } from '../../components/entity-builder/entity-builder';
 import { World } from '../../world/world';
 import { NumberProperty } from '../number/number-property';
@@ -14,9 +14,9 @@ interface Components {
 
 const getEntity = ({ id, point }: { id: number, point: RawPoint }): EntityType<Components> => {
     return entityBuilder({
-        id: componentBuilder(NumberProperty)({ current: id }),
-        position: componentBuilder(PointProperty)(point),
-        collision: componentBuilder(CollisionProperty)({ handler: jest.fn() }),
+        id: NumberProperty.factory({ current: id }),
+        position: PointProperty.factory(point),
+        collision: CollisionProperty.factory({ handler: jest.fn() }),
     }).build();
 };
 

@@ -1,4 +1,3 @@
-import { componentBuilder } from '../../components/component/component';
 import { entityBuilder } from '../../components/entity-builder/entity-builder';
 import { Property } from './base-property';
 
@@ -6,20 +5,20 @@ describe('BaseProperty', () => {
     const owner = { component: {} };
 
     it('should be truthy', () => {
-        const property: Property<number> = componentBuilder(Property<number>)(0)({ owner });
+        const property: Property<number> = Property<number>.build(owner, 0);
 
         expect(property).toBeTruthy();
     });
 
     it('should get current', () => {
-        const property = componentBuilder(Property<number>)(3)({ owner });
+        const property = Property<number>.build(owner, 3);
 
         expect(property.current).toBeTruthy();
         expect(property.current).toEqual(3);
     });
 
     it('should set and get current', () => {
-        const property = componentBuilder(Property<number>)(0)({ owner });
+        const property = Property<number>.build(owner, 0);
 
         property.current = 5;
 
@@ -28,7 +27,7 @@ describe('BaseProperty', () => {
 
     it('should have number current', () => {
         const value = 1;
-        const property = componentBuilder(Property<number>)(value)({ owner });
+        const property = Property<number>.build(owner, value);
 
         expect(property.current).toEqual(value);
         expect(typeof property.current).toEqual('number');
@@ -36,7 +35,7 @@ describe('BaseProperty', () => {
 
     it('should have string current', () => {
         const value = '123';
-        const property = componentBuilder(Property<string>)(value)({ owner });
+        const property = Property<string>.build(owner, value);
 
         expect(property.current).toEqual(value);
         expect(typeof property.current).toEqual('string');
@@ -44,7 +43,7 @@ describe('BaseProperty', () => {
 
     it('should have boolean current', () => {
         const value = true;
-        const property = componentBuilder(Property<boolean>)(value)({ owner });
+        const property = Property<boolean>.build(owner, value);
 
         expect(property.current).toEqual(value);
         expect(typeof property.current).toEqual('boolean');
@@ -52,7 +51,7 @@ describe('BaseProperty', () => {
 
     it('should have object current', () => {
         const value = { foo: 5 };
-        const property = componentBuilder(Property<{ foo: number }>)(value)({ owner });
+        const property = Property<{ foo: number }>.build(owner, value);
 
         expect(property.current).toEqual(value);
         expect(typeof property.current).toEqual('object');
@@ -61,7 +60,7 @@ describe('BaseProperty', () => {
 
     it('should have array current', () => {
         const value = [1, 2, 3];
-        const property = componentBuilder(Property<number[]>)(value)({ owner });
+        const property = Property<number[]>.build(owner, value);
 
         expect(property.current).toEqual(value);
         expect(typeof property.current).toEqual('object');
@@ -74,7 +73,7 @@ describe('BaseProperty', () => {
             TWO = 'TWO',
         }
         const value: TestEnum = TestEnum.ONE;
-        const property = componentBuilder(Property<TestEnum>)(value)({ owner });
+        const property = Property<TestEnum>.build(owner, value);
 
         expect(property.current).toEqual(value);
         expect(typeof property.current).toEqual('string');
@@ -86,7 +85,7 @@ describe('BaseProperty', () => {
             public field = 1;
         }
         const value = new Test();
-        const property = componentBuilder(Property<Test>)(value)({ owner });
+        const property = Property<Test>.build(owner, value);
 
         expect(property.current).toEqual(value);
         expect(typeof property.current).toEqual('object');
@@ -94,8 +93,8 @@ describe('BaseProperty', () => {
     });
 
     it('should have another property current', () => {
-        const value = componentBuilder(Property<number>)(1)({ owner });
-        const property = componentBuilder(Property<Property<number>>)(value)({ owner });
+        const value = Property<number>.build(owner, 1);
+        const property = Property<Property<number>>.build(owner, value);
 
         expect(property.current).toEqual(value);
         expect(typeof property.current).toEqual('object');
@@ -103,16 +102,16 @@ describe('BaseProperty', () => {
     });
 
     it('should compare equal values', () => {
-        const value = componentBuilder(Property<number>)(1)({ owner });
-        const value2 = componentBuilder(Property<number>)(1)({ owner });
+        const value = Property<number>.build(owner, 1);
+        const value2 = Property<number>.build(owner, 1);
 
         expect(value.isEqual(value2)).toBeTruthy();
         expect(value.isEqualValue(value2.current)).toBeTruthy();
     });
 
     it('should compare not equal values', () => {
-        const value = componentBuilder(Property<number>)(1)({ owner });
-        const value2 = componentBuilder(Property<number>)(2)({ owner });
+        const value = Property<number>.build(owner, 1);
+        const value2 = Property<number>.build(owner, 2);
 
         expect(value.isEqual(value2)).toBeFalsy();
         expect(value.isEqualValue(value2.current)).toBeFalsy();
@@ -121,7 +120,7 @@ describe('BaseProperty', () => {
     describe('using in the class', () => {
         it('should add default component to class', () => {
             const Actor = entityBuilder({
-                comp: componentBuilder(Property<number>)(3),
+                comp: Property<number>.factory(3),
             });
 
             const actor = Actor.build();

@@ -4,8 +4,6 @@ import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
 import { UnknownComponent } from '../components-owner/chain-builder';
 
-// export type Opt<T> = T extends void ? null | undefined | void : T;
-
 export interface EntityType<Components extends Record<keyof Components, unknown>> {
     component: Components;
 }
@@ -22,13 +20,34 @@ export interface ComponentOptionsOptProps<Props, Owner> {
 
 export type ComponentPropsType<Component extends UnknownComponent> = Component['__propsType'];
 export type ComponentDepsType<Component extends UnknownComponent> = Component['__depsType'];
+export type ComponentStaticThis<T extends Component<Props, Deps>, Props, Deps> = { new (options: ComponentOptions<Props, EntityType<Deps>>): T };
 
 export class Component<Props = void, Deps = {}> implements OnTick, OnDestroy {
     private _owner: PropertyOwner<EntityType<Deps>> = new PropertyOwner<EntityType<Deps>>();
     public __propsType!: Props;
     public __depsType!: Deps;
-    public __ownerType!: EntityType<Deps>;
     public __initProps: () => void;
+
+    static builder<SComp extends Component<SProps, SDeps>, SProps, SDeps>(
+        this: ComponentStaticThis<SComp, SProps, SDeps>,
+    ): ComponentStaticFactory<SComp, SProps, SDeps> {
+        return componentBuilder(this);
+    }
+
+    static factory<SComp extends Component<SProps, SDeps>, SProps, SDeps>(
+        this: ComponentStaticThis<SComp, SProps, SDeps>,
+        ...staticProps: StaticPropsType<SComp, SProps, SDeps>
+    ): ComponentFactory<SComp, SProps, SDeps> {
+        return componentBuilder(this)(...staticProps);
+    }
+
+    static build<SComp extends Component<SProps, SDeps>, SProps, SDeps>(
+        this: ComponentStaticThis<SComp, SProps, SDeps>,
+        owner: EntityType<SDeps>,
+        ...staticProps: StaticPropsType<SComp, SProps, SDeps>
+    ): SComp {
+        return componentBuilder(this)(...staticProps)({ owner });
+    }
 
     constructor({ props, owner }: ComponentOptions<Props, EntityType<Deps>>) {
         this._owner.ref = owner as EntityType<Deps>;

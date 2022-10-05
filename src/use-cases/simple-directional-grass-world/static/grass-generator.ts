@@ -1,4 +1,4 @@
-import { Component, componentBuilder } from '../../../domain/components/component/component';
+import { Component } from '../../../domain/components/component/component';
 import { entityBuilder } from '../../../domain/components/entity-builder/entity-builder';
 import { Positionable } from '../../../domain/property/point/positionable';
 import { OnTick } from '../../../domain/time-thread/on-tick';
@@ -60,7 +60,7 @@ export class GrassGeneratorComponent extends Component<Props> implements OnTick 
 }
 
 export const GrassGenerator = entityBuilder({
-    grassGenerator: componentBuilder(GrassGeneratorComponent)(),
+    grassGenerator: GrassGeneratorComponent.builder()(),
 });
 
 export type GrassGenerator = ReturnType<typeof GrassGenerator.build>;

@@ -1,4 +1,4 @@
-import { Component, componentBuilder } from '../component/component';
+import { Component } from '../component/component';
 import { chainBuilder } from './chain-builder';
 
 describe('ChainBuilder', () => {
@@ -27,10 +27,10 @@ describe('ChainBuilder', () => {
         const defaultOwner = { component: {} };
 
         const testBuilder = chainBuilder<Foo>({
-            field1: componentBuilder(NumberComponent),
-            field2: componentBuilder(OptNumberComponent),
-            field3: componentBuilder(NumberComponent),
-            field4: componentBuilder(NumberComponent),
+            field1: NumberComponent.builder(),
+            field2: OptNumberComponent.builder(),
+            field3: NumberComponent.builder(),
+            field4: NumberComponent.builder(),
         });
 
         testBuilder

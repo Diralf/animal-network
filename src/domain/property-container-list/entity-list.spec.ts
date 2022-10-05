@@ -1,4 +1,3 @@
-import { componentBuilder } from '../components/component/component';
 import { Entity, entityBuilder } from '../components/entity-builder/entity-builder';
 import { Property } from '../property/base/base-property';
 import { EntityList } from './entity-list';
@@ -13,7 +12,7 @@ describe('EntityList', () => {
         const propertyContainerList = new EntityList<TestContainer>();
 
         const TestEntity = entityBuilder({
-            foo: componentBuilder(NumberProperty)({ current: 0 }),
+            foo: NumberProperty.factory({ current: 0 }),
         });
 
         const entity1 = TestEntity.build({ foo: { current: 3 } });
@@ -32,13 +31,13 @@ describe('EntityList', () => {
             foo: Property<number>;
         }
         const Test1Entity = entityBuilder({
-            foo: componentBuilder(Property<number>)(0),
+            foo: Property<number>.factory(0),
         });
         interface Test2 {
             bar: Property<string>;
         }
         const Test2Entity = entityBuilder({
-            bar: componentBuilder(Property<string>)(''),
+            bar: Property<string>.factory(''),
         });
 
         it('should find by property', () => {

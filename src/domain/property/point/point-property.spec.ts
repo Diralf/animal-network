@@ -1,10 +1,9 @@
-import { componentBuilder } from '../../components/component/component';
 import { PointProperty } from './point-property';
 import { RawPoint } from './raw-point';
 
 describe('PointProperty', () => {
     function getPointProperty(point: RawPoint) {
-        return componentBuilder(PointProperty)(point)({ props: point, owner: { component: {} } });
+        return PointProperty.build({ component: {} }, point);
     }
 
     it('should be truthy', () => {

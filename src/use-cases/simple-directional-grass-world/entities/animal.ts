@@ -1,5 +1,5 @@
 import { entityBuilder } from '../../../domain/components/entity-builder/entity-builder';
-import { Component, componentBuilder } from '../../../domain/components/component/component';
+import { Component } from '../../../domain/components/component/component';
 import { CollisionOptions } from '../../../domain/property/collision/collision-options';
 import { DirectionMovementValue } from '../../../domain/property/direction-movement/direction-movement-property';
 import { World } from '../../../domain/world/world';
@@ -86,9 +86,9 @@ class AnimalCommonComponent extends Component<void, Owner<'taste' | 'size' | 'me
 }
 
 export const Animal = entityBuilder({
-    animalCommon: componentBuilder(AnimalCommonComponent)(),
-    animalMovement: componentBuilder(AnimalMovementComponent)(),
-    animalCollision: componentBuilder(AnimalCollisionComponent)(),
+    animalCommon: AnimalCommonComponent.builder()(),
+    animalMovement: AnimalMovementComponent.builder()(),
+    animalCollision: AnimalCollisionComponent.builder()(),
     ...simpleBuilder()
         .tags([InstanceTypes.ANIMAL])
         .position()

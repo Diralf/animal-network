@@ -1,6 +1,6 @@
 import { OnTick } from '../../time-thread/on-tick';
 import { World } from '../../world/world';
-import { Component, componentBuilder } from '../component/component';
+import { Component } from '../component/component';
 import { chainBuilder } from '../components-owner/chain-builder';
 import { entityBuilder, ComponentsDeps } from './entity-builder';
 
@@ -24,9 +24,9 @@ describe('EntityBuilder', () => {
     }
 
     const testBuilder = () => chainBuilder<Components>({
-        name: componentBuilder(StringComponent),
-        age: componentBuilder(NumberComponent),
-        street: componentBuilder(StringComponent),
+        name: StringComponent.builder(),
+        age: NumberComponent.builder(),
+        street: StringComponent.builder(),
     });
 
     it('using functional paradigm', () => {
@@ -70,10 +70,10 @@ describe('ComponentsOwner', () => {
     }
 
     const testBuilder = () => chainBuilder<Components>({
-        numberComponent: componentBuilder(NumberComponent),
-        defaultComponent: componentBuilder(DefaultComponent),
-        otherComponent: componentBuilder(OtherComponent),
-        ownerComponent: componentBuilder(OwnerComponent),
+        numberComponent: NumberComponent.builder(),
+        defaultComponent: DefaultComponent.builder(),
+        otherComponent: OtherComponent.builder(),
+        ownerComponent: OwnerComponent.builder(),
     });
 
     {
@@ -93,8 +93,8 @@ describe('ComponentsOwner', () => {
         }
 
         const deps1: ComponentsDeps<ComponentsDepsTest> = {
-            numberComponent: componentBuilder(NumberComponent)()({ owner: { component: {} } }),
-            otherComponent: componentBuilder(OtherComponent)('123')({ owner: { component: {} } }),
+            numberComponent: NumberComponent.build({ component: {} }),
+            otherComponent: OtherComponent.build({ component: {} }, '123'),
         };
 
         // @ts-expect-error
@@ -227,5 +227,54 @@ describe('ComponentsOwner', () => {
 
             Actor.build();
         }
+    });
+
+    describe('component builder getting by different static method', () => {
+        it('should add component by builder() only', () => {
+            const Actor = entityBuilder({
+                numberComponent: NumberComponent.builder()(),
+                ownerComponent: OwnerComponent.builder()(1),
+            });
+
+            const actor = Actor.build();
+
+            expect(actor).toBeTruthy();
+            expect(actor.component.numberComponent).toBeTruthy();
+            expect(actor.component.numberComponent.value).toEqual(3);
+            expect(actor.component.ownerComponent).toBeTruthy();
+            expect(actor.component.ownerComponent.value).toEqual(1);
+        });
+
+        it('should add component by factory() only', () => {
+            const Actor = entityBuilder({
+                numberComponent: NumberComponent.factory(),
+                ownerComponent: OwnerComponent.factory(1),
+            });
+
+            const actor = Actor.build();
+
+            expect(actor).toBeTruthy();
+            expect(actor.component.numberComponent).toBeTruthy();
+            expect(actor.component.numberComponent.value).toEqual(3);
+            expect(actor.component.ownerComponent).toBeTruthy();
+            expect(actor.component.ownerComponent.value).toEqual(1);
+        });
+
+        it('should add component by builder() and factory() only', () => {
+            const Actor = entityBuilder({
+                // @ts-expect-error TODO resolve this error
+                numberComponent: NumberComponent.builder()(),
+                // @ts-expect-error TODO resolve this error
+                ownerComponent: OwnerComponent.factory(1),
+            });
+
+            const actor = Actor.build();
+
+            expect(actor).toBeTruthy();
+            expect(actor.component.numberComponent).toBeTruthy();
+            expect(actor.component.numberComponent.value).toEqual(3);
+            expect(actor.component.ownerComponent).toBeTruthy();
+            expect(actor.component.ownerComponent.value).toEqual(1);
+        });
     });
 });
