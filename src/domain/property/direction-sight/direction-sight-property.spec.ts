@@ -1,4 +1,4 @@
-import { FieldBuilder } from '../../../clients/console/utils/field-builder';
+import { FieldBuilder } from '../../utils/field-builder';
 import { EntityType } from '../../components/component/component';
 import { entityBuilder } from '../../components/entity-builder/entity-builder';
 import { World } from '../../world/world';

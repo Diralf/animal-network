@@ -1,4 +1,4 @@
-import { FieldBuilder } from '../../clients/console/utils/field-builder';
+import { FieldBuilder } from '../../domain/utils/field-builder';
 import { EntityType } from '../../domain/components/component/component';
 import { DirectionMovementValue } from '../../domain/property/direction-movement/direction-movement-property';
 import { DirectionTurn } from '../../domain/property/direction/direction-property';
