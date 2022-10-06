@@ -22,10 +22,9 @@ interface Build<Remain, Original extends Record<keyof Original, UnknownComponent
 }
 
 type Builder<Comps extends Record<keyof Comps, UnknownComponent>, Original extends Record<keyof Original, UnknownComponent> = Comps> = {
-    [Key in keyof Comps]:
-        (...[staticProps]: StaticPropsType<Comps[Key], ComponentPropsType<Comps[Key]>, ComponentDepsType<Comps[Key]>>)
-            => Builder<Omit<Comps, Key>, Original>
-        & Build<Omit<Comps, Key>, Original>
+    [Key in keyof Comps]: (
+        ...[staticProps]: StaticPropsType<Comps[Key], ComponentPropsType<Comps[Key]>, ComponentDepsType<Comps[Key]>>
+    ) => Builder<Omit<Comps, Key>, Original> & Build<Omit<Comps, Key>, Original>
 };
 
 type InitBuilders<Components extends Record<keyof Components, UnknownComponent>> = {

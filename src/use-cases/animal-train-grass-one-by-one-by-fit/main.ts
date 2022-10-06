@@ -11,7 +11,7 @@ function displayWorld(simpleWorld: SimpleGrassWorld) {
 
     console.log(tf.memory());
     console.log(`ID: ${simpleWorld.world.id} `.padEnd(40, '-'));
-    console.log(`size: ${sizes}`, `time: ${time}`, `taste: ${animals[0].taste}`, `energy: ${animals[0].component.energy.current}`);
+    console.log(`size: ${sizes}`, `time: ${time}`, `taste: ${animals[0].component.taste.current}`, `energy: ${animals[0].component.energy.current}`);
     console.log((animals[0] as NeuralAnimal).component.brain.lastCommand);
     console.log(animals[0].component.sight.asString());
     console.log(simpleWorld.world.print(simpleWorld.world.getEntityList()), ' ');
