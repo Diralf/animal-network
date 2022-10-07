@@ -38,7 +38,6 @@
   },
   "dependencies": {
     "@tensorflow/tfjs": "^3.19.0",
-    "@tensorflow/tfjs-node": "^3.19.0",
-    "@tensorflow/tfjs-vis": "^1.5.1"
+    "@tensorflow/tfjs-node": "^3.19.0"
   }
 }
