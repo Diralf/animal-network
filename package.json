@@ -1,7 +1,7 @@
 {
-  "name": "animal-network",
-  "description": "",
-  "version": "1.0.0",
+  "name": "@diralf/animal-network",
+  "description": "Package with animal-network",
+  "version": "0.0.1",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
@@ -17,7 +17,7 @@
     "type": "git",
     "url": "git+https://github.com/Diralf/animal-network.git"
   },
-  "author": "",
+  "author": "Diralf",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Diralf/animal-network/issues"
@@ -39,5 +39,10 @@
   "dependencies": {
     "@tensorflow/tfjs": "^3.19.0",
     "@tensorflow/tfjs-node": "^3.19.0"
-  }
+  },
+  "keywords": [
+    "neural-network",
+    "animal",
+    "tenser-flow"
+  ]
 }
