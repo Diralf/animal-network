@@ -3,6 +3,7 @@ import { DirectionMovementValue } from '../../../domain/property/direction-movem
 import { simpleBuilder } from '../components/component-builder';
 import { Animal } from './animal';
 
+// TODO add method for factorySet injection
 export const StaticAnimal = entityBuilder({
     ...Animal.factorySet,
     ...simpleBuilder()

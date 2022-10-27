@@ -85,11 +85,14 @@ class AnimalCommonComponent extends Component<void, Owner<'taste' | 'size' | 'me
     }
 }
 
-export const Animal = entityBuilder({
-    animalCommon: AnimalCommonComponent.builder()(),
-    animalMovement: AnimalMovementComponent.builder()(),
-    animalCollision: AnimalCollisionComponent.builder()(),
-    ...simpleBuilder()
+export const animalBuilder = simpleBuilder().add({
+    animalCommon: AnimalCommonComponent.builder(),
+    animalMovement: AnimalMovementComponent.builder(),
+    animalCollision: AnimalCollisionComponent.builder(),
+});
+
+export const Animal = entityBuilder(
+    animalBuilder
         .tags([InstanceTypes.ANIMAL])
         .position()
         .collision()
@@ -103,7 +106,11 @@ export const Animal = entityBuilder({
         .size({ current: 10 })
         .sight({ range: [5, 2] })
 
+        .animalCommon()
+        .animalMovement()
+        .animalCollision()
+
         .build(),
-});
+);
 
 export type Animal = ReturnType<typeof Animal.build>;
