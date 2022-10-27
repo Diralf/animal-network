@@ -38,6 +38,7 @@ export class World<Components extends Record<keyof Components, UnknownComponent>
 
     public removeEntity(...instances: Array<EntityType<Components>>): void {
         this.entityList.remove(...instances);
+        this.savedEntityList.add(...instances);
         const onTickInstances = instances.filter((instance) => isOnTickGuard(instance)) as unknown as OnTick[];
         this.timeThread.removeListener(...onTickInstances);
         const onDestroy: OnDestroy[] = instances.filter((instances) => 'onDestroy' in instances) as any;

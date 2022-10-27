@@ -31,13 +31,20 @@ type InitBuilders<Components extends Record<keyof Components, UnknownComponent>>
     [Key in keyof Components]: ComponentStaticFactory<Components[Key], ComponentPropsType<Components[Key]>, ComponentDepsType<Components[Key]>>;
 };
 
+interface AddBuilder<Original extends Record<keyof Original, UnknownComponent>> {
+    add<Additional extends Record<keyof Additional, UnknownComponent>>(
+        initBuilder: InitBuilders<Additional>
+    ): Builder<Original & Additional> & AddBuilder<Original & Additional>;
+}
+
 export function chainBuilder<
     Original extends Record<keyof Original, UnknownComponent>,
     Components extends Record<keyof Components, UnknownComponent> = Original,
     Result extends FactorySet<Omit<Original, keyof Components>> = FactorySet<Omit<Original, keyof Components>>
 >(
-    initBuilder: InitBuilders<Components>, result: Result = ({} as unknown as Result),
-): Builder<Components, Original> {
+    initBuilder: InitBuilders<Components>,
+    result: Result = ({} as unknown as Result),
+): Builder<Components, Original> & AddBuilder<Components> {
     const builder = {} as Builder<Components, Original>;
     const keys = Object.keys(initBuilder) as Array<keyof Components>;
     keys.forEach(<Key extends keyof Components>(key: Key) => {
@@ -49,14 +56,21 @@ export function chainBuilder<
                 build: () => newResult as unknown as FactorySet<Omit<Original, keyof Omit<Components, Key>>>,
             };
             const newBuilders = initBuilder as unknown as InitBuilders<Omit<Components, Key>>;
-            const newBuilder = chainBuilder<Original, Omit<Components, Key>, FactorySet<Omit<Original, keyof Omit<Components, Key>>>>(newBuilders, newResult);
+            const newBuilder = chainBuilder<Original, Omit<Components, Key>, FactorySet<Omit<Original, keyof Omit<Components, Key>>>>(
+                newBuilders,
+                newResult,
+            );
             return {
                 ...newBuilder,
                 ...build,
             };
         };
     });
-    return builder;
+    (builder as unknown as AddBuilder<Components>).add = (additional) => chainBuilder({
+        ...initBuilder,
+        ...additional,
+    } as any);
+    return builder as any;
 }
 
 /** Example moved to entity-builder.spec.ts */
