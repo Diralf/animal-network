@@ -42,9 +42,9 @@ export async function main() {
         activeWorlds.forEach((world, index) => {
             world.tick();
 
-            if (world.findByTag(InstanceTypes.ANIMAL).length === 0) {
-                finishedWorlds.push(activeWorlds.splice(index, 1)[0]);
-            }
+            // if (world.findByTag(InstanceTypes.ANIMAL).length === 0) {
+            //     //finishedWorlds.push(activeWorlds.splice(index, 1)[0]);
+            // }
         });
 
         if (activeWorlds.length > 0) {

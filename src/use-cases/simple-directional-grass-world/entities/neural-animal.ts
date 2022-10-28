@@ -5,6 +5,7 @@ import { World } from '../../../domain/world/world';
 import { AnimalDirectionGrassNetwork } from '../../../network/animal-direction-grass-network/animal-direction-grass-network';
 import { Owner } from '../components/component-builder';
 import { Animal } from './animal';
+import { DeadAnimal } from './dead-animal';
 
 class NeuralBrainComponent extends Component<void, Owner<'brain' | 'sight' | 'size' | 'taste' | 'energy'>> {
     private network = new AnimalDirectionGrassNetwork();
@@ -43,9 +44,21 @@ class NeuralBrainComponent extends Component<void, Owner<'brain' | 'sight' | 'si
     }
 }
 
+class AnimalDeathComponent extends Component<void, Owner<'position'> & { neuralBrain: NeuralBrainComponent }> {
+    public onDestroy(world: World) {
+        const dead = DeadAnimal.build({
+            position: this.owner.component.position.current,
+            deadNetwork: this.owner.component.neuralBrain.getNetwork(),
+        });
+        world.addEntity(dead);
+        super.onDestroy(world);
+    }
+}
+
 export const NeuralAnimal = entityBuilder({
     ...Animal.factorySet,
     neuralBrain: NeuralBrainComponent.builder()(),
+    death: AnimalDeathComponent.builder()(),
 });
 
 export type NeuralAnimal = ReturnType<typeof NeuralAnimal.build>;

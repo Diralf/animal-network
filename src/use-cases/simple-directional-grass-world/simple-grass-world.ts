@@ -33,7 +33,9 @@ export class SimpleGrassWorld {
     }
 
     public findByTag(tag: InstanceTypes): SimpleGrassWorldEntity[] {
-        return this.world.getEntityList().find((instance) => instance.component.tags.current.includes(tag));
+        return this.world.getEntityList().find((instance) => {
+            return instance.component.tags.current.includes(tag);
+        });
     }
 
     async startOneByOne(param: { width: number; height: number, maxGrass: number, network?: AnimalDirectionGrassNetwork }) {
