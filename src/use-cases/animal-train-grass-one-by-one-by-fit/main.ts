@@ -42,9 +42,9 @@ export async function main() {
         activeWorlds.forEach((world, index) => {
             world.tick();
 
-            // if (world.findByTag(InstanceTypes.ANIMAL).length === 0) {
-            //     //finishedWorlds.push(activeWorlds.splice(index, 1)[0]);
-            // }
+            if (world.findByTag(InstanceTypes.ANIMAL).length === 0) {
+                 finishedWorlds.push(activeWorlds.splice(index, 1)[0]);
+            }
         });
 
         if (activeWorlds.length > 0) {
@@ -77,6 +77,6 @@ async function pickOne(finishedWorlds: SimpleGrassWorld[], worldParams: { width:
     await world.trainSavedNetwork();
 
     const child = new SimpleGrassWorld();
-    await child.startOneByOne({ ...worldParams, network: world.getSavedNetwort() });
+    await child.startOneByOne({ ...worldParams, network: world.getSavedNetwort() ?? undefined });
     return child;
 }

@@ -17,7 +17,6 @@ export class World<Components extends Record<keyof Components, UnknownComponent>
     public id = 0;
     public width = 0;
     public height = 0;
-    public savedEntityList = new EntityList();
 
     private entityMap: Map<string, (point: RawPoint) => EntityType<Components>> = new Map();
 
@@ -38,7 +37,6 @@ export class World<Components extends Record<keyof Components, UnknownComponent>
 
     public removeEntity(...instances: Array<EntityType<Components>>): void {
         this.entityList.remove(...instances);
-        this.savedEntityList.add(...instances);
         const onTickInstances = instances.filter((instance) => isOnTickGuard(instance)) as unknown as OnTick[];
         this.timeThread.removeListener(...onTickInstances);
         const onDestroy: OnDestroy[] = instances.filter((instances) => 'onDestroy' in instances) as any;

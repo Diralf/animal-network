@@ -4,6 +4,7 @@ import { RawPoint } from '../../domain/property/point/raw-point';
 import { Visualable } from '../../domain/property/sight/visualable';
 import { World } from '../../domain/world/world';
 import { AnimalDirectionGrassNetwork } from '../../network/animal-direction-grass-network/animal-direction-grass-network';
+import { DeadAnimal } from './entities/dead-animal';
 import { Hole } from './entities/hole';
 import { NeuralAnimal } from './entities/neural-animal';
 import { GrassGenerator } from './static/grass-generator';
@@ -83,25 +84,24 @@ export class SimpleGrassWorld {
     }
 
     dispose() {
-        const entities: NeuralAnimal[] = this.world.savedEntityList.getAll() as any;
+        const entities: DeadAnimal[] = this.findByTag(InstanceTypes.DEAD) as any;
         entities.forEach((entity) => {
-            entity.component.neuralBrain.dispose();
+            entity.component.deadNetwork.current?.dispose();
         });
-        this.world.savedEntityList.clear();
     }
 
-    private getSavedNeuralEntity(): NeuralAnimal {
-        return this.world.savedEntityList.getAll()[0] as any;
+    private getSavedNeuralEntity(): DeadAnimal {
+        return this.findByTag(InstanceTypes.DEAD)[0] as any;
     }
 
     getSavedNetwort() {
         const entity = this.getSavedNeuralEntity();
-        return entity.component.neuralBrain.getNetwork();
+        return entity.component.deadNetwork.current;
     }
 
     async trainSavedNetwork() {
         const network = this.getSavedNetwort();
-        network.compile();
-        await network.fit();
+        network?.compile();
+        await network?.fit();
     }
 }
