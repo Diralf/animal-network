@@ -17,6 +17,7 @@ export interface AnimalGrassNetworkPredictInput {
 
 interface LifeFrame {
     sight: number[][][];
+    inner: number[];
     output: number[];
     taste: number;
     energy: number;
@@ -31,14 +32,16 @@ interface StorageModel {
     previousRecord: number;
     generation: number;
     recordSum: number;
-    model: tf.Sequential;
+    model: tf.LayersModel;
 }
 
+const NUM_OUTPUT_CLASSES = 10;
+
 export class AnimalDirectionGrassNetwork {
-    private model: tf.Sequential;
+    private model: tf.LayersModel;
     private lifeFrames: LifeFrame[] = [];
     private previousRecord;
-    private inputShape = [8, 8, 2];
+    private inputShape = [8, 8, 1];
     private commands: DirectionBrainCommand[] = [
         DirectionTurn.TURN_LEFT,
         DirectionTurn.TURN_RIGHT,
@@ -49,8 +52,8 @@ export class AnimalDirectionGrassNetwork {
     private generation = 0;
     private recordSum = 0;
 
-    private memoPredict = memo((normalizedSight: number[][][]) => {
-        return this.predictByNetwork(normalizedSight);
+    private memoPredict = memo((normalizedSight: number[][][], innerParams: number[]) => {
+        return this.predictByNetwork(normalizedSight, innerParams);
     });
 
     constructor({ model, previousRecord, generation, recordSum }: Partial<StorageModel> = {}) {
@@ -79,12 +82,19 @@ export class AnimalDirectionGrassNetwork {
 
     public predict({ sight, size, taste, energy }: AnimalGrassNetworkPredictInput): DirectionBrainCommand {
         return tf.tidy(() => {
-            const normalizedSight = this.getNormalizedSight(sight.current, size.current, taste.current, energy.current);
+            const normalizedSight = this.getNormalizedSight(sight.current);
+            const inner = [
+                size.current / 100,
+                taste.current,
+                energy.current / 100,
+                ...new Array(7).fill(0),
+            ];
 
-            const { command, output } = this.memoPredict.call(normalizedSight);
+            const { command, output } = this.memoPredict.call(normalizedSight, inner);
 
             this.lifeFrames.push({
                 sight: normalizedSight,
+                inner,
                 output,
                 taste: taste.current,
                 energy: energy.current,
@@ -94,16 +104,17 @@ export class AnimalDirectionGrassNetwork {
         });
     }
 
-    private predictByNetwork(normalizedSight: number[][][]): { output: number[]; command: DirectionBrainCommand } {
+    private predictByNetwork(normalizedSight: number[][][], innerParams: number[]): { output: number[]; command: DirectionBrainCommand } {
         const xs = tf.tensor4d([normalizedSight]);
-        const ys: tf.Tensor<tf.Rank> = this.model.predict(xs) as tf.Tensor<tf.Rank>;
+        const os = tf.tensor2d([innerParams]);
+        const ys: tf.Tensor<tf.Rank> = this.model.predict([xs, os]) as tf.Tensor<tf.Rank>;
         const outputs: Int32Array = ys.dataSync() as Int32Array;
 
         const {
             command,
             index,
         } = this.getMaxCommand(outputs);
-        const output = new Array(this.commands.length).fill(0);
+        const output = new Array(NUM_OUTPUT_CLASSES).fill(0);
         output[index] = 1;
         return {
             command,
@@ -111,49 +122,15 @@ export class AnimalDirectionGrassNetwork {
         };
     }
 
-    private getNormalizedSight(sight: number[][], size: number, taste: number, energy: number): number[][][] {
+    private getNormalizedSight(sight: number[][]): number[][][] {
         const normalized: number[][][] = [];
         const shape = [this.inputShape[0], this.inputShape[1]];
-        const parametersColumn = 7;
 
         for (let i = 0; i < shape[0]; i++) {
             normalized[i] = [];
             for (let j = 0; j < shape[1]; j++) {
-                if (j === parametersColumn) {
-                    let value = 0;
-                    switch (i) {
-                        case 0:
-                            value = taste;
-                            break;
-                        case 1:
-                            value = energy / 100;
-                            break;
-                    }
-                    normalized[i][j] = [
-                        value,
-                        0,
-                    ];
-                } else {
-                    const cell = sight[i] && sight[i][j];
-                    let cellSize;
-                    switch (cell) {
-                        case 6:
-                            cellSize = Math.min(Math.max(size, 0), 100) / 100;
-                            break;
-                        case 3:
-                            cellSize = 0.5;
-                            break;
-                        case 9:
-                            cellSize = 1;
-                            break;
-                        default:
-                            cellSize = 0;
-                    }
-                    normalized[i][j] = [
-                        (cell && cell / 10) ?? 0,
-                        cellSize,
-                    ];
-                }
+                const cell = sight[i] && sight[i][j];
+                normalized[i][j] = [(cell && cell / 10) ?? 0];
             }
         }
 
@@ -170,39 +147,51 @@ export class AnimalDirectionGrassNetwork {
             }
         });
 
-        return { command: this.commands[maxIndex], index: maxIndex };
+        return { command: this.commands[maxIndex] ?? BrainCommandsOther.STAND, index: maxIndex };
     }
 
-    private createModel(): tf.Sequential {
-        const model = tf.sequential();
-
-        model.add(tf.layers.conv2d({
-            inputShape: this.inputShape,
+    private createModel(): tf.LayersModel {
+        const sightInput = tf.input({ shape: this.inputShape });
+        const sightConv1 = tf.layers.conv2d({
             kernelSize: 5,
             filters: 8,
             activation: 'relu',
             kernelInitializer: 'varianceScaling',
-        }));
-
-        model.add(tf.layers.maxPooling2d({}));
-
-        model.add(tf.layers.conv2d({
+        }).apply(sightInput);
+        // const sightMaxPool1 = tf.layers.maxPooling2d({}).apply(sightConv1);
+        const sightConv2 = tf.layers.conv2d({
             kernelSize: 5,
             filters: 16,
             activation: 'relu',
             kernelInitializer: 'varianceScaling',
             padding: 'same',
-        }));
-        model.add(tf.layers.maxPooling2d({}));
+        }).apply(sightConv1);
+        // const sightMaxPool2 = tf.layers.maxPooling2d({}).apply(sightConv2);
+        const sightFlatten = tf.layers.flatten().apply(sightConv2);
 
-        model.add(tf.layers.flatten());
+        const sightDense = tf.layers.dense({
+            units: 20,
+            kernelInitializer: 'varianceScaling',
+            activation: 'softmax',
+        }).apply(sightFlatten);
 
-        const NUM_OUTPUT_CLASSES = this.commands.length;
-        model.add(tf.layers.dense({
+        const otherInput = tf.input({ shape: [10] });
+        const otherDense = tf.layers.dense({ units: 10 }).apply(otherInput);
+
+        const fullConcat = tf.layers.concatenate().apply([sightDense as any, otherDense as any]);
+
+        const fullDense = tf.layers.dense({
             units: NUM_OUTPUT_CLASSES,
             kernelInitializer: 'varianceScaling',
             activation: 'softmax',
-        }));
+        }).apply(fullConcat);
+
+        const model = tf.model({
+            inputs: [sightInput, otherInput],
+            outputs: [fullDense as any],
+        });
+
+        // model.summary();
 
         return model;
     }
@@ -243,6 +232,8 @@ export class AnimalDirectionGrassNetwork {
         const [trainXs, trainYs] = tf.tidy(() => {
             const sightArray = lifeFrames.map(({ sight }) => sight);
             const sightTensor = tf.tensor4d(sightArray);
+            const innerArray = lifeFrames.map(({ inner }) => inner);
+            const innerTensor = tf.tensor2d(innerArray);
             let lastTasteIndex = 0;
             let lastLowEnergyIndex = 0;
             const trueArray = lifeFrames
@@ -285,7 +276,7 @@ export class AnimalDirectionGrassNetwork {
                 .reverse();
             const trueTensor = tf.tensor2d(trueArray);
             return [
-                sightTensor,
+                [sightTensor, innerTensor],
                 trueTensor,
             ];
         });
@@ -307,7 +298,8 @@ export class AnimalDirectionGrassNetwork {
         });
         console.log({ ...lastEpoch, generation: this.generation, reward, current: lifeFrames.length, averageRecord, previous: previousRecord });
 
-        trainXs.dispose();
+        trainXs[0].dispose();
+        trainXs[1].dispose();
         trainYs.dispose();
     }
 
@@ -351,7 +343,7 @@ export class AnimalDirectionGrassNetwork {
         } catch (e) {
             console.error(e);
         }
-        const model = await tf.loadLayersModel('file://./model/model.json') as unknown as tf.Sequential;
+        const model = await tf.loadLayersModel('file://./model/model.json');
         return {
             ...result,
             model,
