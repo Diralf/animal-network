@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
+    "start": "tsc && node --es-module-specifier-resolution=node ./dist/index.js",
     "test": "jest --watch",
     "mutate-unit": "npx stryker run",
     "mutate-integration": "npx stryker run --disableBail",
