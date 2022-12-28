@@ -7,14 +7,14 @@ export enum DirectionTurn {
     TURN_RIGHT = 'TURN_RIGHT',
 }
 
-interface Props {
+export interface DirectionPropertyProps {
     initialDirection: RawPoint;
 }
 
-export class DirectionProperty extends Component<Props> {
+export class DirectionProperty extends Component<DirectionPropertyProps> {
     private current!: RawPoint;
 
-    public onPropsInit(props: Props = { initialDirection: { x: 0, y: -1 } }): void {
+    public onPropsInit(props: DirectionPropertyProps = { initialDirection: { x: 0, y: -1 } }): void {
         this.current = props.initialDirection;
     }
 

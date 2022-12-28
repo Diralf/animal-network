@@ -8,19 +8,19 @@ import { positionableGuard } from '../point/positionable.guard';
 import { Publisher } from '../utils/observer';
 import { CollisionOptions } from './collision-options';
 
-interface Props {
+export interface CollisionPropertyProps {
     handler?(options: CollisionOptions): void;
 }
 
-interface Deps {
+export interface CollisionPropertyDeps {
     position: PointProperty;
 }
 
-export class CollisionProperty extends Component<Props, Deps> implements OnTick {
+export class CollisionProperty extends Component<CollisionPropertyProps, CollisionPropertyDeps> implements OnTick {
     public publisher = new Publisher<[CollisionOptions]>();
     private handler!: (options: CollisionOptions) => void;
 
-    public onPropsInit(props: Props = { handler: () => {}}): void {
+    public onPropsInit(props: CollisionPropertyProps = { handler: () => {}}): void {
         this.handler = props.handler ?? (() => {});
     }
 

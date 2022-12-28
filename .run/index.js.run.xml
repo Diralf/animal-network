@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="index.js" type="NodeJSConfigurationType" nameIsGenerated="true" node-parameters="--es-module-specifier-resolution=node" path-to-js-file="index.js" working-dir="$PROJECT_DIR$/dist">
+  <configuration default="false" name="index.js" type="NodeJSConfigurationType" application-parameters="run" nameIsGenerated="true" node-parameters="--es-module-specifier-resolution=node" path-to-js-file="index.js" working-dir="$PROJECT_DIR$/dist">
     <envs>
       <env name="VIEW_PER_RUNS" value="1" />
     </envs>

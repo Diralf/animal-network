@@ -1,18 +1,18 @@
 import { Property } from '../base/base-property';
 
-interface Props {
+export interface NumberPropertyProps {
     defaultValue?: number;
     min?: number;
     max?: number;
     current?: number;
 }
 
-export class NumberProperty extends Property<number, Props> {
+export class NumberProperty extends Property<number, NumberPropertyProps> {
     private _default!: number;
     private _min!: number;
     private _max!: number;
 
-    onPropsInit(props: Props = {}) {
+    onPropsInit(props: NumberPropertyProps = {}) {
         this._min = props.min ?? -Number.MAX_SAFE_INTEGER;
         this._max = props.max ?? Number.MAX_SAFE_INTEGER;
 

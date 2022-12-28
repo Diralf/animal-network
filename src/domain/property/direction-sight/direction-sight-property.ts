@@ -12,21 +12,21 @@ import { rotateMatrix } from '../utils/rotate-matrix';
 import { rotateVector } from '../utils/rotate-vector';
 import { visualEntitiesAsString } from '../utils/visual-entities-as-string';
 
-interface Deps {
+export interface DirectionSightPropertyDeps {
     position: PointProperty;
     direction: DirectionProperty;
     visual: NumberProperty;
 }
 
-interface Props {
+export interface DirectionSightPropertyProps {
     range: [number, number];
 }
 
-export class DirectionSightProperty extends Component<Props, Deps> implements OnTick {
+export class DirectionSightProperty extends Component<DirectionSightPropertyProps, DirectionSightPropertyDeps> implements OnTick {
     public current: number[][] = [];
-    private range!: Props['range'];
+    private range!: DirectionSightPropertyProps['range'];
 
-    onPropsInit(props: Props = { range: [1, 1] }) {
+    onPropsInit(props: DirectionSightPropertyProps = { range: [1, 1] }) {
         this.range = props.range;
     }
 
@@ -108,7 +108,7 @@ export class DirectionSightProperty extends Component<Props, Deps> implements On
         );
     }
 
-    public tick(world: World<Deps>): void {
+    public tick(world: World<DirectionSightPropertyDeps>): void {
         this.update(world.getEntityList());
     }
 }

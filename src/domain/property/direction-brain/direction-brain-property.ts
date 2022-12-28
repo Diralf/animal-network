@@ -22,16 +22,16 @@ export enum BrainCommandsOther {
 export type DirectionBrainCommand = DirectionTurn | DirectionMovementValue | BrainCommandsOther;
 export type DirectionBrainHandler = (input: DirectionBrainHandlerInput) => DirectionBrainCommand;
 
-interface Props {
+export interface DirectionBrainPropertyProps {
     handler?: DirectionBrainHandler;
 }
 
-export class DirectionBrainProperty extends Component<Props, DirectionBrainOwner> implements OnTick {
+export class DirectionBrainProperty extends Component<DirectionBrainPropertyProps, DirectionBrainOwner> implements OnTick {
     public publisher = new Publisher<[DirectionBrainCommand]>();
     public lastCommand: DirectionBrainCommand | null = null;
     private handler?: DirectionBrainHandler;
 
-    public onPropsInit(props: Props): void {
+    public onPropsInit(props: DirectionBrainPropertyProps): void {
         this.handler = props.handler;
     }
 

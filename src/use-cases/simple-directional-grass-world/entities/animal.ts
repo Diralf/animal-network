@@ -9,7 +9,7 @@ import { Grass } from './grass';
 import { InstanceTypes } from '../types/instance-types';
 import { Hole } from './hole';
 
-class AnimalCollisionComponent extends Component<void, Owner<'collision' | 'taste' | 'size' | 'energy' | 'position'>> {
+export class AnimalCollisionComponent extends Component<void, Owner<'collision' | 'taste' | 'size' | 'energy' | 'position'>> {
     onInit() {
         super.onInit();
         this.owner.component.collision.publisher.subscribe(({ other, world }: CollisionOptions): void => {
@@ -41,7 +41,7 @@ class AnimalCollisionComponent extends Component<void, Owner<'collision' | 'tast
     }
 }
 
-class AnimalMovementComponent extends Component<void, Owner<'movement' | 'energy'>> {
+export class AnimalMovementComponent extends Component<void, Owner<'movement' | 'energy'>> {
     onInit() {
         super.onInit();
         this.owner.component.movement.publisher.subscribe(this.handleMovement);
@@ -70,7 +70,7 @@ class AnimalMovementComponent extends Component<void, Owner<'movement' | 'energy
     }
 }
 
-class AnimalCommonComponent extends Component<void, Owner<'taste' | 'size' | 'metabolizeSpeed' | 'movement' | 'energy'>> {
+export class AnimalCommonComponent extends Component<void, Owner<'taste' | 'size' | 'metabolizeSpeed' | 'movement' | 'energy'>> {
     public tick(world: World, time: number): void {
         super.tick(world, time);
         this.owner.component.taste.current = 0;
