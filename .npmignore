@@ -1,6 +1,8 @@
 /models
 /.run
-src
+/.idea
+/src
 /coverage
 /model
 /reports
+*.tgz
