@@ -1,2 +1,6 @@
 /models
 /.run
+/src
+/coverage
+/model
+/reports
