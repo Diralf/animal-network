@@ -1,7 +1,7 @@
 {
   "name": "@diralf/animal-network",
   "description": "Package with animal-network",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
