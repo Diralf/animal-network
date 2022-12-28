@@ -4,6 +4,14 @@ import { NeuralAnimal } from '../simple-directional-grass-world/entities/neural-
 import { SimpleGrassWorld } from '../simple-directional-grass-world/simple-grass-world';
 import { InstanceTypes } from '../simple-directional-grass-world/types/instance-types';
 
+const getViewPerRuns = () => {
+    try {
+        return parseInt(process.env.VIEW_PER_RUNS ?? '100', 10);
+    } catch {
+        return 100;
+    }
+};
+
 function displayWorld(simpleWorld: SimpleGrassWorld) {
     const animals = simpleWorld.findByTag(InstanceTypes.ANIMAL) as Animal[];
     const sizes = animals.map((animal) => animal.component.size.current);
@@ -38,7 +46,7 @@ export async function main() {
     }
 
     async function step() {
-        isGenerationView = generation % 100 === 0;
+        isGenerationView = generation % getViewPerRuns() === 0;
         activeWorlds.forEach((world, index) => {
             world.tick();
 
